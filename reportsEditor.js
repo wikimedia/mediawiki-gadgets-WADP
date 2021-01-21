@@ -30,7 +30,7 @@
         mw.loader.load( 'ext.gadget.arpQueryForm' );
     }
 
-    if ( mw.config.values.wgPageName.split( 'Wikimedia_Affiliates_Data_Portal/' )[1] == 'Organizations_Information' ) {
+    if ( mw.config.values.wgPageName.split( 'Wikimedia_Affiliates_Data_Portal/' )[1] === 'Organizations_Information' ) {
         mw.loader.load( 'ext.gadget.reportOrgInfoForm' );
     }
 }() );
