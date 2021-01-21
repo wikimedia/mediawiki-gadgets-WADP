@@ -18,7 +18,6 @@
             getRelevantRawEntry,
             parseContentModule,
             openWindow,
-            uniqueId,
             userLang,
             cleanRawEntry,
             windowManager,
@@ -27,7 +26,6 @@
             getContentList,
             queryAffiliatesPage,
             queryCountriesPage,
-            affiliatesContent,
             generateKeyValuePair,
             sanitizeInput,
             convertDateToDdMmYyyyFormat,
@@ -36,7 +34,7 @@
             fieldDerecognitionNote;
 
         userLang = mw.config.get( 'wgUserLanguage' );
-        if ( userLang == 'en' ) {
+        if ( userLang === 'en' ) {
             userLang = 'en-foo'; // quick hack fix
         }
         new mw.Api().get( {
@@ -136,7 +134,7 @@
             generateKeyValuePair = function ( k, v ) {
                 var res, jsonarray;
                 res = '\t\t'.concat( k, ' = ' );
-                if ( k == 'dm_structure' ) {
+                if ( k === 'dm_structure' ) {
                     jsonarray = JSON.stringify( v );
                     // Lua uses { } for "arrays"
                     jsonarray = jsonarray.replace( '[', '{' );
@@ -187,8 +185,8 @@
                     // Loop through the individual key-value pairs within each entry
                     for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
                         if (
-                            entries[ i ].value.fields[ j ].key.name == 'unique_id' &&
-                            entries[ i ].value.fields[ j ].value.value == uniqueId
+                            entries[ i ].value.fields[ j ].key.name === 'unique_id' &&
+                            entries[ i ].value.fields[ j ].value.value === uniqueId
                         ) {
                             return entries[ i ].value.fields;
                         }
@@ -207,7 +205,7 @@
                 var entryData = {},
                     i, j;
                 for ( i = 0; i < relevantRawEntry.length; i++ ) {
-                    if ( relevantRawEntry[ i ].key.name == 'dm_structure' ) {
+                    if ( relevantRawEntry[ i ].key.name === 'dm_structure' ) {
                         entryData.dm_structure = [];
                         for (
                             j = 0;
@@ -531,8 +529,7 @@
              * to initialize widgets, and to set up event handlers.
              */
             OrgInfoEditor.prototype.initialize = function () {
-                var dialog, i, fieldDMStructureSelected, dm_structure = [];
-                dialog = this;
+                var i, fieldDMStructureSelected, dm_structure = [];
 
                 OrgInfoEditor.super.prototype.initialize.call( this );
                 this.content = new OO.ui.PanelLayout( {
@@ -796,7 +793,7 @@
                 fieldDerecognitionNote.toggle( false );
 
                 this.fieldRecognitionStatus.on( 'change', function ( status ) {
-                    if ( status == 'derecognised' ) {
+                    if ( status === 'derecognised' ) {
                         fieldDerecognitionDate.toggle( true );
                         fieldDerecognitionNote.toggle( true );
                     } else {
@@ -989,14 +986,13 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
              * Save the changes to [[Module:Organizational_Informations]] page.
              */
             OrgInfoEditor.prototype.saveItem = function ( deleteFlag ) {
-                var dialog = this, content;
+                var dialog = this;
 
                 dialog.pushPending();
 
@@ -1146,11 +1142,11 @@
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( workingEntry.group_name == dialog.group_name.split(' ~ ')[0] ) {
+                        if ( workingEntry.group_name === dialog.group_name.split(' ~ ')[0] ) {
                             workingEntry = processWorkingEntry( workingEntry );
                             editSummary = gadgetMsg[ 'updated-org-info' ] + ' ' + workingEntry.group_name;
                         }
-                        if ( workingEntry.unique_id != dialog.uniqueId || !deleteFlag ) {
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
                             manifest.push( workingEntry );
                         }
                     }
@@ -1205,12 +1201,12 @@
                                 manifest[ i ].group_country
                             );
                         }
-                        if ( !manifest[ i ].legal_entity && manifest[ i ].org_type == 'User Group' ) {
+                        if ( !manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
                             insertInPlace += generateKeyValuePair(
                                 'legal_entity',
                                 'No'
                             );
-                        } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type == 'User Group' ) {
+                        } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
                             insertInPlace += generateKeyValuePair(
                                 'legal_entity',
                                 manifest[ i ].legal_entity
@@ -1388,7 +1384,6 @@
                     // First check if the user is logged in
                     if ( mw.config.get ( 'wgUserName' ) === null ) {
                         alert( gadgetMsg[ 'you-need-to-log-in' ] );
-                        return;
                     } else {
                         new mw.Api().get( getContentModuleQuery() ).done( function ( data ) {
                             var entryData, record, content;
