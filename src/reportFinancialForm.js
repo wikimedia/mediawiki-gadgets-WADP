@@ -19,16 +19,12 @@
             getRelevantRawEntry,
             parseContentModule,
             openWindow,
-            uniqueId,
             userLang,
             cleanRawEntry,
             windowManager,
             AffiliateLookupTextInputWidget,
-            getValidity,
             getAffiliatesList,
             queryAffiliatesPage,
-            affiliatesContent,
-            affiliates,
             fieldReportLangCode,
             fieldReportInEnglishLink,
             fieldImportedReportDate,
@@ -42,7 +38,7 @@
             EDITMODE = '';
 
         userLang = mw.config.get( 'wgUserLanguage' );
-        if ( userLang == 'en' ) {
+        if ( userLang === 'en' ) {
             userLang = 'en-foo'; // quick hack fix
         }
         new mw.Api().get( {
@@ -173,8 +169,8 @@
                     // Loop through the individual key-value pairs within each entry
                     for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
                         if (
-                            entries[ i ].value.fields[ j ].key.name == 'unique_id'
-                            && entries[ i ].value.fields[ j ].value.value == uniqueId
+                            entries[ i ].value.fields[ j ].key.name === 'unique_id'
+                            && entries[ i ].value.fields[ j ].value.value === uniqueId
                         ) {
                             return entries[ i ].value.fields;
                         }
@@ -428,7 +424,7 @@
                 } );
                 fieldMultiyear.toggle();
                 tempReportType.on( 'change', function () {
-                    if ( tempReportType.getValue() == 'Multi-year Financial Report'  ) {
+                    if ( tempReportType.getValue() === 'Multi-year Financial Report'  ) {
                         fieldMultiyear.toggle( true );
                     } else {
                         fieldMultiyear.toggle( false );
@@ -511,8 +507,7 @@
                 } );
                 fieldImportedReportDate.toggle();
                 this.fieldImportedReportCB.on( 'change', function ( isSelected ) {
-                    var makeVisible = isSelected;
-                    fieldImportedReportDate.toggle( makeVisible );
+                    fieldImportedReportDate.toggle( isSelected );
                 } );
 
                 this.fieldDateOfSubmission = new OO.ui.TextInputWidget ( {
@@ -659,7 +654,6 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
@@ -699,9 +693,9 @@
                             delete workingEntry.group_name;
                         }
 
-                        if ( dialog.fieldReportType.getValue() == 'Annual Financial Report' ) {
+                        if ( dialog.fieldReportType.getValue() === 'Annual Financial Report' ) {
                             workingEntry.report_type = dialog.fieldReportType.getValue();
-                        } else if ( dialog.fieldReportType.getValue() == 'Multi-year Financial Report' ) {
+                        } else if ( dialog.fieldReportType.getValue() === 'Multi-year Financial Report' ) {
                             workingEntry.report_type = dialog.fieldReportType.getValue();
                             workingEntry.multiyear_duration = dialog.fieldMultiyear.getValue();
                         } else if ( !dialog.fieldReportType.getValue() && workingEntry.report_type ) {
@@ -783,7 +777,7 @@
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( workingEntry.unique_id != dialog.uniqueId || !deleteFlag ) {
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
                             manifest.push( workingEntry );
                         }
                     }
@@ -952,7 +946,6 @@
                 // First check if the user is logged in
                 if ( mw.config.get ( 'wgUserName' ) === null ) {
                     alert( gadgetMsg[ 'you-need-to-log-in' ] );
-                    return;
                 } else {
                     openWindow( {} );
                 }
