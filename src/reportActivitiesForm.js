@@ -18,16 +18,12 @@
             getRelevantRawEntry,
             parseContentModule,
             openWindow,
-            uniqueId,
             userLang,
             cleanRawEntry,
             windowManager,
             AffiliateLookupTextInputWidget,
-            getValidity,
             getAffiliatesList,
             queryAffiliatesPage,
-            affiliatesContent,
-            affiliates,
             fieldImportedReportDate,
             fieldReportLangCode,
             fieldReportInEnglishLink,
@@ -44,7 +40,7 @@
             EDITMODE = '';
 
         userLang = mw.config.get( 'wgUserLanguage' );
-        if ( userLang == 'en' ) {
+        if ( userLang === 'en' ) {
             userLang = 'en-foo'; // quick hack fix
         }
         new mw.Api().get( {
@@ -136,7 +132,7 @@
             generateKeyValuePair = function ( k, v ) {
                 var res, jsonarray;
                 res = '\t\t'.concat( k, ' = ' );
-                if ( k == 'partnership_info' ) {
+                if ( k === 'partnership_info' ) {
                     jsonarray = JSON.stringify( v );
                     // Lua uses { } for "arrays"
                     jsonarray = jsonarray.replace( '[', '{' );
@@ -186,8 +182,8 @@
                     // Loop through the individual key-value pairs within each entry
                     for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
                         if (
-                            entries[ i ].value.fields[ j ].key.name == 'unique_id'
-                            && entries[ i ].value.fields[ j ].value.value == uniqueId
+                            entries[ i ].value.fields[ j ].key.name === 'unique_id'
+                            && entries[ i ].value.fields[ j ].value.value === uniqueId
                         ) {
                             return entries[ i ].value.fields;
                         }
@@ -206,7 +202,7 @@
                 var entryData = {},
                     i, j;
                 for ( i = 0; i < relevantRawEntry.length; i++ ) {
-                    if ( relevantRawEntry[ i ].key.name == 'partnership_info' ) {
+                    if ( relevantRawEntry[ i ].key.name === 'partnership_info' ) {
                         entryData.partnership_info = [];
                         for (
                             j = 0;
@@ -449,7 +445,7 @@
                 } );
                 fieldArMultiyear.toggle();
                 tmpReportType.on('change', function ( isSelected) {
-                    if ( tmpReportType.getValue() == 'Multi-year Activities Report'  ) {
+                    if ( tmpReportType.getValue() === 'Multi-year Activities Report'  ) {
                         fieldArMultiyear.toggle(true);
                     } else {
                         fieldArMultiyear.toggle(false);
@@ -532,8 +528,7 @@
                 } );
                 fieldPartnershipOtherInput.toggle();
                 fieldPartnershipOther.on( 'change', function ( isSelected ) {
-                    var makeVisible = isSelected;
-                    fieldPartnershipOtherInput.toggle( makeVisible );
+                    fieldPartnershipOtherInput.toggle( isSelected );
                 } );
 
                 this.fieldSandboxReport = new OO.ui.CheckboxInputWidget( {
@@ -556,8 +551,7 @@
 
                 fieldImportedReportDate.toggle();
                 this.fieldImportedReportCB.on( 'change', function ( isSelected ) {
-                    var makeVisible = isSelected;
-                    fieldImportedReportDate.toggle( makeVisible );
+                    fieldImportedReportDate.toggle( isSelected );
                 } );
 
                 this.fieldDateOfSubmission = new OO.ui.TextInputWidget( {
@@ -730,7 +724,7 @@
                             delete workingEntry.group_name;
                         }
 
-                        if ( dialog.fieldReportType.getValue() == 'Multi-year Financial Report' ) {
+                        if ( dialog.fieldReportType.getValue() === 'Multi-year Financial Report' ) {
                             workingEntry.report_type = dialog.fieldReportType.getValue();
                             workingEntry.multiyear_duration = dialog.fieldMultiyear.getValue();
                         } else if ( !dialog.fieldReportType.getValue() && workingEntry.report_type ) {
@@ -772,7 +766,7 @@
                         if ( dialog.fieldPartnershipInfo.findSelectedItemsData() ) {
                             workingEntry.partnership_info = dialog.fieldPartnershipInfo.findSelectedItemsData();
                             for ( i=0; i < workingEntry.partnership_info.length; i++ ) {
-                                if ( workingEntry.partnership_info[ i ] == 'Other' ) {
+                                if ( workingEntry.partnership_info[ i ] === 'Other' ) {
                                     workingEntry.partnership_info[ i ] = dialog.fieldPartnershipOtherInput.getValue();
                                 }
                             }
@@ -807,7 +801,7 @@
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( workingEntry.unique_id != dialog.uniqueId || !deleteFlag ) {
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
                             manifest.push( workingEntry );
                         }
                     }
@@ -966,7 +960,6 @@
                 // First check if the user is logged in
                 if ( mw.config.get ( 'wgUserName' ) === null ) {
                     alert( gadgetMsg[ 'you-need-to-log-in' ] );
-                    return;
                 } else {
                     openWindow( {} );
                 }
