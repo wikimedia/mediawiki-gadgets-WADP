@@ -12,14 +12,23 @@
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse'
     ] ).done( function () {
-        var gadgetMsg, getContentModuleQuery, getRelevantRawEntry,
-            parseContentModule, openWindow, uniqueId, userLang, cleanRawEntry,
-            windowManager, AffiliateLookupTextInputWidget, getValidity,
-            getAffiliatesList, queryAffiliatesPage, affiliatesContent, affiliates,
-            fieldImportedReportDate, fieldPartnershipOther, fieldPartnershipOtherInput;
+        var gadgetMsg,
+            getContentModuleQuery,
+            getRelevantRawEntry,
+            parseContentModule,
+            openWindow,
+            userLang,
+            cleanRawEntry,
+            windowManager,
+            AffiliateLookupTextInputWidget,
+            getAffiliatesList,
+            queryAffiliatesPage,
+            fieldImportedReportDate,
+            fieldPartnershipOther,
+            fieldPartnershipOtherInput;
 
         userLang = mw.config.get( 'wgUserLanguage' );
-        if ( userLang == 'en' ) {
+        if ( userLang === 'en' ) {
             userLang = 'en-foo'; // quick hack fix
         }
         new mw.Api().get( {
@@ -86,8 +95,8 @@
                     // Loop through the individual key-value pairs within each entry
                     for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
                         if (
-                            entries[ i ].value.fields[ j ].key.name == 'unique_id' &&
-                            entries[ i ].value.fields[ j ].value.value == uniqueId
+                            entries[ i ].value.fields[ j ].key.name === 'unique_id' &&
+                            entries[ i ].value.fields[ j ].value.value === uniqueId
                         ) {
                             return entries[ i ].value.fields;
                         }
@@ -106,7 +115,7 @@
                 var entryData = {},
                     i, j;
                 for ( i = 0; i < relevantRawEntry.length; i++ ) {
-                    if ( relevantRawEntry[ i ].key.name == 'partnership_info' ) {
+                    if ( relevantRawEntry[ i ].key.name === 'partnership_info' ) {
                         entryData.partnership_info = [];
                         for (
                             j = 0;
@@ -405,8 +414,7 @@
                 } );
                 fieldPartnershipOtherInput.toggle();
                 fieldPartnershipOther.on('change', function ( isSelected ) {
-                    var makeVisible = isSelected;
-                    fieldPartnershipOtherInput.toggle( makeVisible );
+                    fieldPartnershipOtherInput.toggle( isSelected );
                 } );
 
                 this.fieldImportedReportCB = new OO.ui.CheckboxInputWidget( {
@@ -417,8 +425,7 @@
                 } );
                 fieldImportedReportDate.toggle();
                 this.fieldImportedReportCB.on('change', function ( isSelected ) {
-                    var makeVisible = isSelected;
-                    fieldImportedReportDate.toggle( makeVisible );
+                    fieldImportedReportDate.toggle( isSelected );
                 } );
 
                 this.fieldDateOfSubmission = new OO.ui.TextInputWidget( {
@@ -544,7 +551,7 @@
              * Save the changes to [[Module:Grant_Reports]] page.
              */
             GrantsEditor.prototype.saveItem = function ( deleteFlag ) {
-                var dialog = this, content;
+                var dialog = this;
 
                 dialog.pushPending();
 
@@ -578,7 +585,7 @@
                     generateKeyValuePair = function ( k, v ) {
                         var res, jsonarray;
                         res = '\t\t'.concat( k, ' = ' );
-                        if ( k == 'partnership_info' ) {
+                        if ( k === 'partnership_info' ) {
                             jsonarray = JSON.stringify( v );
                             // Lua uses { } for "arrays"
                             jsonarray = jsonarray.replace( '[', '{' );
@@ -651,7 +658,7 @@
                         if ( dialog.fieldPartnershipInfo.findSelectedItemsData() ) {
                             workingEntry.partnership_info = dialog.fieldPartnershipInfo.findSelectedItemsData();
                             for ( i=0; i < workingEntry.partnership_info.length; i++ ) {
-                                if ( workingEntry.partnership_info[ i ] == 'Other' ) {
+                                if ( workingEntry.partnership_info[ i ] === 'Other' ) {
                                     workingEntry.partnership_info[ i ] = dialog.fieldPartnershipOtherInput.getValue();
                                 }
                             }
@@ -677,7 +684,7 @@
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( workingEntry.unique_id != dialog.uniqueId || !deleteFlag ) {
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
                             manifest.push( workingEntry );
                         }
                     }
