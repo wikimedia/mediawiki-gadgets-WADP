@@ -26,8 +26,6 @@
             openAdvanceWindow,
             windowManager,
             getOrgInfoContentModuleQuery,
-            getWadQueryPortalFormViews,
-            getWadQueryPortalFormUsage,
             parseContentModule,
             cleanRawEntry,
             /* Cache `counter` variable */ counter = 0,
@@ -50,7 +48,7 @@
             generateKeyValuePair;
 
         userLang = mw.config.get( 'wgUserLanguage' );
-        if ( userLang == 'en' ) {
+        if ( userLang === 'en' ) {
             userLang = 'en-foo'; // quick hack fix
         }
         new mw.Api().get( {
@@ -195,7 +193,7 @@
 
                 for ( i = 0; i < entries.length; i++ ) {
                     entry = cleanRawEntry( entries[ i ].value.fields );
-                    if ( entry.org_type == type && entry.recognition_status !== 'derecognised' ) {
+                    if ( entry.org_type === type && entry.recognition_status !== 'derecognised' ) {
                         counter = counter + 1;
                     }
                 }
@@ -221,7 +219,7 @@
                 for ( i = 0; i < entries.length; i++ ) {
                     entry = cleanRawEntry( entries[ i ].value.fields );
                     member_count = parseInt( entry.member_count );
-                    if ( entry.region == region && member_count > 0 && entry.recognition_status !== 'derecognised' ) {
+                    if ( entry.region === region && member_count > 0 && entry.recognition_status !== 'derecognised' ) {
                         counter = counter + member_count;
                     }
                 }
@@ -247,7 +245,7 @@
                 var entryData = {}, i, j;
 
                 for ( i = 0; i < relevantRawEntry.length; i++ ) {
-                    if ( relevantRawEntry[ i ].key.name == 'dm_structure' ) {
+                    if ( relevantRawEntry[ i ].key.name === 'dm_structure' ) {
                         entryData.dm_structure = [];
                         for (
                             j = 0;
@@ -258,7 +256,7 @@
                                 relevantRawEntry[ i ].value.fields[ j ].value.value
                             );
                         }
-                    } else if ( relevantRawEntry[ i ].key.name == 'partnership_info' ) {
+                    } else if ( relevantRawEntry[ i ].key.name === 'partnership_info' ) {
                         entryData.partnership_info = [];
                         for (
                             j = 0;
@@ -341,7 +339,6 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             ArpSubQueryLeafWindow.prototype.initialize = function () {
@@ -425,7 +422,6 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             ArpSubQueryForm.prototype.initialize = function () {
@@ -459,7 +455,7 @@
                 this.$body.append( '<br/><p style="text-align: center;"><b>' + gadgetMsg[ 'query-question' ] + '</b> ' + queryInfo[1] + '</p>' );
                 this.$body.append( '<p style="background-color: #87CEFA; text-align: center;"><br/>' + queryInfo[2] + '<br/><br/></p>' );
 
-                if ( queryInfo[0] == 'ARP-Q1' ) {
+                if ( queryInfo[0] === 'ARP-Q1' ) {
                     this.fieldAffiliateCountSubQueries = new OO.ui.RadioSelectWidget( {
                         items: [
                             new OO.ui.RadioOptionWidget( {
@@ -511,7 +507,7 @@
                     } );
 
                     this.content.$element.append( this.fieldSet.$element );
-                } else if ( queryInfo[0] == 'ARP-Q2' ) {
+                } else if ( queryInfo[0] === 'ARP-Q2' ) {
                     /** -- Legal Status Sub-Queries -- */
                     this.fieldSet21 = new OO.ui.FieldsetLayout( {
                         label: gadgetMsg[ 'legal-status-subquery-label' ],
@@ -541,7 +537,7 @@
 
                     this.content.$element.append( this.fieldSet21.$element );
                     this.content.$element.append( this.fieldSet22.$element );
-                } else if ( queryInfo[0] == 'ARP-Q3' ) {
+                } else if ( queryInfo[0] === 'ARP-Q3' ) {
                     /** -- Compliance Status Sub-Queries -- */
                     this.fieldSet31 = new OO.ui.FieldsetLayout( {
                         label: gadgetMsg[ 'compliance-status-subquery-label' ],
@@ -586,7 +582,7 @@
 
                     this.content.$element.append( this.fieldSet31.$element );
                     this.content.$element.append( this.fieldSet32.$element );
-                } else if ( queryInfo[0] == 'ARP-Q5' ) {
+                } else if ( queryInfo[0] === 'ARP-Q5' ) {
                     this.fieldProgramsSubQueries = new OO.ui.RadioSelectWidget( {
                         items: [
                             new OO.ui.RadioOptionWidget( {
@@ -620,7 +616,7 @@
                     } );
 
                     this.content.$element.append( this.fieldSet.$element );
-                } else if ( queryInfo[0] == 'ARP-Q6' ) {
+                } else if ( queryInfo[0] === 'ARP-Q6' ) {
                     this.fieldProgramsSubQueries = new OO.ui.RadioSelectWidget( {
                         items: [
                             new OO.ui.RadioOptionWidget( {
@@ -654,7 +650,7 @@
                     } );
 
                     this.content.$element.append( this.fieldSet.$element );
-                } else if ( queryInfo[0] == 'ARP-Q7' ) {
+                } else if ( queryInfo[0] === 'ARP-Q7' ) {
                     /** -- Affiliate Composition Sub-Queries -- */
                     this.fieldSetS1 = new OO.ui.FieldsetLayout( {
                         label: gadgetMsg[ 'affiliate-composition-subquery1-label' ],
@@ -716,7 +712,7 @@
 
                     this.content.$element.append( this.fieldSetS1.$element );
                     this.content.$element.append( this.fieldSetS2.$element );
-                } else if ( queryInfo[0] == 'ARP-Q8' ) {
+                } else if ( queryInfo[0] === 'ARP-Q8' ) {
                     /** -- Affiliate Composition Sub-Queries -- */
                     this.fieldSetS1 = new OO.ui.FieldsetLayout( {
                         label: gadgetMsg[ 'see-additional-queries-on-results' ],
@@ -807,7 +803,7 @@
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.region == region && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.region === region && entry.recognition_status !== 'derecognised' ) {
                                 counter = counter + 1;
                             }
                         }
@@ -821,13 +817,13 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldLegalStatusSubQueries1 !== null
                         && dialog.fieldLegalStatusSubQueries1.isSelected()
-                        && dialog.fieldLegalStatusSubQueries1.getValue() == 'ARP-Q2.1'
+                        && dialog.fieldLegalStatusSubQueries1.getValue() === 'ARP-Q2.1'
                     ) {
                         entries = parseContentModule( data.query.pages );
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.org_type == 'User Group' && entry.legal_entity == 'Yes' && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' && entry.recognition_status !== 'derecognised' ) {
                                 counter = counter + 1;
                             }
                         }
@@ -842,7 +838,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldLegalStatusSubQueries2 !== null
                         && dialog.fieldLegalStatusSubQueries2.isSelected()
-                        && dialog.fieldLegalStatusSubQueries2.getValue() == 'ARP-Q2.2'
+                        && dialog.fieldLegalStatusSubQueries2.getValue() === 'ARP-Q2.2'
                     ) {
                         /** TODO: Algorithm for this query can be improved */
                         var list_africa = "<br/>",
@@ -858,24 +854,24 @@
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.org_type == 'User Group' && entry.legal_entity == 'Yes' && entry.recognition_status !== 'derecognised' )
-                                || entry.org_type == 'Chapter' || entry.org_type == 'Thematic Organization'
+                            if ( ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' && entry.recognition_status !== 'derecognised' )
+                                || entry.org_type === 'Chapter' || entry.org_type === 'Thematic Organization'
                             ) {
-                                if ( entry.region == 'Africa' ) {
+                                if ( entry.region === 'Africa' ) {
                                     list_africa += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region == 'Asia' ) {
+                                } else if ( entry.region === 'Asia' ) {
                                     list_asia += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region == 'Europe' ) {
+                                } else if ( entry.region === 'Europe' ) {
                                     list_EU += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region == 'North America' ) {
+                                } else if ( entry.region === 'North America' ) {
                                     list_NA += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region == 'South America'	) {
+                                } else if ( entry.region === 'South America'	) {
                                     list_SA += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region == 'Oceania') {
+                                } else if ( entry.region === 'Oceania') {
                                     list_Oc += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region == 'International' ) {
+                                } else if ( entry.region === 'International' ) {
                                     list_Int += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region == 'Middle East' ) {
+                                } else if ( entry.region === 'Middle East' ) {
                                     list_ME += '* ' + entry.group_name + '<br/>';
                                 }
                             }
@@ -899,19 +895,19 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldComplianceStatusSubQueries1 !== null
                         && dialog.fieldComplianceStatusSubQueries1.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries1.getValue() == 'ARP-Q3.1'
+                        && dialog.fieldComplianceStatusSubQueries1.getValue() === 'ARP-Q3.1'
                     ) {
                         entries = parseContentModule( data.query.pages );
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting == 'Tick' || entry.uptodate_reporting == 'Tick-N' )
-                                && entry.org_type == 'User Group' && entry.recognition_status !== 'derecognised'
+                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                && entry.org_type === 'User Group' && entry.recognition_status !== 'derecognised'
                             ) {
                                 percentage = percentage + 1;
                             }
 
-                            if ( entry.org_type == 'User Group' && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.org_type === 'User Group' && entry.recognition_status !== 'derecognised' ) {
                                 counter = counter + 1;
                             }
                         }
@@ -931,19 +927,19 @@
                         percentage = 0;
                     } else if ( dialog.fieldComplianceStatusSubQueries2 !== null
                         && dialog.fieldComplianceStatusSubQueries2.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries2.getValue() == 'ARP-Q3.2'
+                        && dialog.fieldComplianceStatusSubQueries2.getValue() === 'ARP-Q3.2'
                     ) {
                         entries = parseContentModule( data.query.pages );
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting == 'Tick' || entry.uptodate_reporting == 'Tick-N' )
-                                && entry.org_type == 'Chapter' && entry.recognition_status !== 'derecognised'
+                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                && entry.org_type === 'Chapter' && entry.recognition_status !== 'derecognised'
                             ) {
                                 percentage = percentage + 1;
                             }
 
-                            if ( entry.org_type == 'Chapter' && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.org_type === 'Chapter' && entry.recognition_status !== 'derecognised' ) {
                                 counter = counter + 1;
                             }
                         }
@@ -963,19 +959,19 @@
                         percentage = 0;
                     } else if ( dialog.fieldComplianceStatusSubQueries3 !== null
                         && dialog.fieldComplianceStatusSubQueries3.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries3.getValue() == 'ARP-Q3.3'
+                        && dialog.fieldComplianceStatusSubQueries3.getValue() === 'ARP-Q3.3'
                     ) {
                         entries = parseContentModule( data.query.pages );
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting == 'Tick' || entry.uptodate_reporting == 'Tick-N' )
-                                && entry.org_type == 'Thematic Organization' && entry.recognition_status !== 'derecognised'
+                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                && entry.org_type === 'Thematic Organization' && entry.recognition_status !== 'derecognised'
                             ) {
                                 percentage = percentage + 1;
                             }
 
-                            if ( entry.org_type == 'Thematic Organization' && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.org_type === 'Thematic Organization' && entry.recognition_status !== 'derecognised' ) {
                                 counter = counter + 1;
                             }
                         }
@@ -995,14 +991,14 @@
                         percentage = 0;
                     } else if ( dialog.fieldComplianceStatusSubQueries4 !== null
                         && dialog.fieldComplianceStatusSubQueries4.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries4.getValue() == 'ARP-Q3.4'
+                        && dialog.fieldComplianceStatusSubQueries4.getValue() === 'ARP-Q3.4'
                     ) {
                         list = "<br/>";
                         entries = parseContentModule( data.query.pages );
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting == 'Tick' || entry.uptodate_reporting == 'Tick-N' )
+                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 list += "* " + entry.group_name + "<br/>";
@@ -1019,14 +1015,14 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldComplianceStatusSubQueries5 !== null
                         && dialog.fieldComplianceStatusSubQueries5.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries5.getValue() == 'ARP-Q3.5'
+                        && dialog.fieldComplianceStatusSubQueries5.getValue() === 'ARP-Q3.5'
                     ) {
                         list = "<br/>";
                         entries = parseContentModule( data.query.pages );
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting == 'Cross' || entry.uptodate_reporting == 'Cross-N' )
+                            if ( ( entry.uptodate_reporting === 'Cross' || entry.uptodate_reporting === 'Cross-N' )
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 list += "* " + entry.group_name + "<br/>";
@@ -1044,7 +1040,7 @@
                         dialog.fieldProgramsSubQueries !== null
                         && dialog.fieldProgramsSubQueries.findSelectedItem() !== null
                     ) {
-                        if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() == 'ARP-Q5.1' ) {
+                        if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q5.1' ) {
                             /** TODO: Algorithm for this query can be improved */
                             var list_glam_africa = "<br/>",
                                 list_glam_asia = "<br/>",
@@ -1062,27 +1058,27 @@
                                 for ( j = 0; j < activities_reports.length; j++ ) {
                                     a_report = cleanRawEntry( activities_reports[j].value.fields );
                                     if (
-                                        entry.group_name == a_report.group_name
+                                        entry.group_name === a_report.group_name
                                         && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
                                         && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
                                         && a_report.partnership_info.includes( "GLAM Institutions" )
                                         && entry.recognition_status !== 'derecognised'
                                     ) {
-                                        if ( entry.region == 'Africa' ) {
+                                        if ( entry.region === 'Africa' ) {
                                             list_glam_africa += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Asia' ) {
+                                        } else if ( entry.region === 'Asia' ) {
                                             list_glam_asia += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Europe' ) {
+                                        } else if ( entry.region === 'Europe' ) {
                                             list_glam_EU += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'North America' ) {
+                                        } else if ( entry.region === 'North America' ) {
                                             list_glam_NA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'South America' ) {
+                                        } else if ( entry.region === 'South America' ) {
                                             list_glam_SA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Oceania' ) {
+                                        } else if ( entry.region === 'Oceania' ) {
                                             list_glam_Oc += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'International' ) {
+                                        } else if ( entry.region === 'International' ) {
                                             list_glam_Int += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Middle East' ) {
+                                        } else if ( entry.region === 'Middle East' ) {
                                             list_glam_ME += '* ' + entry.group_name + '<br/>';
                                         }
                                         break;
@@ -1104,7 +1100,7 @@
                             );
                             dialog.close();
                             openLeafWindow( {} );
-                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() == 'ARP-Q5.2' ) {
+                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q5.2' ) {
                             var list_glam_ugs = '<br/>',
                                 list_glam_chpts = '<br/>',
                                 list_glam_thorgs = '<br/>';
@@ -1116,17 +1112,17 @@
                                 for ( j = 0; j < activities_reports.length; j++ ) {
                                     a_report = cleanRawEntry( activities_reports[j].value.fields );
                                     if (
-                                        entry.group_name == a_report.group_name
+                                        entry.group_name === a_report.group_name
                                         && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
+                                        && ( a_report.end_date.split("/")[2] === parseInt( new Date().getFullYear() ) - 1 )
                                         && a_report.partnership_info.includes( "GLAM Institutions" )
                                         && entry.recognition_status !== 'derecognised'
                                     ) {
-                                        if ( entry.org_type == 'User Group' ) {
+                                        if ( entry.org_type === 'User Group' ) {
                                             list_glam_ugs += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type == 'Chapter' ) {
+                                        } else if ( entry.org_type === 'Chapter' ) {
                                             list_glam_chpts += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type == 'Thematic Organization' ) {
+                                        } else if ( entry.org_type === 'Thematic Organization' ) {
                                             list_glam_thorgs += '* ' + entry.group_name + '<br/>';
                                         }
                                         break;
@@ -1140,10 +1136,10 @@
                                 + '<b><i>User Groups</i></b>' + list_glam_ugs + '<br/>'
                                 + '<b><i>Chapters</i></b>' + list_glam_chpts + '<br/>'
                                 + '<b><i>Thematic Organizations</i></b>' + list_glam_thorgs + '<br/>'
-                            ),
-                                dialog.close();
+                            );
+                            dialog.close();
                             openLeafWindow( {} );
-                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() == 'ARP-Q6.1' ) {
+                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q6.1' ) {
                             /** TODO: Algorithm for this query can be improved */
                             var list_education_africa = "<br/>",
                                 list_education_asia = "<br/>",
@@ -1161,27 +1157,27 @@
                                 for ( j = 0; j < activities_reports.length; j++ ) {
                                     a_report = cleanRawEntry( activities_reports[j].value.fields );
                                     if (
-                                        entry.group_name == a_report.group_name
+                                        entry.group_name === a_report.group_name
                                         && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
                                         && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
                                         && a_report.partnership_info.includes( "Educational Institutions" )
                                         && entry.recognition_status !== 'derecognised'
                                     ) {
-                                        if ( entry.region == 'Africa' ) {
+                                        if ( entry.region === 'Africa' ) {
                                             list_education_africa += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Asia' ) {
+                                        } else if ( entry.region === 'Asia' ) {
                                             list_education_asia += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Europe' ) {
+                                        } else if ( entry.region === 'Europe' ) {
                                             list_education_EU += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'North America' ) {
+                                        } else if ( entry.region === 'North America' ) {
                                             list_education_NA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'South America' ) {
+                                        } else if ( entry.region === 'South America' ) {
                                             list_education_SA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Oceania' ) {
+                                        } else if ( entry.region === 'Oceania' ) {
                                             list_education_Oc += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'International' ) {
+                                        } else if ( entry.region === 'International' ) {
                                             list_education_Int += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region == 'Middle East' ) {
+                                        } else if ( entry.region === 'Middle East' ) {
                                             list_education_ME += '* ' + entry.group_name + '<br/>';
                                         }
                                         break;
@@ -1200,10 +1196,10 @@
                                 + '<b><i>Oceania</i></b>' + list_education_Oc + '<br/>'
                                 + '<b><i>International</i></b>' + list_education_Int + '<br/>'
                                 + '<b><i>Middle East</i></b>' + list_education_ME + '<br/>'
-                            ),
-                                dialog.close();
+                            );
+                            dialog.close();
                             openLeafWindow( {} );
-                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() == 'ARP-Q6.2' ) {
+                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q6.2' ) {
                             var list_education_ugs = '<br/>',
                                 list_education_chpts = '<br/>',
                                 list_education_thorgs = '<br/>';
@@ -1215,17 +1211,17 @@
                                 for ( j = 0; j < activities_reports.length; j++ ) {
                                     a_report = cleanRawEntry( activities_reports[j].value.fields );
                                     if (
-                                        entry.group_name == a_report.group_name
+                                        entry.group_name === a_report.group_name
                                         && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
                                         && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
                                         && a_report.partnership_info.includes( "Educational Institutions" )
                                         && entry.recognition_status !== 'derecognised'
                                     ) {
-                                        if ( entry.org_type == 'User Group' ) {
+                                        if ( entry.org_type === 'User Group' ) {
                                             list_education_ugs += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type == 'Chapter' ) {
+                                        } else if ( entry.org_type === 'Chapter' ) {
                                             list_education_chpts += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type == 'Thematic Organization' ) {
+                                        } else if ( entry.org_type === 'Thematic Organization' ) {
                                             list_education_thorgs += '* ' + entry.group_name + '<br/>';
                                         }
                                         break;
@@ -1239,20 +1235,20 @@
                                 + '<b><i>User Groups</i></b>' + list_education_ugs + '<br/>'
                                 + '<b><i>Chapters</i></b>' + list_education_chpts + '<br/>'
                                 + '<b><i>Thematic Organizations</i></b>' + list_education_thorgs + '<br/>'
-                            ),
-                                dialog.close();
+                            );
+                            dialog.close();
                             openLeafWindow( {} );
                         }
                     } else if ( dialog.fieldAffiliateCompositionSubQueries1 !== null
                         && dialog.fieldAffiliateCompositionSubQueries1.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries1.getValue() == 'ARP-Q7.1'
+                        && dialog.fieldAffiliateCompositionSubQueries1.getValue() === 'ARP-Q7.1'
                     ) {
                         count = 0;
                         entries = parseContentModule( data.query.pages );
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             count = parseInt( entry.member_count );
-                            if ( entry.org_type == "Chapter" && count > 0 && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.org_type === "Chapter" && count > 0 && entry.recognition_status !== 'derecognised' ) {
                                 counter += count;
                             }
                         }
@@ -1265,14 +1261,14 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries2 !== null
                         && dialog.fieldAffiliateCompositionSubQueries2.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries2.getValue() == 'ARP-Q7.2'
+                        && dialog.fieldAffiliateCompositionSubQueries2.getValue() === 'ARP-Q7.2'
                     ) {
                         count = 0;
                         entries = parseContentModule( data.query.pages );
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             count = parseInt( entry.member_count );
-                            if ( entry.org_type == "Thematic Organization" && count > 0 && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.org_type === "Thematic Organization" && count > 0 && entry.recognition_status !== 'derecognised' ) {
                                 counter += count;
                             }
                         }
@@ -1285,14 +1281,14 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries3 !== null
                         && dialog.fieldAffiliateCompositionSubQueries3.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries3.getValue() == 'ARP-Q7.3'
+                        && dialog.fieldAffiliateCompositionSubQueries3.getValue() === 'ARP-Q7.3'
                     ) {
                         count = 0;
                         entries = parseContentModule( data.query.pages );
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             count = parseInt( entry.member_count );
-                            if ( entry.org_type == "User Group" && count > 0 && entry.recognition_status !== 'derecognised' ) {
+                            if ( entry.org_type === "User Group" && count > 0 && entry.recognition_status !== 'derecognised' ) {
                                 counter += count;
                             }
                         }
@@ -1305,7 +1301,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries4 !== null
                         && dialog.fieldAffiliateCompositionSubQueries4.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries4.getValue() == 'ARP-Q7.4'
+                        && dialog.fieldAffiliateCompositionSubQueries4.getValue() === 'ARP-Q7.4'
                     ) {
                         entries = parseContentModule( data.query.pages );
 
@@ -1325,7 +1321,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries5 !== null
                         && dialog.fieldAffiliateCompositionSubQueries5.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries5.getValue() == 'ARP-Q7.5'
+                        && dialog.fieldAffiliateCompositionSubQueries5.getValue() === 'ARP-Q7.5'
                     ) {
                         list = '';
                         entries = parseContentModule( data.query.pages );
@@ -1346,7 +1342,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries6 !== null
                         && dialog.fieldAffiliateCompositionSubQueries6.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries6.getValue() == 'ARP-Q7.6'
+                        && dialog.fieldAffiliateCompositionSubQueries6.getValue() === 'ARP-Q7.6'
                     ) {
                         list = '';
                         entries = parseContentModule( data.query.pages );
@@ -1369,7 +1365,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries1 !== null
                         && dialog.fieldAffiliateCompositionSubQueries1.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries1.getValue() == 'ARP-Q8.1'
+                        && dialog.fieldAffiliateCompositionSubQueries1.getValue() === 'ARP-Q8.1'
                     ) {
                         list = "<br/>";
                         entries = parseContentModule( data.query.pages );
@@ -1389,7 +1385,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries2 !== null
                         && dialog.fieldAffiliateCompositionSubQueries2.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries2.getValue() == 'ARP-Q8.2'
+                        && dialog.fieldAffiliateCompositionSubQueries2.getValue() === 'ARP-Q8.2'
                     ) {
                         list = "<br/>";
                         entries = parseContentModule( data.query.pages );
@@ -1409,7 +1405,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries3 !== null
                         && dialog.fieldAffiliateCompositionSubQueries3.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries3.getValue() == 'ARP-Q8.3'
+                        && dialog.fieldAffiliateCompositionSubQueries3.getValue() === 'ARP-Q8.3'
                     ) {
                         list = "<br/>";
                         entries = parseContentModule( data.query.pages );
@@ -1429,7 +1425,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries4 !== null
                         && dialog.fieldAffiliateCompositionSubQueries4.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries4.getValue() == 'ARP-Q8.4'
+                        && dialog.fieldAffiliateCompositionSubQueries4.getValue() === 'ARP-Q8.4'
                     ) {
                         list = "<br/>";
                         entries = parseContentModule( data.query.pages );
@@ -1449,7 +1445,7 @@
                         openLeafWindow( {} );
                     } else if ( dialog.fieldAffiliateCompositionSubQueries5 !== null
                         && dialog.fieldAffiliateCompositionSubQueries5.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries5.getValue() == 'ARP-Q8.5'
+                        && dialog.fieldAffiliateCompositionSubQueries5.getValue() === 'ARP-Q8.5'
                     ) {
                         affiliate_structures = {
                             'board': 0,
@@ -1466,7 +1462,7 @@
                             if (
                                 entry.dm_structure !== undefined
                                 && entry.dm_structure.length > 0
-                                && entry.org_type == "Chapter"
+                                && entry.org_type === "Chapter"
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 /* For board structures */
@@ -1507,7 +1503,7 @@
                         clearCounter();
                     } else if ( dialog.fieldAffiliateCompositionSubQueries6 !== null
                         && dialog.fieldAffiliateCompositionSubQueries6.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries6.getValue() == 'ARP-Q8.6'
+                        && dialog.fieldAffiliateCompositionSubQueries6.getValue() === 'ARP-Q8.6'
                     ) {
                         affiliate_structures = {
                             'board': 0,
@@ -1524,7 +1520,7 @@
                             if (
                                 entry.dm_structure !== undefined
                                 && entry.dm_structure.length > 0
-                                && entry.org_type == "Thematic Organization"
+                                && entry.org_type === "Thematic Organization"
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 /* For board structures */
@@ -1565,7 +1561,7 @@
                         clearCounter();
                     } else if ( dialog.fieldAffiliateCompositionSubQueries7 !== null
                         && dialog.fieldAffiliateCompositionSubQueries7.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries7.getValue() == 'ARP-Q8.7'
+                        && dialog.fieldAffiliateCompositionSubQueries7.getValue() === 'ARP-Q8.7'
                     ) {
                         affiliate_structures = {
                             'board': 0,
@@ -1582,7 +1578,7 @@
                             if (
                                 entry.dm_structure !== undefined
                                 && entry.dm_structure.length > 0
-                                && entry.org_type == "User Group"
+                                && entry.org_type === "User Group"
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 /* For board structures */
@@ -1730,7 +1726,6 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
@@ -1975,7 +1970,7 @@
                     } )
                 ] );
 
-                this.fieldToggleSwitch.on( 'change', function ( status ) {
+                this.fieldToggleSwitch.on( 'change', function () {
                     // Close the basic window & open the advance window.
                     dialog.close();
                     openBasicWindow( {} );
@@ -2101,7 +2096,7 @@
                     } )
                 ] );
 
-                this.fieldToggleSwitch.on( 'change', function ( status ) {
+                this.fieldToggleSwitch.on( 'change', function () {
                     // Close the basic window & open the advance window.
                     dialog.close();
                     openAdvanceWindow( {} );
@@ -2173,7 +2168,6 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
@@ -2194,7 +2188,7 @@
                     var windowManager = new OO.ui.WindowManager();
 
                     /** ARP-Q1 implementation */
-                    if ( dialog.fieldAffiliateCount.isSelected() && dialog.fieldAffiliateCount.getValue() == 'ARP-Q1' ) {
+                    if ( dialog.fieldAffiliateCount.isSelected() && dialog.fieldAffiliateCount.getValue() === 'ARP-Q1' ) {
                         var ug_count = 0, chpt_count = 0, thorg_count = 0;
                         entries = parseContentModule( data.query.pages );
                         counter = luaTableCounter( entries );
@@ -2202,15 +2196,15 @@
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             if ( entry.recognition_status !== 'derecognised' ) {
-                                if ( entry.org_type == 'User Group' ) {
+                                if ( entry.org_type === 'User Group' ) {
                                     ug_count = ug_count + 1;
                                 }
 
-                                if ( entry.org_type == 'Chapter' ) {
+                                if ( entry.org_type === 'Chapter' ) {
                                     chpt_count = chpt_count + 1;
                                 }
 
-                                if ( entry.org_type == 'Thematic Organization' ) {
+                                if ( entry.org_type === 'Thematic Organization' ) {
                                     thorg_count = thorg_count + 1;
                                 }
                             }
@@ -2229,7 +2223,7 @@
 
                         clearCounter();
                         openSubWindow( {} );
-                    } else if ( dialog.fieldLegalStatus.isSelected() && dialog.fieldLegalStatus.getValue() == 'ARP-Q2' ) {
+                    } else if ( dialog.fieldLegalStatus.isSelected() && dialog.fieldLegalStatus.getValue() === 'ARP-Q2' ) {
                         var notLegalEntitiesCount = 0, orgInfoCount = 0;
 
                         entries = parseContentModule( data.query.pages );
@@ -2241,8 +2235,8 @@
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             if (
-                                ( entry.org_type == 'Thematic Organization' || entry.org_type == 'Chapter'
-                                    || ( entry.org_type == 'User Group' && entry.legal_entity == 'Yes' ) )
+                                ( entry.org_type === 'Thematic Organization' || entry.org_type === 'Chapter'
+                                    || ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' ) )
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 counter = counter + 1;
@@ -2262,13 +2256,13 @@
 
                         clearCounter();
                         openSubWindow( {} );
-                    } else if ( dialog.fieldComplianceStatus.isSelected() && dialog.fieldComplianceStatus.getValue() == 'ARP-Q3' ) {
+                    } else if ( dialog.fieldComplianceStatus.isSelected() && dialog.fieldComplianceStatus.getValue() === 'ARP-Q3' ) {
                         entries = parseContentModule( data.query.pages );
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             if (
-                                ( entry.uptodate_reporting == 'Tick' || entry.uptodate_reporting == 'Tick-N')
+                                ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N')
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 percentage = percentage + 1;
@@ -2291,14 +2285,14 @@
                         // Clear `percentage` variable
                         percentage = 0;
                         openSubWindow( {} );
-                    } else if ( dialog.fieldPrograms1.isSelected() && dialog.fieldPrograms1.getValue() == 'ARP-Q5' ) {
+                    } else if ( dialog.fieldPrograms1.isSelected() && dialog.fieldPrograms1.getValue() === 'ARP-Q5' ) {
                         entries = parseContentModule( data.query.pages );
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             for ( j = 0; j < activities_reports.length; j++ ) {
                                 a_report = cleanRawEntry( activities_reports[j].value.fields );
                                 if (
-                                    entry.group_name == a_report.group_name
+                                    entry.group_name === a_report.group_name
                                     && entry.org_type !== 'Allied or other organization'
                                     && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
                                     && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
@@ -2325,14 +2319,14 @@
 
                         clearCounter();
                         openSubWindow( {} );
-                    } else if ( dialog.fieldPrograms2.isSelected() && dialog.fieldPrograms2.getValue() == 'ARP-Q6' ) {
+                    } else if ( dialog.fieldPrograms2.isSelected() && dialog.fieldPrograms2.getValue() === 'ARP-Q6' ) {
                         entries = parseContentModule( data.query.pages );
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
                             for ( j = 0; j < activities_reports.length; j++ ) {
                                 a_report = cleanRawEntry( activities_reports[j].value.fields );
                                 if (
-                                    entry.group_name == a_report.group_name
+                                    entry.group_name === a_report.group_name
                                     && entry.org_type !== 'Allied or other organization'
                                     && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
                                     && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
@@ -2359,7 +2353,7 @@
 
                         clearCounter();
                         openSubWindow( {} );
-                    } else if ( dialog.fieldAffiliateComposition1.isSelected() && dialog.fieldAffiliateComposition1.getValue() == 'ARP-Q7' ) {
+                    } else if ( dialog.fieldAffiliateComposition1.isSelected() && dialog.fieldAffiliateComposition1.getValue() === 'ARP-Q7' ) {
                         var count = 0;
                         entries = parseContentModule( data.query.pages );
                         for ( i = 0; i < entries.length; i++ ) {
@@ -2380,7 +2374,7 @@
 
                         clearCounter();
                         openSubWindow( {} );
-                    } else if ( dialog.fieldAffiliateComposition2.isSelected() && dialog.fieldAffiliateComposition2.getValue() == 'ARP-Q8' ) {
+                    } else if ( dialog.fieldAffiliateComposition2.isSelected() && dialog.fieldAffiliateComposition2.getValue() === 'ARP-Q8' ) {
                         var affiliate_structures = {
                             'board': 0,
                             'democratic_process': 0,
