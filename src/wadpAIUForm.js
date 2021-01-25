@@ -35,12 +35,11 @@
             pmcTabsArray = [],
             queryAffiliatesPage,
             sanitizeInput,
-            uniqueId,
             userLang,
             windowManager;
 
         userLang = mw.config.get( 'wgUserLanguage' );
-        if ( userLang == 'en' ) {
+        if ( userLang === 'en' ) {
             userLang = 'en-foo'; // quick hack fix
         }
         new mw.Api().get( {
@@ -155,7 +154,7 @@
             generateKeyValuePair = function ( k, v ) {
                 var res, jsonarray;
                 res = '\t\t'.concat( k, ' = ' );
-                if ( k == 'dm_structure' ) {
+                if ( k === 'dm_structure' ) {
                     jsonarray = JSON.stringify( v );
                     // Lua uses { } for "arrays"
                     jsonarray = jsonarray.replace( '[', '{' );
@@ -205,8 +204,8 @@
                     // Loop through the individual key-value pairs within each entry
                     for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
                         if (
-                            entries[ i ].value.fields[ j ].key.name == 'unique_id' &&
-                            entries[ i ].value.fields[ j ].value.value == uniqueId
+                            entries[ i ].value.fields[ j ].key.name === 'unique_id' &&
+                            entries[ i ].value.fields[ j ].value.value === uniqueId
                         ) {
                             return entries[ i ].value.fields;
                         }
@@ -677,14 +676,13 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
              * Save the changes to [[Module:Affiliate_Indicators]] page.
              */
             AffiliateIndicatorEditorW1.prototype.saveItem = function ( deleteFlag ) {
-                var dialog = this, content;
+                var dialog = this;
 
                 dialog.pushPending();
 
@@ -817,7 +815,7 @@
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( workingEntry.group_name == dialog.group_name.split(' ~ ')[0] ) {
+                        if ( workingEntry.group_name === dialog.group_name.split(' ~ ')[0] ) {
                             workingEntry = processWorkingEntry( workingEntry );
                             if ( deleteFlag ) {
                                 editSummary = gadgetMsg[ 'revert-aiu-incomplete-entry' ] + ' ' + workingEntry.group_name;
@@ -825,7 +823,7 @@
                                 editSummary = gadgetMsg[ 'updated-aff-indicators' ] + ' ' + workingEntry.group_name;
                             }
                         }
-                        if ( workingEntry.unique_id != dialog.uniqueId || !deleteFlag ) {
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
                             manifest.push( workingEntry );
                         }
                     }
@@ -842,7 +840,7 @@
 
                         for ( i = 0; i < entries.length; i++ ) {
                             workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( workingEntry.unique_id == persistentId && deleteFlag == 'delete' ) {
+                            if ( workingEntry.unique_id === persistentId && deleteFlag === 'delete' ) {
                                 workingEntry = processWorkingEntry( workingEntry );
                                 editSummary = gadgetMsg[ 'revert-aiu-incomplete-entry' ] + ' ' + persistentGroupName;
                             } else {
@@ -1588,14 +1586,13 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
              * Save the changes to [[Module:Affiliate_Indicators]] page.
              */
             AffiliateIndicatorEditorW2.prototype.saveItem = function ( deleteFlag ) {
-                var dialog = this, content;
+                var dialog = this;
 
                 dialog.pushPending();
 
@@ -1702,7 +1699,7 @@
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( workingEntry.unique_id == persistentId ) {
+                        if ( workingEntry.unique_id === persistentId ) {
                             workingEntry = processWorkingEntry( workingEntry );
                             if ( deleteFlag ) {
                                 editSummary = gadgetMsg[ 'revert-aiu-incomplete-entry' ] + ' ' + workingEntry.group_name;
@@ -1710,7 +1707,7 @@
                                 editSummary = gadgetMsg[ 'updated-aff-indicators' ] + ' ' + workingEntry.group_name;
                             }
                         }
-                        if ( workingEntry.unique_id != persistentId || !deleteFlag ) {
+                        if ( workingEntry.unique_id !== persistentId || !deleteFlag ) {
                             manifest.push( workingEntry );
                         }
                     }
@@ -1727,7 +1724,7 @@
 
                         for ( i = 0; i < entries.length; i++ ) {
                             workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( workingEntry.unique_id == persistentId && deleteFlag == 'delete' ) {
+                            if ( workingEntry.unique_id === persistentId && deleteFlag === 'delete' ) {
                                 workingEntry = processWorkingEntry( workingEntry );
                                 editSummary = gadgetMsg[ 'revert-aiu-incomplete-entry' ] + ' ' + persistentGroupName;
                             } else {
@@ -2265,7 +2262,7 @@
                 if ( pmcTabs === true && entries.length > 0 ) {
                     for ( i = 0; i < entries.length; i++ ) {
                         entry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( entry.unique_id == persistentId ) {
+                        if ( entry.unique_id === persistentId ) {
                             AffiliateIndicatorEditorW3.super.prototype.initialize.call( dialog );
                             dialog.content = new OO.ui.TabPanelLayout(
                                 entry.program_id, { label: entry.program_name }
@@ -3107,7 +3104,7 @@
                                 if ( pmcEntries ) {
                                     for ( i = 0; i < pmcEntries.length; i++ ) {
                                         entry = cleanRawEntry( pmcEntries[ i ].value.fields );
-                                        if ( entry.unique_id == persistentId ) {
+                                        if ( entry.unique_id === persistentId ) {
                                             pmcTabs = true;
                                             break;
                                         }
@@ -3141,7 +3138,6 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
@@ -3164,9 +3160,7 @@
                      * @return {Object} The same entry but with modifications
                      */
                     processWorkingEntry = function ( workingEntry ) {
-                        if ( workingEntry.program_id ) {
-                            workingEntry.program_id = workingEntry.program_id;
-                        } else {
+                        if ( !workingEntry.program_id ) {
                             workingEntry.program_id = Math.random().toString( 30 ).substring( 2 );
                         }
 
@@ -3267,7 +3261,7 @@
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                        if ( workingEntry.unique_id == persistentId && deleteFlag == 'delete' ) {
+                        if ( workingEntry.unique_id === persistentId && deleteFlag === 'delete' ) {
                             workingEntry = processWorkingEntry( workingEntry );
                             editSummary = gadgetMsg[ 'revert-aiu-incomplete-entry' ] + ' ' + persistentGroupName;
                         } /** else if ( workingEntry.unique_id == persistentId && deleteFlag !== '' ) {
@@ -3282,14 +3276,14 @@
                      * NOTE: Also, make sure to also delete Indicators (W1 & W2)
                      * entries for matching persistent ID.
                      */
-                    if ( deleteFlag == 'delete' && persistentId != '' ) {
+                    if ( deleteFlag === 'delete' && persistentId !== '' ) {
                         new mw.Api().get( getAIUDataModuleQuery() ).done( function ( data ) {
                             var manifest = [];
                             entries = parseAIUDataModule( data.query.pages );
 
                             for ( i = 0; i < entries.length; i++ ) {
                                 workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                                if ( workingEntry.unique_id == persistentId ) {
+                                if ( workingEntry.unique_id === persistentId ) {
                                     workingEntry = processWorkingEntry( workingEntry );
                                     if ( deleteFlag ) {
                                         editSummary = gadgetMsg[ 'revert-aiu-incomplete-entry' ] + ' ' + workingEntry.group_name;
@@ -3297,7 +3291,7 @@
                                         editSummary = gadgetMsg[ 'updated-aff-indicators' ] + ' ' + workingEntry.group_name;
                                     }
                                 }
-                                if ( workingEntry.unique_id != persistentId || !deleteFlag ) {
+                                if ( workingEntry.unique_id !== persistentId || !deleteFlag ) {
                                     manifest.push( workingEntry );
                                 }
                             }
@@ -3525,8 +3519,8 @@
                     }
 
                     // No unique ID means this is a new entry
-                    if ( persistentId != '' ) {
-                        if ( deleteFlag == 'add' || !deleteFlag ) {
+                    if ( persistentId !== '' ) {
+                        if ( deleteFlag === 'add' || !deleteFlag ) {
                             workingEntry = {
                                 unique_id: persistentId
                             };
@@ -3691,13 +3685,13 @@
                             'csrf',
                             { action: 'purge', titles: mw.config.values.wgPageName }
                         ).done( function () {
-                            if ( deleteFlag == 'add' ) {
+                            if ( deleteFlag === 'add' ) {
                                 pmcTabs = true;
                                 new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
                                     pmcEntries = parseAIUDataModule( data.query.pages );
                                     openWindow3( {} );
                                 } );
-                            } else if ( deleteFlag == 'update' ) {
+                            } else if ( deleteFlag === 'update' ) {
                                 new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
                                     pmcEntries = parseAIUDataModule( data.query.pages );
                                     openWindow3( {} );
