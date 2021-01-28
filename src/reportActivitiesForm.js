@@ -690,7 +690,6 @@
                         dialog.close();
                     } );
                 }
-                return NewItemDialog.parent.prototype.getActionProcess.call( this, action );
             };
 
             /**
