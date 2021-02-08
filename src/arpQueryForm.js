@@ -1785,6 +1785,10 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'finance',
                                 label: gadgetMsg[ 'query-object-finance' ]
+                            } ),
+                            new OO.ui.MenuOptionWidget( {
+                                data: 'reports',
+                                label: gadgetMsg[ 'query-object-reports' ]
                             } )
                         ]
                     }
@@ -1825,6 +1829,14 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'with-demographic-of',
                                 label: gadgetMsg[ 'query-subject-with-demographic-of' ]
+                            } ),
+                            new OO.ui.MenuOptionWidget( {
+                                data: 'recognised-in-year',
+                                label: gadgetMsg[ 'query-subject-recognised-in-year' ]
+                            } ),
+                            new OO.ui.MenuOptionWidget( {
+                                data: 'derecognised-in-year',
+                                label: gadgetMsg[ 'query-subject-derecognised-in-year' ]
                             } )
                         ]
                     }
@@ -1849,6 +1861,10 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'user-groups',
                                 label: gadgetMsg[ 'affiliate-search-type-user-groups' ]
+                            } ),
+                            new OO.ui.MenuOptionWidget( {
+                                data: 'specific-affiliate',
+                                label: gadgetMsg[ 'affiliate-search-specific-affiliate' ]
                             } )
                         ]
                     }
@@ -1885,6 +1901,10 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'middle-east',
                                 label: gadgetMsg[ 'affiliate-search-by-region-middle-east' ]
+                            } ),
+                            new OO.ui.MenuOptionWidget( {
+                                data: 'specific-country',
+                                label: gadgetMsg[ 'affiliate-search-by-region-specific-country' ]
                             } )
                         ]
                     }
