@@ -405,7 +405,6 @@
                         id: 'country',
                         required: true,
                         validate: 'text',
-                        value: config,
                         placeholder: gadgetMsg[ 'affiliate-country-placeholder' ]
                     }, config
                 ) );
