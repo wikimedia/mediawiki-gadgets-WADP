@@ -319,6 +319,20 @@
              * @param {Object} sourceblob The original API return
              * @return {Object} raw Entire page content (wikitext)
              */
+            getContentList = function ( sourceblob ) {
+                var i, raw;
+                for ( i in sourceblob ) {  // should only be one result
+                    raw = sourceblob[ i ].revisions[ 0 ][ '*' ];
+                    return raw;
+                }
+            };
+
+            /**
+             * Get an entire content (wikitext) of a given page
+             *
+             * @param {Object} sourceblob The original API return
+             * @return {Object} raw Entire page content (wikitext)
+             */
             getAffiliatesList = function ( sourceblob ) {
                 var i, raw;
                 for ( i in sourceblob ) {  // should only be one result
