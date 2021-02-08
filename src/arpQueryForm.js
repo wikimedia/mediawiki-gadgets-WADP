@@ -2165,10 +2165,22 @@
                             }
                         ),
                         new OO.ui.FieldLayout(
+                            this.fieldSpecificAffiliate,
+                            {
+                                align: 'inline'
+                            }
+                        ),
+                        new OO.ui.FieldLayout(
                             this.fieldAffiliateSearchTypeByRegion,
                             {
                                 label: gadgetMsg[ 'advance-step-five-label' ],
                                 align: 'top'
+                            }
+                        ),
+                        new OO.OO.ui.FieldLayout(
+                            this.fieldSpecificCountry,
+                            {
+                                align: 'inline'
                             }
                         ),
                         new OO.ui.FieldLayout(
