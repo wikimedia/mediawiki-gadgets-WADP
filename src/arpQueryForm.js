@@ -50,6 +50,7 @@
             getAffiliatesList,
             queryAffiliatesPage,
             queryCountriesPage,
+            getContentList,
             CountryLookupTextInputWidget;
 
         userLang = mw.config.get( 'wgUserLanguage' );
@@ -330,7 +331,7 @@
              * Method to Lookup Affiliate names from [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
              * and to be used as autocomplete form element in the forms
              */
-            AffiliateLookupTextInputWidget = function AffiliatesLookupTextInputWidget( config ) {
+            AffiliateLookupTextInputWidget = function AffiliatesLookupTextInputWidget() {
                 // Parent constructor
                 OO.ui.TextInputWidget.call( this, $.extend(
                     {
@@ -338,9 +339,9 @@
                         required: true,
                         validate: 'text',
                         placeholder: gadgetMsg[ 'group-name-placeholder' ]
-                    }, config ) );
+                    } ) );
                 // Mixin constructors
-                OO.ui.mixin.LookupElement.call( this, config );
+                OO.ui.mixin.LookupElement.call( this );
             };
             OO.inheritClass( AffiliateLookupTextInputWidget, OO.ui.TextInputWidget );
             OO.mixinClass( AffiliateLookupTextInputWidget, OO.ui.mixin.LookupElement );
@@ -397,7 +398,7 @@
              * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Countries]]
              * and to be used as autocomplete form element in the OI form.
              */
-            CountryLookupTextInputWidget = function CountriesLookupTextInputWidget( config ) {
+            CountryLookupTextInputWidget = function CountriesLookupTextInputWidget() {
                 // Parent constructor
                 OO.ui.TextInputWidget.call( this, $.extend(
                     {
@@ -406,10 +407,10 @@
                         required: true,
                         validate: 'text',
                         placeholder: gadgetMsg[ 'affiliate-country-placeholder' ]
-                    }, config
+                    }
                 ) );
                 // Mixin constructors
-                OO.ui.mixin.LookupElement.call( this, config );
+                OO.ui.mixin.LookupElement.call( this );
             };
             OO.inheritClass( CountryLookupTextInputWidget, OO.ui.TextInputWidget );
             OO.mixinClass( CountryLookupTextInputWidget, OO.ui.mixin.LookupElement );
@@ -1893,7 +1894,7 @@
              * Set custom height for the advance modal window
              */
             AdvanceArpQueryForm.prototype.getBodyHeight = function () {
-                return 580;
+                return 600;
             };
 
 
@@ -2054,13 +2055,13 @@
                             } ),
                             new OO.ui.MenuOptionWidget( {
                                 data: 'specific-affiliate',
-                                label: gadgetMsg[ 'affiliate-search-specific-affiliate' ]
+                                label: gadgetMsg[ 'affiliate-search-type-specific-affiliate' ]
                             } )
                         ]
                     }
                 } );
 
-                fieldSpecificAffiliate = this.fieldSpecificAffiliate = AffiliateLookupTextInputWidget();
+                fieldSpecificAffiliate = this.fieldSpecificAffiliate = new AffiliateLookupTextInputWidget();
                 fieldSpecificAffiliate.toggle();
                 tmpFieldAffiliateSearchType.on( 'labelChange', function () {
                     if ( tmpFieldAffiliateSearchType.getLabel() === 'Specific affiliate organization'  ) {
@@ -2110,7 +2111,7 @@
                     }
                 } );
 
-                fieldSpecificCountry = this.fieldSpecificCountry = CountryLookupTextInputWidget();
+                fieldSpecificCountry = this.fieldSpecificCountry = new CountryLookupTextInputWidget();
                 fieldSpecificCountry.toggle();
                 tmpFieldAffiliateSearchTypeByRegion.on( 'labelChange', function () {
                     if ( tmpFieldAffiliateSearchTypeByRegion.getLabel() === 'Specific country'  ) {
@@ -2177,7 +2178,7 @@
                                 align: 'top'
                             }
                         ),
-                        new OO.OO.ui.FieldLayout(
+                        new OO.ui.FieldLayout(
                             this.fieldSpecificCountry,
                             {
                                 align: 'inline'
