@@ -389,13 +389,10 @@
              * to initialize widgets, and to set up event handlers.
              */
             ActivitiesEditor.prototype.initialize = function () {
-                var dialog,
-                    i,
+                var i,
                     fieldPartnershipInfoSelected,
                     fieldArMultiyear,
                     tmpReportType;
-
-                dialog = this;
 
                 ActivitiesEditor.super.prototype.initialize.call( this );
                 this.content = new OO.ui.PanelLayout( {
@@ -444,7 +441,7 @@
                     ]
                 } );
                 fieldArMultiyear.toggle();
-                tmpReportType.on('change', function ( isSelected) {
+                tmpReportType.on('change', function () {
                     if ( tmpReportType.getValue() === 'Multi-year Activities Report'  ) {
                         fieldArMultiyear.toggle(true);
                     } else {
@@ -696,7 +693,7 @@
              * Save the changes to [[Module:Activities_Reports]] or [[Module:Activities_Reports/Sandbox]] page.
              */
             ActivitiesEditor.prototype.saveItem = function ( deleteFlag ) {
-                var dialog = this, content;
+                var dialog = this;
 
                 dialog.pushPending();
                 apiObj = new mw.Api();

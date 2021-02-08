@@ -45,7 +45,12 @@
             leafWindowResults,
             streamDataCache,
             sanitizeInput,
-            generateKeyValuePair;
+            generateKeyValuePair,
+            AffiliateLookupTextInputWidget,
+            getAffiliatesList,
+            queryAffiliatesPage,
+            queryCountriesPage,
+            CountryLookupTextInputWidget;
 
         userLang = mw.config.get( 'wgUserLanguage' );
         if ( userLang === 'en' ) {
@@ -273,6 +278,187 @@
                 }
 
                 return entryData;
+            };
+
+            /**
+             * Provides API parameters for getting the content from
+             * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
+             *
+             * @return {Object}
+             */
+            queryAffiliatesPage = function () {
+                return {
+                    action: 'query',
+                    prop: 'revisions',
+                    titles: 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates',
+                    rvprop: 'content',
+                    rvlimit: 1
+                };
+            };
+
+            /**
+             * Provides API parameters for getting the content from
+             * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Countries]]
+             *
+             * @return {Object}
+             */
+            queryCountriesPage = function () {
+                return {
+                    action: 'query',
+                    prop: 'revisions',
+                    titles: 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Countries',
+                    rvprop: 'content',
+                    rvlimit: 1
+                };
+            };
+
+            /**
+             * Get an entire content (wikitext) of a given page
+             *
+             * @param {Object} sourceblob The original API return
+             * @return {Object} raw Entire page content (wikitext)
+             */
+            getAffiliatesList = function ( sourceblob ) {
+                var i, raw;
+                for ( i in sourceblob ) {  // should only be one result
+                    raw = sourceblob[ i ].revisions[ 0 ][ '*' ];
+                    return raw;
+                }
+            };
+
+            /**
+             * Method to Lookup Affiliate names from [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
+             * and to be used as autocomplete form element in the forms
+             */
+            AffiliateLookupTextInputWidget = function AffiliatesLookupTextInputWidget( config ) {
+                // Parent constructor
+                OO.ui.TextInputWidget.call( this, $.extend(
+                    {
+                        indicator: 'required',
+                        required: true,
+                        validate: 'text',
+                        placeholder: gadgetMsg[ 'group-name-placeholder' ]
+                    }, config ) );
+                // Mixin constructors
+                OO.ui.mixin.LookupElement.call( this, config );
+            };
+            OO.inheritClass( AffiliateLookupTextInputWidget, OO.ui.TextInputWidget );
+            OO.mixinClass( AffiliateLookupTextInputWidget, OO.ui.mixin.LookupElement );
+
+            /* Get a new request object of the current lookup query value. */
+            AffiliateLookupTextInputWidget.prototype.getLookupRequest = function () {
+                var value = this.getValue();
+                return this.getValidity().then( function () {
+                    // Query the API to get the list of affiliates
+                    return new mw.Api().get( queryAffiliatesPage() ).then( function ( data ) {
+                        var affiliates,
+                            affiliatesContent;
+
+                        affiliatesContent = getAffiliatesList( data.query.pages );
+                        affiliates = affiliatesContent.split( ',\n' );
+                        // Filter to only affiliates whose names contain the input (case-insensitive)
+                        affiliates = affiliates.filter( function ( v ) {
+                            return v.toLowerCase().indexOf( value.toLowerCase() ) !== -1;
+                        } );
+                        return affiliates;
+                    } );
+                }, function () {
+                    // No results when the input contains invalid content
+                    return [];
+                } );
+            };
+
+            /* Pre-process data returned by the request from #getLookupRequest. */
+            AffiliateLookupTextInputWidget.prototype.getLookupCacheDataFromResponse = function ( response ) {
+                return response || [];
+            };
+
+            /** Get a list of menu option widgets from the (possibly cached) data
+             * returned by #getLookupCacheDataFromResponse.
+             */
+            AffiliateLookupTextInputWidget.prototype.getLookupMenuOptionsFromData = function ( data ) {
+                var items = [],
+                    i,
+                    affiliate;
+
+                for ( i = 0; i < data.length; i++ ) {
+                    affiliate = String( data[ i ] );
+                    affiliate = affiliate.split( ' ~ ' )[ 0 ];
+                    items.push( new OO.ui.MenuOptionWidget( {
+                        data: affiliate,
+                        label: affiliate
+                    } ) );
+                }
+                return items;
+            };
+
+            /**
+             * Method to lookup affiliate countries names from
+             * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Countries]]
+             * and to be used as autocomplete form element in the OI form.
+             */
+            CountryLookupTextInputWidget = function CountriesLookupTextInputWidget( config ) {
+                // Parent constructor
+                OO.ui.TextInputWidget.call( this, $.extend(
+                    {
+                        indicator: 'required',
+                        id: 'country',
+                        required: true,
+                        validate: 'text',
+                        value: config,
+                        placeholder: gadgetMsg[ 'affiliate-country-placeholder' ]
+                    }, config
+                ) );
+                // Mixin constructors
+                OO.ui.mixin.LookupElement.call( this, config );
+            };
+            OO.inheritClass( CountryLookupTextInputWidget, OO.ui.TextInputWidget );
+            OO.mixinClass( CountryLookupTextInputWidget, OO.ui.mixin.LookupElement );
+
+            /* Get a new request object of the current lookup query value. */
+            CountryLookupTextInputWidget.prototype.getLookupRequest = function () {
+                var value = this.getValue();
+                return this.getValidity().then( function () {
+                    // Query the API to get the list of countries
+                    return new mw.Api().get( queryCountriesPage() ).then( function ( data ) {
+                        var countries, countriesContent;
+                        countriesContent = getContentList( data.query.pages );
+                        countries = countriesContent.split(',\n');
+
+                        // Filter to only countries whose names contain the input (case-insensitive)
+                        countries = countries.filter( function ( v ) {
+                            return v.toLowerCase().indexOf( value.toLowerCase() ) !== -1;
+                        } );
+
+                        return countries;
+                    } );
+                }, function () {
+                    // No results when the input contains invalid content
+                    return [];
+                } );
+            };
+
+            /* Pre-process data returned by the request from #getLookupRequest(). */
+            CountryLookupTextInputWidget.prototype.getLookupCacheDataFromResponse = function ( response ) {
+                return response || [];
+            };
+
+            /**
+             * Get a list of menu option widgets from the (possibly cached) data
+             * returned by #getLookupCacheDataFromResponse().
+             */
+            CountryLookupTextInputWidget.prototype.getLookupMenuOptionsFromData = function ( data ) {
+                var items = [], i, country;
+
+                for ( i = 0; i < data.length; i++ ) {
+                    country = String( data[ i ] );
+                    items.push( new OO.ui.MenuOptionWidget( {
+                        data: country,
+                        label: country
+                    } ) );
+                }
+
+                return items;
             };
 
             /********************** Leaf QP Windows **************************/
@@ -1708,7 +1894,7 @@
              * Set custom height for the advance modal window
              */
             AdvanceArpQueryForm.prototype.getBodyHeight = function () {
-                return 540;
+                return 580;
             };
 
 
@@ -1733,7 +1919,12 @@
              * to initialize widgets, and to set up event handlers.
              */
             AdvanceArpQueryForm.prototype.initialize = function () {
-                var dialog, i;
+                var dialog,
+                    fieldSpecificAffiliate,
+                    fieldSpecificCountry,
+                    tmpFieldAffiliateSearchType,
+                    tmpFieldAffiliateSearchTypeByRegion;
+
                 dialog = this;
 
                 AdvanceArpQueryForm.super.prototype.initialize.call( this );
@@ -1842,7 +2033,7 @@
                     }
                 } );
 
-                this.fieldAffiliateSearchType = new OO.ui.DropdownWidget( {
+                tmpFieldAffiliateSearchType = this.fieldAffiliateSearchType = new OO.ui.DropdownWidget( {
                     label: gadgetMsg[ 'type-of-affiliate-to-query' ],
                     menu: {
                         items: [
@@ -1870,7 +2061,17 @@
                     }
                 } );
 
-                this.fieldAffiliateSearchTypeByRegion = new OO.ui.DropdownWidget( {
+                fieldSpecificAffiliate = this.fieldSpecificAffiliate = AffiliateLookupTextInputWidget();
+                fieldSpecificAffiliate.toggle();
+                tmpFieldAffiliateSearchType.on( 'labelChange', function () {
+                    if ( tmpFieldAffiliateSearchType.getLabel() === 'Specific affiliate organization'  ) {
+                        fieldSpecificAffiliate.toggle(true);
+                    } else {
+                        fieldSpecificAffiliate.toggle(false);
+                    }
+                } );
+
+                tmpFieldAffiliateSearchTypeByRegion = this.fieldAffiliateSearchTypeByRegion = new OO.ui.DropdownWidget( {
                     label: gadgetMsg[ 'type-of-affiliate-to-query-by-region' ],
                     menu: {
                         items: [
@@ -1907,6 +2108,16 @@
                                 label: gadgetMsg[ 'affiliate-search-by-region-specific-country' ]
                             } )
                         ]
+                    }
+                } );
+
+                fieldSpecificCountry = this.fieldSpecificCountry = CountryLookupTextInputWidget();
+                fieldSpecificCountry.toggle();
+                tmpFieldAffiliateSearchTypeByRegion.on( 'labelChange', function () {
+                    if ( tmpFieldAffiliateSearchTypeByRegion.getLabel() === 'Specific country'  ) {
+                        fieldSpecificCountry.toggle(true);
+                    } else {
+                        fieldSpecificCountry.toggle(false);
                     }
                 } );
 
@@ -2010,7 +2221,7 @@
              * to initialize widgets, and to set up event handlers.
              */
             ArpQueryForm.prototype.initialize = function () {
-                var dialog, i;
+                var dialog;
                 dialog = this;
 
                 ArpQueryForm.super.prototype.initialize.call( this );
