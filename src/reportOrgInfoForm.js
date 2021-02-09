@@ -580,8 +580,8 @@
                             label: gadgetMsg[ 'sub-saharan-africa' ]
                         },
                         {
-                            data: 'Asia',
-                            label: gadgetMsg[ 'asia' ]
+                            data: 'Asia/Pacific',
+                            label: gadgetMsg[ 'asia-pacific' ]
                         },
                         {
                             data: 'Europe',
@@ -594,10 +594,6 @@
                         {
                             data: 'North America',
                             label: gadgetMsg[ 'north-america' ]
-                        },
-                        {
-                            data: 'Oceania',
-                            label: gadgetMsg[ 'oceania' ]
                         },
                         {
                             data: 'South America',

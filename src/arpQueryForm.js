@@ -215,7 +215,7 @@
              * it's a cache variable.
              *
              * @param {Object} entries AST tree (Lua Table)
-             * @param {String} region The affiliate region e.g. Asia, Sub-Saharan Africa etc.
+             * @param {String} region The affiliate region e.g. Asia/Pacific, Sub-Saharan Africa etc.
              * @return {Object} Count
              */
             luaTableCounterByAffiliateRegion = function ( entries, region ) {
@@ -663,8 +663,8 @@
                                 label: gadgetMsg[ 'how-many-affiliates-per-region-africa' ]
                             } ),
                             new OO.ui.RadioOptionWidget( {
-                                data: 'Asia',
-                                label: gadgetMsg[ 'how-many-affiliates-per-region-asia' ]
+                                data: 'Asia/Pacific',
+                                label: gadgetMsg[ 'how-many-affiliates-per-region-asia-pacific' ]
                             } ),
                             new OO.ui.RadioOptionWidget( {
                                 data: 'Europe',
@@ -677,10 +677,6 @@
                             new OO.ui.RadioOptionWidget( {
                                 data: 'South America',
                                 label: gadgetMsg[ 'how-many-affiliates-per-region-south-america' ]
-                            } ),
-                            new OO.ui.RadioOptionWidget( {
-                                data: 'Oceania',
-                                label: gadgetMsg[ 'how-many-affiliates-per-region-oceania' ]
                             } ),
                             new OO.ui.RadioOptionWidget( {
                                 data: 'International',
@@ -1059,7 +1055,7 @@
                             ) {
                                 if ( entry.region === 'Sub-Saharan Africa' ) {
                                     list_africa += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'Asia' ) {
+                                } else if ( entry.region === 'Asia/Pacific' ) {
                                     list_asia += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'Europe' ) {
                                     list_EU += '* ' + entry.group_name + '<br/>';
@@ -1067,8 +1063,6 @@
                                     list_NA += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'South America'	) {
                                     list_SA += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'Oceania') {
-                                    list_Oc += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'International' ) {
                                     list_Int += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'MENA' ) {
@@ -1081,11 +1075,10 @@
                         leafWindowResults = new OO.ui.HtmlSnippet(
                             '<b style="text-align: center;">' + gadgetMsg[ 'arp-q22-results' ] + '</b><br/><br/>'
                             + '<b><i>Sub-Saharan Africa</i></b>' + list_africa + '<br/>'
-                            + '<b><i>Asia</i></b>' + list_asia + '<br/>'
+                            + '<b><i>Asia/Pacific</i></b>' + list_asia + '<br/>'
                             + '<b><i>Europe</i></b>' + list_EU + '<br/>'
                             + '<b><i>North America</i></b>' + list_NA + '<br/>'
                             + '<b><i>South America</i></b>' + list_SA + '<br/>'
-                            + '<b><i>Oceania</i></b>' + list_Oc + '<br/>'
                             + '<b><i>International</i></b>' + list_Int + '<br/>'
                             + '<b><i>MENA</i></b>' + list_MENA + '<br/>'
                         );
@@ -1266,7 +1259,7 @@
                                     ) {
                                         if ( entry.region === 'Sub-Saharan Africa' ) {
                                             list_glam_africa += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Asia' ) {
+                                        } else if ( entry.region === 'Asia/Pacific' ) {
                                             list_glam_asia += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'Europe' ) {
                                             list_glam_EU += '* ' + entry.group_name + '<br/>';
@@ -1274,8 +1267,6 @@
                                             list_glam_NA += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'South America' ) {
                                             list_glam_SA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Oceania' ) {
-                                            list_glam_Oc += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'International' ) {
                                             list_glam_Int += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'MENA' ) {
@@ -1290,11 +1281,10 @@
                             leafWindowResults = new OO.ui.HtmlSnippet(
                                 '<b>' + gadgetMsg[ 'arp-q51-results' ] + '</b><br/><br/>'
                                 + '<b><i>Sub-Saharan Africa</i></b>' + list_glam_africa + '<br/>'
-                                + '<b><i>Asia</i></b>' + list_glam_asia + '<br/>'
+                                + '<b><i>Asia/Pacific</i></b>' + list_glam_asia + '<br/>'
                                 + '<b><i>Europe</i></b>' + list_glam_EU + '<br/>'
                                 + '<b><i>North America</i></b>' + list_glam_NA + '<br/>'
                                 + '<b><i>South America</i></b>' + list_glam_SA + '<br/>'
-                                + '<b><i>Oceania</i></b>' + list_glam_Oc + '<br/>'
                                 + '<b><i>International</i></b>' + list_glam_Int + '<br/>'
                                 + '<b><i>MENA</i></b>' + list_glam_MENA + '<br/>'
                             );
@@ -1365,7 +1355,7 @@
                                     ) {
                                         if ( entry.region === 'Sub-Saharan Africa' ) {
                                             list_education_africa += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Asia' ) {
+                                        } else if ( entry.region === 'Asia/Pacific' ) {
                                             list_education_asia += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'Europe' ) {
                                             list_education_EU += '* ' + entry.group_name + '<br/>';
@@ -1373,8 +1363,6 @@
                                             list_education_NA += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'South America' ) {
                                             list_education_SA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Oceania' ) {
-                                            list_education_Oc += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'International' ) {
                                             list_education_Int += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'MENA' ) {
@@ -1389,11 +1377,10 @@
                             leafWindowResults = new OO.ui.HtmlSnippet(
                                 '<b>' + gadgetMsg[ 'arp-q61-results' ] + '</b><br/><br/>'
                                 + '<b><i>Sub-Saharan Africa</i></b>' + list_education_africa + '<br/>'
-                                + '<b><i>Asia</i></b>' + list_education_asia + '<br/>'
+                                + '<b><i>Asia/Pacific</i></b>' + list_education_asia + '<br/>'
                                 + '<b><i>Europe</i></b>' + list_education_EU + '<br/>'
                                 + '<b><i>North America</i></b>' + list_education_NA + '<br/>'
                                 + '<b><i>South America</i></b>' + list_education_SA + '<br/>'
-                                + '<b><i>Oceania</i></b>' + list_education_Oc + '<br/>'
                                 + '<b><i>International</i></b>' + list_education_Int + '<br/>'
                                 + '<b><i>MENA</i></b>' + list_education_MENA + '<br/>'
                             );
@@ -1509,11 +1496,10 @@
                         leafWindowResults = new OO.ui.HtmlSnippet(
                             '<b>' + gadgetMsg[ 'arp-q74-results' ] + '</b><br/><br/>' +
                             '* Sub-Saharan Africa - <b>' + luaTableCounterByAffiliateRegion( entries, 'Sub-Saharan Africa' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* Asia - <b>' + luaTableCounterByAffiliateRegion( entries, 'Asia' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                            '* Asia/Pacific - <b>' + luaTableCounterByAffiliateRegion( entries, 'Asia/Pacific' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* Europe - <b>' + luaTableCounterByAffiliateRegion( entries, 'Europe' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* North America - <b>' + luaTableCounterByAffiliateRegion( entries, 'North America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* South America - <b>' + luaTableCounterByAffiliateRegion( entries, 'South America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* Oceania - <b>' + luaTableCounterByAffiliateRegion( entries, 'Oceania' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* International - <b>' + luaTableCounterByAffiliateRegion( entries, 'International' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* MENA - <b>' + luaTableCounterByAffiliateRegion( entries, 'MENA' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>'
                         );
@@ -2094,8 +2080,8 @@
                                 label: gadgetMsg[ 'affiliate-search-by-region-africa' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'asia',
-                                label: gadgetMsg[ 'affiliate-search-by-region-asia' ]
+                                data: 'asia/pacific',
+                                label: gadgetMsg[ 'affiliate-search-by-region-asia-pacific' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
                                 data: 'europe',
@@ -2104,10 +2090,6 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'north-america',
                                 label: gadgetMsg[ 'affiliate-search-by-region-north-america' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'oceania',
-                                label: gadgetMsg[ 'affiliate-search-by-region-oceania' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
                                 data: 'south-america',
