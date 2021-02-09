@@ -576,8 +576,8 @@
                             label: gadgetMsg[ 'international' ]
                         },
                         {
-                            data: 'Africa',
-                            label: gadgetMsg[ 'africa' ]
+                            data: 'Sub-Saharan Africa',
+                            label: gadgetMsg[ 'sub-saharan-africa' ]
                         },
                         {
                             data: 'Asia',
@@ -588,8 +588,8 @@
                             label: gadgetMsg[ 'europe' ]
                         },
                         {
-                            data: 'Middle East',
-                            label: gadgetMsg[ 'middle-east' ]
+                            data: 'MENA',
+                            label: gadgetMsg[ 'mena' ]
                         },
                         {
                             data: 'North America',
