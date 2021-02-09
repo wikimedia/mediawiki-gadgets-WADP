@@ -215,7 +215,7 @@
              * it's a cache variable.
              *
              * @param {Object} entries AST tree (Lua Table)
-             * @param {String} region The affiliate region e.g. Asia, Africa etc.
+             * @param {String} region The affiliate region e.g. Asia, Sub-Saharan Africa etc.
              * @return {Object} Count
              */
             luaTableCounterByAffiliateRegion = function ( entries, region ) {
@@ -659,7 +659,7 @@
                     this.fieldAffiliateCountSubQueries = new OO.ui.RadioSelectWidget( {
                         items: [
                             new OO.ui.RadioOptionWidget( {
-                                data: 'Africa',
+                                data: 'Sub-Saharan Africa',
                                 label: gadgetMsg[ 'how-many-affiliates-per-region-africa' ]
                             } ),
                             new OO.ui.RadioOptionWidget( {
@@ -687,8 +687,8 @@
                                 label: gadgetMsg[ 'how-many-affiliates-per-region-international' ]
                             } ),
                             new OO.ui.RadioOptionWidget( {
-                                data: 'Middle East',
-                                label: gadgetMsg[ 'how-many-affiliates-per-region-middle-east' ]
+                                data: 'MENA',
+                                label: gadgetMsg[ 'how-many-affiliates-per-region-middle-east-north-africa' ]
                             } )
                         ]
                     } );
@@ -1048,7 +1048,7 @@
                             list_SA = "<br/>",
                             list_Oc = "<br/>",
                             list_Int = "<br/>",
-                            list_ME = "<br/>";
+                            list_MENA = "<br/>";
 
                         entries = parseContentModule( data.query.pages );
 
@@ -1057,7 +1057,7 @@
                             if ( ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' && entry.recognition_status !== 'derecognised' )
                                 || entry.org_type === 'Chapter' || entry.org_type === 'Thematic Organization'
                             ) {
-                                if ( entry.region === 'Africa' ) {
+                                if ( entry.region === 'Sub-Saharan Africa' ) {
                                     list_africa += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'Asia' ) {
                                     list_asia += '* ' + entry.group_name + '<br/>';
@@ -1071,8 +1071,8 @@
                                     list_Oc += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'International' ) {
                                     list_Int += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'Middle East' ) {
-                                    list_ME += '* ' + entry.group_name + '<br/>';
+                                } else if ( entry.region === 'MENA' ) {
+                                    list_MENA += '* ' + entry.group_name + '<br/>';
                                 }
                             }
                         }
@@ -1080,14 +1080,14 @@
                         // Cache the results
                         leafWindowResults = new OO.ui.HtmlSnippet(
                             '<b style="text-align: center;">' + gadgetMsg[ 'arp-q22-results' ] + '</b><br/><br/>'
-                            + '<b><i>Africa</i></b>' + list_africa + '<br/>'
+                            + '<b><i>Sub-Saharan Africa</i></b>' + list_africa + '<br/>'
                             + '<b><i>Asia</i></b>' + list_asia + '<br/>'
                             + '<b><i>Europe</i></b>' + list_EU + '<br/>'
                             + '<b><i>North America</i></b>' + list_NA + '<br/>'
                             + '<b><i>South America</i></b>' + list_SA + '<br/>'
                             + '<b><i>Oceania</i></b>' + list_Oc + '<br/>'
                             + '<b><i>International</i></b>' + list_Int + '<br/>'
-                            + '<b><i>Middle East</i></b>' + list_ME + '<br/>'
+                            + '<b><i>MENA</i></b>' + list_MENA + '<br/>'
                         );
 
                         dialog.close();
@@ -1249,7 +1249,7 @@
                                 list_glam_SA = "<br/>",
                                 list_glam_Oc = "<br/>",
                                 list_glam_Int = "<br/>",
-                                list_glam_ME = "<br/>";
+                                list_glam_MENA = "<br/>";
 
                             entries = parseContentModule( data.query.pages );
 
@@ -1264,7 +1264,7 @@
                                         && a_report.partnership_info.includes( "GLAM Institutions" )
                                         && entry.recognition_status !== 'derecognised'
                                     ) {
-                                        if ( entry.region === 'Africa' ) {
+                                        if ( entry.region === 'Sub-Saharan Africa' ) {
                                             list_glam_africa += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'Asia' ) {
                                             list_glam_asia += '* ' + entry.group_name + '<br/>';
@@ -1278,8 +1278,8 @@
                                             list_glam_Oc += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'International' ) {
                                             list_glam_Int += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Middle East' ) {
-                                            list_glam_ME += '* ' + entry.group_name + '<br/>';
+                                        } else if ( entry.region === 'MENA' ) {
+                                            list_glam_MENA += '* ' + entry.group_name + '<br/>';
                                         }
                                         break;
                                     }
@@ -1289,14 +1289,14 @@
                             // Cache the results
                             leafWindowResults = new OO.ui.HtmlSnippet(
                                 '<b>' + gadgetMsg[ 'arp-q51-results' ] + '</b><br/><br/>'
-                                + '<b><i>Africa</i></b>' + list_glam_africa + '<br/>'
+                                + '<b><i>Sub-Saharan Africa</i></b>' + list_glam_africa + '<br/>'
                                 + '<b><i>Asia</i></b>' + list_glam_asia + '<br/>'
                                 + '<b><i>Europe</i></b>' + list_glam_EU + '<br/>'
                                 + '<b><i>North America</i></b>' + list_glam_NA + '<br/>'
                                 + '<b><i>South America</i></b>' + list_glam_SA + '<br/>'
                                 + '<b><i>Oceania</i></b>' + list_glam_Oc + '<br/>'
                                 + '<b><i>International</i></b>' + list_glam_Int + '<br/>'
-                                + '<b><i>Middle East</i></b>' + list_glam_ME + '<br/>'
+                                + '<b><i>MENA</i></b>' + list_glam_MENA + '<br/>'
                             );
                             dialog.close();
                             openLeafWindow( {} );
@@ -1348,7 +1348,7 @@
                                 list_education_SA = "<br/>",
                                 list_education_Oc = "<br/>",
                                 list_education_Int = "<br/>",
-                                list_education_ME = "<br/>";
+                                list_education_MENA = "<br/>";
 
                             entries = parseContentModule( data.query.pages );
 
@@ -1363,7 +1363,7 @@
                                         && a_report.partnership_info.includes( "Educational Institutions" )
                                         && entry.recognition_status !== 'derecognised'
                                     ) {
-                                        if ( entry.region === 'Africa' ) {
+                                        if ( entry.region === 'Sub-Saharan Africa' ) {
                                             list_education_africa += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'Asia' ) {
                                             list_education_asia += '* ' + entry.group_name + '<br/>';
@@ -1377,8 +1377,8 @@
                                             list_education_Oc += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'International' ) {
                                             list_education_Int += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Middle East' ) {
-                                            list_education_ME += '* ' + entry.group_name + '<br/>';
+                                        } else if ( entry.region === 'MENA' ) {
+                                            list_education_MENA += '* ' + entry.group_name + '<br/>';
                                         }
                                         break;
                                     }
@@ -1388,14 +1388,14 @@
                             // Cache the results
                             leafWindowResults = new OO.ui.HtmlSnippet(
                                 '<b>' + gadgetMsg[ 'arp-q61-results' ] + '</b><br/><br/>'
-                                + '<b><i>Africa</i></b>' + list_education_africa + '<br/>'
+                                + '<b><i>Sub-Saharan Africa</i></b>' + list_education_africa + '<br/>'
                                 + '<b><i>Asia</i></b>' + list_education_asia + '<br/>'
                                 + '<b><i>Europe</i></b>' + list_education_EU + '<br/>'
                                 + '<b><i>North America</i></b>' + list_education_NA + '<br/>'
                                 + '<b><i>South America</i></b>' + list_education_SA + '<br/>'
                                 + '<b><i>Oceania</i></b>' + list_education_Oc + '<br/>'
                                 + '<b><i>International</i></b>' + list_education_Int + '<br/>'
-                                + '<b><i>Middle East</i></b>' + list_education_ME + '<br/>'
+                                + '<b><i>MENA</i></b>' + list_education_MENA + '<br/>'
                             );
                             dialog.close();
                             openLeafWindow( {} );
@@ -1508,14 +1508,14 @@
                         // Cache results
                         leafWindowResults = new OO.ui.HtmlSnippet(
                             '<b>' + gadgetMsg[ 'arp-q74-results' ] + '</b><br/><br/>' +
-                            '* Africa - <b>' + luaTableCounterByAffiliateRegion( entries, 'Africa' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                            '* Sub-Saharan Africa - <b>' + luaTableCounterByAffiliateRegion( entries, 'Sub-Saharan Africa' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* Asia - <b>' + luaTableCounterByAffiliateRegion( entries, 'Asia' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* Europe - <b>' + luaTableCounterByAffiliateRegion( entries, 'Europe' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* North America - <b>' + luaTableCounterByAffiliateRegion( entries, 'North America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* South America - <b>' + luaTableCounterByAffiliateRegion( entries, 'South America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* Oceania - <b>' + luaTableCounterByAffiliateRegion( entries, 'Oceania' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* International - <b>' + luaTableCounterByAffiliateRegion( entries, 'International' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* Middle East - <b>' + luaTableCounterByAffiliateRegion( entries, 'Middle East' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>'
+                            '* MENA - <b>' + luaTableCounterByAffiliateRegion( entries, 'MENA' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>'
                         );
                         dialog.close();
                         openLeafWindow( {} );
