@@ -836,17 +836,17 @@
                                 align: 'top'
                             }
                         ),
+                        new OO.ui.FieldLayout(
+                            this.fieldGroupCountry,
+                            {
+                                label: gadgetMsg[ 'affiliate-country' ],
+                                align: 'top'
+                            }
+                        ),
                     ] );
                 }
 
                 this.fieldSet.addItems( [
-                    new OO.ui.FieldLayout(
-                        this.fieldGroupCountry,
-                        {
-                            label: gadgetMsg[ 'affiliate-country' ],
-                            align: 'top'
-                        }
-                    ),
                     new OO.ui.FieldLayout(
                         this.fieldLegalEntity,
                         {
