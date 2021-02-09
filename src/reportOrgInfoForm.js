@@ -596,8 +596,8 @@
                             label: gadgetMsg[ 'north-america' ]
                         },
                         {
-                            data: 'South America',
-                            label: gadgetMsg[ 'south-america' ]
+                            data: 'South/Latin America',
+                            label: gadgetMsg[ 'south-latin-america' ]
                         }
                     ]
                 } );

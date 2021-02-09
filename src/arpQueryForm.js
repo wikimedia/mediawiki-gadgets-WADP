@@ -675,8 +675,8 @@
                                 label: gadgetMsg[ 'how-many-affiliates-per-region-north-america' ]
                             } ),
                             new OO.ui.RadioOptionWidget( {
-                                data: 'South America',
-                                label: gadgetMsg[ 'how-many-affiliates-per-region-south-america' ]
+                                data: 'South/Latin America',
+                                label: gadgetMsg[ 'how-many-affiliates-per-region-south-latin-america' ]
                             } ),
                             new OO.ui.RadioOptionWidget( {
                                 data: 'International',
@@ -1061,7 +1061,7 @@
                                     list_EU += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'North America' ) {
                                     list_NA += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'South America'	) {
+                                } else if ( entry.region === 'South/Latin America'	) {
                                     list_SA += '* ' + entry.group_name + '<br/>';
                                 } else if ( entry.region === 'International' ) {
                                     list_Int += '* ' + entry.group_name + '<br/>';
@@ -1078,7 +1078,7 @@
                             + '<b><i>Asia/Pacific</i></b>' + list_asia + '<br/>'
                             + '<b><i>Europe</i></b>' + list_EU + '<br/>'
                             + '<b><i>North America</i></b>' + list_NA + '<br/>'
-                            + '<b><i>South America</i></b>' + list_SA + '<br/>'
+                            + '<b><i>South/Latin America</i></b>' + list_SA + '<br/>'
                             + '<b><i>International</i></b>' + list_Int + '<br/>'
                             + '<b><i>MENA</i></b>' + list_MENA + '<br/>'
                         );
@@ -1265,7 +1265,7 @@
                                             list_glam_EU += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'North America' ) {
                                             list_glam_NA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'South America' ) {
+                                        } else if ( entry.region === 'South/Latin America' ) {
                                             list_glam_SA += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'International' ) {
                                             list_glam_Int += '* ' + entry.group_name + '<br/>';
@@ -1284,7 +1284,7 @@
                                 + '<b><i>Asia/Pacific</i></b>' + list_glam_asia + '<br/>'
                                 + '<b><i>Europe</i></b>' + list_glam_EU + '<br/>'
                                 + '<b><i>North America</i></b>' + list_glam_NA + '<br/>'
-                                + '<b><i>South America</i></b>' + list_glam_SA + '<br/>'
+                                + '<b><i>South/Latin America</i></b>' + list_glam_SA + '<br/>'
                                 + '<b><i>International</i></b>' + list_glam_Int + '<br/>'
                                 + '<b><i>MENA</i></b>' + list_glam_MENA + '<br/>'
                             );
@@ -1361,7 +1361,7 @@
                                             list_education_EU += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'North America' ) {
                                             list_education_NA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'South America' ) {
+                                        } else if ( entry.region === 'South/Latin America' ) {
                                             list_education_SA += '* ' + entry.group_name + '<br/>';
                                         } else if ( entry.region === 'International' ) {
                                             list_education_Int += '* ' + entry.group_name + '<br/>';
@@ -1380,7 +1380,7 @@
                                 + '<b><i>Asia/Pacific</i></b>' + list_education_asia + '<br/>'
                                 + '<b><i>Europe</i></b>' + list_education_EU + '<br/>'
                                 + '<b><i>North America</i></b>' + list_education_NA + '<br/>'
-                                + '<b><i>South America</i></b>' + list_education_SA + '<br/>'
+                                + '<b><i>South/Latin America</i></b>' + list_education_SA + '<br/>'
                                 + '<b><i>International</i></b>' + list_education_Int + '<br/>'
                                 + '<b><i>MENA</i></b>' + list_education_MENA + '<br/>'
                             );
@@ -1499,7 +1499,7 @@
                             '* Asia/Pacific - <b>' + luaTableCounterByAffiliateRegion( entries, 'Asia/Pacific' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* Europe - <b>' + luaTableCounterByAffiliateRegion( entries, 'Europe' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* North America - <b>' + luaTableCounterByAffiliateRegion( entries, 'North America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* South America - <b>' + luaTableCounterByAffiliateRegion( entries, 'South America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                            '* South/Latin America - <b>' + luaTableCounterByAffiliateRegion( entries, 'South/Latin America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* International - <b>' + luaTableCounterByAffiliateRegion( entries, 'International' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
                             '* MENA - <b>' + luaTableCounterByAffiliateRegion( entries, 'MENA' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>'
                         );
