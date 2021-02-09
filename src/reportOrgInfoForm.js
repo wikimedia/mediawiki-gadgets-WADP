@@ -827,7 +827,12 @@
                                 label: gadgetMsg[ 'identify-your-organization' ],
                                 align: 'top'
                             }
-                        ),
+                        )
+                    ]
+                } );
+
+                if ( users.indexOf( mw.config.values.wgUserName ) > -1 ) {
+                    this.fieldSet.addItems( [
                         new OO.ui.FieldLayout(
                             this.fieldRegion,
                             {
@@ -835,89 +840,92 @@
                                 align: 'top'
                             }
                         ),
-                        new OO.ui.FieldLayout(
-                            this.fieldGroupCountry,
-                            {
-                                label: gadgetMsg[ 'affiliate-country' ],
-                                align: 'top'
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldLegalEntity,
-                            {
-                                label: gadgetMsg[ 'legal-entity-or-not' ],
-                                align: 'top'
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldMissionChanged,
-                            {
-                                label: gadgetMsg[ 'has-group-mission-changed' ],
-                                align: 'top'
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldExplanation,
-                            {
-                                label: gadgetMsg[ 'mission-changed-or-unsure-explanation' ],
-                                align: 'top'
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldGroupMembershipPage,
-                            {
-                                label: gadgetMsg[ 'group-membership-page' ],
-                                align: 'top'
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldMembershipCount,
-                            {
-                                label: gadgetMsg[ 'membership-count' ],
-                                align: 'top'
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldFacebook,
-                            {
-                                label: gadgetMsg[ 'social-media-links' ],
-                                align: 'top',
-                                help: gadgetMsg[ 'facebook-link-help' ]
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldTwitter,
-                            {
-                                label: '',
-                                align: 'inline',
-                                help: gadgetMsg[ 'twitter-link-help' ]
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldOther,
-                            {
-                                label: '',
-                                align: 'inline',
-                                help: gadgetMsg[ 'blog-news-help' ]
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldDecisionMakingStructure,
-                            {
-                                label: gadgetMsg[ 'decision-making-structure' ],
-                                align: 'top'
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldBoardContacts,
-                            {
-                                label: gadgetMsg[ 'board-shared-structure' ],
-                                align: 'top',
-                                help: gadgetMsg[ 'board-shared-structure-tip' ]
-                            }
-                        ),
-                    ]
-                } );
+                    ] );
+                }
+
+                this.fieldSet.addItems( [
+                    new OO.ui.FieldLayout(
+                        this.fieldGroupCountry,
+                        {
+                            label: gadgetMsg[ 'affiliate-country' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldLegalEntity,
+                        {
+                            label: gadgetMsg[ 'legal-entity-or-not' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldMissionChanged,
+                        {
+                            label: gadgetMsg[ 'has-group-mission-changed' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldExplanation,
+                        {
+                            label: gadgetMsg[ 'mission-changed-or-unsure-explanation' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldGroupMembershipPage,
+                        {
+                            label: gadgetMsg[ 'group-membership-page' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldMembershipCount,
+                        {
+                            label: gadgetMsg[ 'membership-count' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldFacebook,
+                        {
+                            label: gadgetMsg[ 'social-media-links' ],
+                            align: 'top',
+                            help: gadgetMsg[ 'facebook-link-help' ]
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldTwitter,
+                        {
+                            label: '',
+                            align: 'inline',
+                            help: gadgetMsg[ 'twitter-link-help' ]
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldOther,
+                        {
+                            label: '',
+                            align: 'inline',
+                            help: gadgetMsg[ 'blog-news-help' ]
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldDecisionMakingStructure,
+                        {
+                            label: gadgetMsg[ 'decision-making-structure' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldBoardContacts,
+                        {
+                            label: gadgetMsg[ 'board-shared-structure' ],
+                            align: 'top',
+                            help: gadgetMsg[ 'board-shared-structure-tip' ]
+                        }
+                    ),
+                ] );
 
                 if ( users.indexOf( mw.config.values.wgUserName ) > -1 ) {
                     this.fieldSet.addItems( [
