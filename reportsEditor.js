@@ -10,7 +10,7 @@
 ( function () {
     'use strict';
 
-    if ( mw.config.values.wgPageName === 'Wikimedia_Affiliates_Data_Portal' ) {
+    if ( mw.config.values.wgPageName.startsWith( 'Wikimedia_Affiliates_Data_Portal' ) ) {
         /* Load Organizational Info Form (module) */
         mw.loader.load( 'ext.gadget.reportOrgInfoForm' );
 
