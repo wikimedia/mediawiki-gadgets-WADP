@@ -26,11 +26,12 @@
         /* Load Activities Report Form (module) */
         mw.loader.load( 'ext.gadget.reportActivitiesForm' );
 
-        /* Load the ARP Query Form (module) */
-        mw.loader.load( 'ext.gadget.arpQueryForm' );
+        /* Load the WADP Query Form (module) */
+        mw.loader.load( 'ext.gadget.wadpQueryForm' );
     }
 
     if ( mw.config.values.wgPageName.split( 'Wikimedia_Affiliates_Data_Portal/' )[1] === 'Organizations_Information' ) {
+        /* Load the org info form for end users to update affiliate info */
         mw.loader.load( 'ext.gadget.reportOrgInfoForm' );
     }
 }() );
