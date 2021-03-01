@@ -29,7 +29,7 @@
             parseContentModule,
             cleanRawEntry,
             /* Cache `counter` variable */ counter = 0,
-            clearCounter,
+            clearCounterCache,
             luaTableCounter,
             luaTableCounterForAffiliateType,
             luaTableCounterByAffiliateRegion,
@@ -170,7 +170,7 @@
              */
             luaTableCounter = function ( luaTable ) {
                 var entry;
-                clearCounter(); // Always clear cache first!
+                clearCounterCache();
 
                 for ( i = 0; i < luaTable.length; i++ ) {
                     entry = cleanRawEntry( luaTable[ i ].value.fields );
@@ -195,7 +195,7 @@
              */
             luaTableCounterForAffiliateType = function ( entries, type ) {
                 var entry;
-                clearCounter(); // Always clear cache first!
+                clearCounterCache();
 
                 for ( i = 0; i < entries.length; i++ ) {
                     entry = cleanRawEntry( entries[ i ].value.fields );
@@ -220,7 +220,7 @@
              */
             luaTableCounterByAffiliateRegion = function ( entries, region ) {
                 var entry, member_count = 0;
-                clearCounter(); // Always clear cache first!
+                clearCounterCache();
 
                 for ( i = 0; i < entries.length; i++ ) {
                     entry = cleanRawEntry( entries[ i ].value.fields );
@@ -236,7 +236,7 @@
             /**
              * Utility method to clear `counter` cache value
              */
-            clearCounter = function () {
+            clearCounterCache = function () {
                 counter = 0;
             };
 
@@ -505,13 +505,6 @@
                     label: gadgetMsg[ 'dismiss' ],
                     flags: 'safe'
                 },
-                /**{
-					action: 'delete',
-					modes: 'edit',
-					label: 'Download to CSV',
-					flags: 'safe',
-					icons: [ 'progressive' ]
-				},*/
             ];
 
             /**
@@ -529,12 +522,7 @@
                 if ( action === 'continue' ) {
                     dialog.close();
                     openBasicWindow( {} );
-                } /** Disable logic for now!
-                 else if ( action === 'delete' ) {
-					var file;
-					file = fopen( "results.csv", 3 );
-					fwrite( file, streamDataCache );
-				}*/ else {
+                } else {
                     return new OO.ui.Process( function () {
                         dialog.close();
                     } );
@@ -625,10 +613,10 @@
             };
 
             ArpSubQueryForm.prototype.initialize = function () {
-                var dialog = this;
-
-                /* To avoid `undefined` error thrown in the `if` and `else if`
-                   blocks below, define some variables and set them below */
+                /**
+                 * To avoid `undefined` error thrown in the `if` and `else if`
+                 * blocks below, define some variables and set them below
+                 */
                 this.fieldAffiliateCountSubQueries = null;
                 this.fieldLegalStatusSubQueries1 = null;
                 this.fieldLegalStatusSubQueries2 = null;
@@ -975,7 +963,7 @@
             /**
              * Execute the search query - from Layer II to Layer III
              */
-            ArpSubQueryForm.prototype.executeSearch = function ( deleteFlag ) {
+            ArpSubQueryForm.prototype.executeSearch = function () {
                 var dialog = this, content, activities_reports, count;
                 var messageDialog = new OO.ui.MessageDialog();
 
@@ -1009,7 +997,7 @@
                         );
 
                         dialog.close();
-                        clearCounter();
+                        clearCounterCache();
                         openLeafWindow( {} );
                     } else if ( dialog.fieldLegalStatusSubQueries1 !== null
                         && dialog.fieldLegalStatusSubQueries1.isSelected()
@@ -1030,7 +1018,7 @@
                         );
 
                         dialog.close();
-                        clearCounter();
+                        clearCounterCache();
                         openLeafWindow( {} );
                     } else if ( dialog.fieldLegalStatusSubQueries2 !== null
                         && dialog.fieldLegalStatusSubQueries2.isSelected()
@@ -1042,7 +1030,6 @@
                             list_EU = "<br/>",
                             list_NA = "<br/>",
                             list_SA = "<br/>",
-                            list_Oc = "<br/>",
                             list_Int = "<br/>",
                             list_MENA = "<br/>";
 
@@ -1084,7 +1071,7 @@
                         );
 
                         dialog.close();
-                        clearCounter();
+                        clearCounterCache();
                         openLeafWindow( {} );
                     } else if ( dialog.fieldComplianceStatusSubQueries1 !== null
                         && dialog.fieldComplianceStatusSubQueries1.isSelected()
@@ -1116,7 +1103,7 @@
 
                         dialog.close();
                         openLeafWindow( {} );
-                        clearCounter();
+                        clearCounterCache();
                         percentage = 0;
                     } else if ( dialog.fieldComplianceStatusSubQueries2 !== null
                         && dialog.fieldComplianceStatusSubQueries2.isSelected()
@@ -1148,7 +1135,7 @@
 
                         dialog.close();
                         openLeafWindow( {} );
-                        clearCounter();
+                        clearCounterCache();
                         percentage = 0;
                     } else if ( dialog.fieldComplianceStatusSubQueries3 !== null
                         && dialog.fieldComplianceStatusSubQueries3.isSelected()
@@ -1180,7 +1167,7 @@
 
                         dialog.close();
                         openLeafWindow( {} );
-                        clearCounter();
+                        clearCounterCache();
                         percentage = 0;
                     } else if ( dialog.fieldComplianceStatusSubQueries4 !== null
                         && dialog.fieldComplianceStatusSubQueries4.isSelected()
@@ -1195,7 +1182,6 @@
                                 && entry.recognition_status !== 'derecognised'
                             ) {
                                 list += "* " + entry.group_name + "<br/>";
-                                // streamDataCache += entry.group_name + ',';
                             }
                         }
 
@@ -1240,7 +1226,6 @@
                                 list_glam_EU = "<br/>",
                                 list_glam_NA = "<br/>",
                                 list_glam_SA = "<br/>",
-                                list_glam_Oc = "<br/>",
                                 list_glam_Int = "<br/>",
                                 list_glam_MENA = "<br/>";
 
@@ -1304,7 +1289,7 @@
                                     if (
                                         entry.group_name === a_report.group_name
                                         && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                        && ( a_report.end_date.split("/")[2] === parseInt( new Date().getFullYear() ) - 1 )
+                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
                                         && a_report.partnership_info.includes( "GLAM Institutions" )
                                         && entry.recognition_status !== 'derecognised'
                                     ) {
@@ -1686,7 +1671,7 @@
                         );
                         dialog.close();
                         openLeafWindow( {} );
-                        clearCounter();
+                        clearCounterCache();
                     } else if ( dialog.fieldAffiliateCompositionSubQueries6 !== null
                         && dialog.fieldAffiliateCompositionSubQueries6.isSelected()
                         && dialog.fieldAffiliateCompositionSubQueries6.getValue() === 'ARP-Q8.6'
@@ -1744,7 +1729,7 @@
                         );
                         dialog.close();
                         openLeafWindow( {} );
-                        clearCounter();
+                        clearCounterCache();
                     } else if ( dialog.fieldAffiliateCompositionSubQueries7 !== null
                         && dialog.fieldAffiliateCompositionSubQueries7.isSelected()
                         && dialog.fieldAffiliateCompositionSubQueries7.getValue() === 'ARP-Q8.7'
@@ -1802,7 +1787,7 @@
                         );
                         dialog.close();
                         openLeafWindow( {} );
-                        clearCounter();
+                        clearCounterCache();
                     } else {
                         dialog.close();
 
@@ -2341,31 +2326,6 @@
                     openAdvanceWindow( {} );
                 } );
 
-                /** Will be activated in the future
-                 this.fieldAdvocacy = new OO.ui.RadioSelectWidget( {
-					items: [
-						new OO.ui.RadioOptionWidget( {
-							data: 'Yes',
-							label: gadgetMsg[ 'advocacy-question' ]
-						} )
-					]
-				} );
-                 */
-
-                // Append things to fieldSet
-                /** -- this.fieldSet = new OO.ui.FieldsetLayout( {
-					items: [
-						new OO.ui.FieldLayout(
-							this.fieldAdvocacy,
-							{
-								label: 'Advocacy:',
-								align: 'top',
-								classes: [ 'bold-label' ]
-							}
-						)
-					]
-				} ); -- */
-
                 // When everything is done
                 this.content.$element.append( this.fieldSet1.$element );
                 this.content.$element.append( this.fieldSet2.$element );
@@ -2412,8 +2372,10 @@
             /**
              * Execute the search query - from Layer I to Layer II
              */
-            ArpQueryForm.prototype.executeSearch = function ( deleteFlag ) {
-                var dialog = this, content, activities_reports, endFY,
+            ArpQueryForm.prototype.executeSearch = function () {
+                var dialog = this,
+                    activities_reports,
+                    endFY,
                     fyIdentifier;
 
                 dialog.pushPending();
@@ -2423,7 +2385,7 @@
                 } );
 
                 new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
-                    var i, j, handler, entries, entry, a_report;
+                    var i, j, entries, entry, a_report;
                     var windowManager = new OO.ui.WindowManager();
 
                     /** ARP-Q1 implementation */
@@ -2460,7 +2422,7 @@
                             + ug_count.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s4' ]
                         ];
 
-                        clearCounter();
+                        clearCounterCache();
                         openSubWindow( {} );
                     } else if ( dialog.fieldLegalStatus.isSelected() && dialog.fieldLegalStatus.getValue() === 'ARP-Q2' ) {
                         var notLegalEntitiesCount = 0, orgInfoCount = 0;
@@ -2468,8 +2430,7 @@
                         entries = parseContentModule( data.query.pages );
                         orgInfoCount = luaTableCounter( entries ); // cache in `counter`
 
-                        // Set counter to 0 (clear cache) as we've used it above
-                        clearCounter();
+                        clearCounterCache();
 
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
@@ -2493,7 +2454,7 @@
                             counter.toString() + ' ' + gadgetMsg[ 'arp-q2-results' ]
                         ];
 
-                        clearCounter();
+                        clearCounterCache();
                         openSubWindow( {} );
                     } else if ( dialog.fieldComplianceStatus.isSelected() && dialog.fieldComplianceStatus.getValue() === 'ARP-Q3' ) {
                         entries = parseContentModule( data.query.pages );
@@ -2520,8 +2481,7 @@
                             '<b>' + percentage.toString() + '%</b> ' + gadgetMsg[ 'arp-q3-results' ]
                         ];
 
-                        clearCounter();
-                        // Clear `percentage` variable
+                        clearCounterCache();
                         percentage = 0;
                         openSubWindow( {} );
                     } else if ( dialog.fieldPrograms1.isSelected() && dialog.fieldPrograms1.getValue() === 'ARP-Q5' ) {
@@ -2556,7 +2516,7 @@
                             '<b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q5-results' ] + ' (' + fyIdentifier + '-' + endFY +')'
                         ];
 
-                        clearCounter();
+                        clearCounterCache();
                         openSubWindow( {} );
                     } else if ( dialog.fieldPrograms2.isSelected() && dialog.fieldPrograms2.getValue() === 'ARP-Q6' ) {
                         entries = parseContentModule( data.query.pages );
@@ -2590,7 +2550,7 @@
                             '<b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q6-results' ] + ' (' + fyIdentifier + '-' + endFY +')'
                         ];
 
-                        clearCounter();
+                        clearCounterCache();
                         openSubWindow( {} );
                     } else if ( dialog.fieldAffiliateComposition1.isSelected() && dialog.fieldAffiliateComposition1.getValue() === 'ARP-Q7' ) {
                         var count = 0;
@@ -2611,7 +2571,7 @@
                             gadgetMsg[ 'arp-q7-results' ] + ' <b>' + counter.toString() + '</b>'
                         ];
 
-                        clearCounter();
+                        clearCounterCache();
                         openSubWindow( {} );
                     } else if ( dialog.fieldAffiliateComposition2.isSelected() && dialog.fieldAffiliateComposition2.getValue() === 'ARP-Q8' ) {
                         var affiliate_structures = {
@@ -2665,7 +2625,7 @@
                             + affiliate_structures.no_shared_structure.toString() + gadgetMsg[ 'arp-q8-no-shared-structure' ] + '</b>'
                         ];
 
-                        clearCounter();
+                        clearCounterCache();
                         openSubWindow( {} );
                     } else {
                         dialog.close();
