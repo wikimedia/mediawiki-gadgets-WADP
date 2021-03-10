@@ -13,7 +13,7 @@
         'ext.gadget.luaparse',
         'mediawiki.widgets.DateInputWidget'
     ] ).done( function () {
-        var gadgetMsg,
+        var gadgetMsg = {},
             getContentModuleQuery,
             getRelevantRawEntry,
             parseContentModule,

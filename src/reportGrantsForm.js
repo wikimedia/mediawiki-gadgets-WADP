@@ -12,7 +12,7 @@
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse'
     ] ).done( function () {
-        var gadgetMsg,
+        var gadgetMsg = {},
             getContentModuleQuery,
             getRelevantRawEntry,
             parseContentModule,
