@@ -10,7 +10,7 @@
  */
 ( function () {
     'use strict';
-
+    var gadgetMsg = {};
     mw.loader.using( [
         'mediawiki.api',
         'oojs-ui',
@@ -65,7 +65,7 @@
             mclanguage: userLang
         } ).done( function ( data ) {
 
-            var i, res, key, val, gadgetMsg = {};
+            var i, res, key, val;
             res = data.query.messagecollection;
             for ( i = 0; i < res.length; i++ ) {
                 key = res[ i ].key.replace( 'Template:I18n/Reports/', '' );
