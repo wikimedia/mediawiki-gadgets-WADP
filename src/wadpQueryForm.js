@@ -2211,22 +2211,23 @@
                     QUERY = [],
                     dialog = this;
 
-                dialog.pushPending();
+                // dialog.pushPending();
+                dialog.close();
 
                 /* Get query params & log to the console */
-                STRUCTURE = dialog.fieldQuantitativeSearchType.getData();
+                STRUCTURE = dialog.fieldQuantitativeSearchType.getMenu().findSelectedItem().getData();
 
-                QUERY["queryObject"] = dialog.fieldQueryObject.getData();
-                QUERY["querySubject"] = dialog.fieldQuerySubject.getData();
+                QUERY["queryObject"] = dialog.fieldQueryObject.getMenu().findSelectedItem().getData();
+                QUERY["querySubject"] = dialog.fieldQuerySubject.getMenu().findSelectedItem().getData();
 
-                FILTERS["affiliateSearchType"] = dialog.fieldAffiliateSearchType.getData();
-                FILTERS["affiliateSearvyTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getData();
+                FILTERS["affiliateSearchType"] = dialog.fieldAffiliateSearchType.getMenu().findSelectedItem().getData();
+                FILTERS["affiliateSearvyTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
                 FILTERS["startDate"] = dialog.fieldStartDate.getValue();
                 FILTERS["endDate"] = dialog.fieldEndDate.getValue();
 
-                console.log(
-                    { STRUCTURE, QUERY, FILTERS }
-                );
+                console.log( STRUCTURE );
+                console.log( QUERY );
+                console.log( FILTERS );
 
                 // alert( "Work In Progress..." );
             };
