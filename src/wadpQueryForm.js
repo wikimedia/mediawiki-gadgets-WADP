@@ -2207,8 +2207,8 @@
             AdvanceArpQueryForm.prototype.executeSearch = function ( deleteFlag ) {
                 /* Advance query has 3 parts: result structure, actual query & filters */
                 var STRUCTURE = '',
-                    FILTERS = [],
-                    QUERY = [],
+                    QUERY = {},
+                    FILTERS = {},
                     dialog = this;
 
                 // dialog.pushPending();
@@ -2225,11 +2225,9 @@
                 FILTERS["startDate"] = dialog.fieldStartDate.getValue();
                 FILTERS["endDate"] = dialog.fieldEndDate.getValue();
 
-                console.log( STRUCTURE );
-                console.log( QUERY );
-                console.log( FILTERS );
+                console.log( STRUCTURE, QUERY, FILTERS );
 
-                // alert( "Work In Progress..." );
+                alert( "Work In Progress..." );
             };
 
 
