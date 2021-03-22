@@ -2205,7 +2205,30 @@
             };
 
             AdvanceArpQueryForm.prototype.executeSearch = function ( deleteFlag ) {
-                alert( "Work In Progress..." );
+                /* Advance query has 3 parts: result structure, actual query & filters */
+                var STRUCTURE = '',
+                    FILTERS = [],
+                    QUERY = [],
+                    dialog = this;
+
+                dialog.pushPending();
+
+                /* Get query params & log to the console */
+                STRUCTURE = dialog.fieldQuantitativeSearchType.getData();
+
+                QUERY["queryObject"] = dialog.fieldQueryObject.getData();
+                QUERY["querySubject"] = dialog.fieldQuerySubject.getData();
+
+                FILTERS["affiliateSearchType"] = dialog.fieldAffiliateSearchType.getData();
+                FILTERS["affiliateSearvyTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getData();
+                FILTERS["startDate"] = dialog.fieldStartDate.getValue();
+                FILTERS["endDate"] = dialog.fieldEndDate.getValue();
+
+                console.log(
+                    { STRUCTURE, QUERY, FILTERS }
+                );
+
+                // alert( "Work In Progress..." );
             };
 
 
