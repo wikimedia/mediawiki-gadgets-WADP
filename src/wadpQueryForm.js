@@ -2078,11 +2078,11 @@
                             } ),
                             new OO.ui.MenuOptionWidget( {
                                 data: 'south-america',
-                                label: gadgetMsg[ 'affiliate-search-by-region-south-america' ]
+                                label: gadgetMsg[ 'affiliate-search-by-region-south-latin-america' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
                                 data: 'middle-east',
-                                label: gadgetMsg[ 'affiliate-search-by-region-middle-east' ]
+                                label: gadgetMsg[ 'affiliate-search-by-region-mena' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
                                 data: 'specific-country',
