@@ -2225,7 +2225,15 @@
                 FILTERS["startDate"] = dialog.fieldStartDate.getValue();
                 FILTERS["endDate"] = dialog.fieldEndDate.getValue();
 
-                console.log( STRUCTURE, QUERY, FILTERS );
+                console.log(
+                    STRUCTURE,
+                    QUERY["queryObject"],
+                    QUERY["querySubject"],
+                    FILTERS["affiliateSearchType"],
+                    FILTERS["affiliateSearvyTypeByRegion"],
+                    FILTERS["startDate"],
+                    FILTERS["endDate"]
+                );
 
                 alert( "Work In Progress..." );
             };
