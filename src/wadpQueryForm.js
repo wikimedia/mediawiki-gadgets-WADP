@@ -2227,12 +2227,8 @@
 
                 console.log(
                     STRUCTURE,
-                    QUERY["queryObject"],
-                    QUERY["querySubject"],
-                    FILTERS["affiliateSearchType"],
-                    FILTERS["affiliateSearvyTypeByRegion"],
-                    FILTERS["startDate"],
-                    FILTERS["endDate"]
+                    QUERY,
+                    FILTERS
                 );
 
                 alert( "Work In Progress..." );
