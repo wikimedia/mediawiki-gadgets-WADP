@@ -51,7 +51,8 @@
             queryAffiliatesPage,
             queryCountriesPage,
             getContentList,
-            CountryLookupTextInputWidget;
+            CountryLookupTextInputWidget,
+            isEmptyDictionary;
 
         userLang = mw.config.get( 'wgUserLanguage' );
         if ( userLang === 'en' ) {
@@ -340,6 +341,16 @@
                     return raw;
                 }
             };
+
+            /**
+             * Function to check if a dictionary object is empty
+             *
+             * @param {Object} dict The dictionary object
+             * @return {Boolean} If the dictionary is empty (return true), false otherwise
+             */
+            isEmptyDictionary = function ( dict ) {
+                return ( dict && Object.keys(dict).length === 0 && dict.constructor === Object );
+            }
 
             /**
              * Method to Lookup Affiliate names from [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
@@ -2221,9 +2232,13 @@
                 QUERY["querySubject"] = dialog.fieldQuerySubject.getMenu().findSelectedItem().getData();
 
                 FILTERS["affiliateSearchType"] = dialog.fieldAffiliateSearchType.getMenu().findSelectedItem().getData();
-                FILTERS["affiliateSearvyTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
+                FILTERS["affiliateSearchTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
                 FILTERS["startDate"] = dialog.fieldStartDate.getValue();
                 FILTERS["endDate"] = dialog.fieldEndDate.getValue();
+
+                if ( STRUCTURE === '' && isEmptyDictionary( QUERY ) && isEmptyDictionary( FILTERS ) ) {
+                        alert( "Some fields have not been selected, check & fill them in..." );
+                }
 
                 console.log(
                     STRUCTURE,
