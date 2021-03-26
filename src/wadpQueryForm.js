@@ -2261,8 +2261,6 @@
                                         && entry.agreement_date <= FILTERS["endDate"]
                                     ) {
                                         QUERY_RES += "* " + entry.group_name + "<br/>";
-                                    } else {
-                                        QUERY_RES += "No affiliate matching your search.";
                                     }
                                 }
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
