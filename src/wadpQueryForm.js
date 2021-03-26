@@ -52,7 +52,7 @@
             queryCountriesPage,
             getContentList,
             CountryLookupTextInputWidget,
-            isEmptyDictionary;
+            convertDateToYyyyMmDdFormat;
 
         userLang = mw.config.get( 'wgUserLanguage' );
         if ( userLang === 'en' ) {
@@ -77,6 +77,20 @@
                 }
                 gadgetMsg[ key ] = val;
             }
+
+            /**
+             * Convert date to DD/MM/YYYY format
+             * @param {string} date
+             *
+             * @return {string} date
+             */
+            convertDateToYyyyMmDdFormat = function ( date ) {
+                // Put in a format our calendar OOUI will feed on, in YYYY-MM-DD format
+                date = date.split('/');
+                date = date[2] + "-" + date[1] + "-" + date[0];
+
+                return date;
+            };
 
             /**
              * Sanitizes input for saving to wiki
@@ -341,16 +355,6 @@
                     return raw;
                 }
             };
-
-            /**
-             * Function to check if a dictionary object is empty
-             *
-             * @param {Object} dict The dictionary object
-             * @return {Boolean} If the dictionary is empty (return true), false otherwise
-             */
-            isEmptyDictionary = function ( dict ) {
-                return ( dict && Object.keys(dict).length === 0 && dict.constructor === Object );
-            }
 
             /**
              * Method to Lookup Affiliate names from [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
@@ -985,7 +989,7 @@
                 } );
 
                 new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
-                    var i, j, handler, entries, entry, a_report, list, affiliate_structures;
+                    var i, j, entries, entry, a_report, list, affiliate_structures;
                     var windowManager = new OO.ui.WindowManager();
 
                     /** ARP-Q1.x implementations */
@@ -2038,15 +2042,15 @@
                                 label: gadgetMsg[ 'affiliate-search-type-all-affiliates' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'chapters',
+                                data: 'Chapter',
                                 label: gadgetMsg[ 'affiliate-search-type-chapters' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'thorgs',
+                                data: 'Thematic Organization',
                                 label: gadgetMsg[ 'affiliate-search-type-thorgs' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'user-groups',
+                                data: 'User Group',
                                 label: gadgetMsg[ 'affiliate-search-type-user-groups' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
@@ -2072,27 +2076,27 @@
                     menu: {
                         items: [
                             new OO.ui.MenuOptionWidget( {
-                                data: 'africa',
+                                data: 'Sub-Saharan Africa',
                                 label: gadgetMsg[ 'affiliate-search-by-region-africa' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'asia/pacific',
+                                data: 'Asia/Pacific',
                                 label: gadgetMsg[ 'affiliate-search-by-region-asia-pacific' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'europe',
+                                data: 'Europe',
                                 label: gadgetMsg[ 'affiliate-search-by-region-europe' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'north-america',
+                                data: 'North America',
                                 label: gadgetMsg[ 'affiliate-search-by-region-north-america' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'south-america',
+                                data: 'South America',
                                 label: gadgetMsg[ 'affiliate-search-by-region-south-latin-america' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'middle-east',
+                                data: 'MENA',
                                 label: gadgetMsg[ 'affiliate-search-by-region-mena' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
@@ -2217,15 +2221,15 @@
 
             AdvanceArpQueryForm.prototype.executeSearch = function ( deleteFlag ) {
                 /* Advance query has 3 parts: result structure, actual query & filters */
-                var STRUCTURE = '',
+                var STRUCTURE,
                     QUERY = {},
+                    QUERY_RES = '',
                     FILTERS = {},
                     dialog = this;
 
-                // dialog.pushPending();
                 dialog.close();
 
-                /* Get query params & log to the console */
+                /* Get query params: structure, query & filters */
                 STRUCTURE = dialog.fieldQuantitativeSearchType.getMenu().findSelectedItem().getData();
 
                 QUERY["queryObject"] = dialog.fieldQueryObject.getMenu().findSelectedItem().getData();
@@ -2236,8 +2240,46 @@
                 FILTERS["startDate"] = dialog.fieldStartDate.getValue();
                 FILTERS["endDate"] = dialog.fieldEndDate.getValue();
 
-                if ( STRUCTURE === '' && isEmptyDictionary( QUERY ) && isEmptyDictionary( FILTERS ) ) {
-                        alert( "Some fields have not been selected, check & fill them in..." );
+                // "List" data structure
+                if ( STRUCTURE === 'list' ) {
+                    if ( QUERY["queryObject"] === 'affiliates' ) {
+                        if ( QUERY["querySubject"] === 'recognised-in-year' ) {
+                            QUERY_RES = "<br/><br/>";
+                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    // Make sure an agreement date is available or default to 0000-00-00
+                                    entry.agreement_date = entry.agreement_date ? convertDateToYyyyMmDdFormat( entry.agreement_date ) : '0000-00-00';
+                                    if (
+                                        entry.recognition_status === 'recognised'
+                                        && entry.org_type === FILTERS["affiliateSearchType"]
+                                        && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        && entry.agreement_date >= FILTERS["startDate"]
+                                        && entry.agreement_date <= FILTERS["endDate"]
+                                    ) {
+                                        QUERY_RES += "* " + entry.group_name + "<br/>";
+                                    } else {
+                                        QUERY_RES += "No affiliate matching your search.";
+                                    }
+                                }
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        }
+                    }
+                }
+
+                // "Total number of" data structure
+                if ( STRUCTURE === 'number' ) {
+                    // code goes here...
+                }
+
+                // "Percentage of" data structure
+                if ( STRUCTURE === 'percentage' ) {
+                    // code goes here...
                 }
 
                 console.log(
