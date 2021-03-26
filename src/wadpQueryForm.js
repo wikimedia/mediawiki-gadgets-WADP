@@ -2267,6 +2267,31 @@
                                 openLeafWindow( {} );
                             } );
                         }
+
+                        if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
+                            QUERY_RES = "<br/><br/>";
+                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    // Make sure an agreement date is available or default to 0000-00-00
+                                    entry.derecognition_date = entry.derecognition_date ? convertDateToYyyyMmDdFormat( entry.derecognition_date ) : '0000-00-00';
+                                    if (
+                                        entry.recognition_status === 'derecognised'
+                                        && entry.org_type === FILTERS["affiliateSearchType"]
+                                        && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        && entry.derecognition_date >= FILTERS["startDate"]
+                                        && entry.derecognition_date <= FILTERS["endDate"]
+                                    ) {
+                                        QUERY_RES += "* " + entry.group_name + "<br/>";
+                                    }
+                                }
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        }
                     }
                 }
 
