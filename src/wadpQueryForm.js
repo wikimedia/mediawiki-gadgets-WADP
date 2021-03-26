@@ -2276,7 +2276,7 @@
 
                                 for ( i = 0; i < entries.length; i++ ) {
                                     entry = cleanRawEntry( entries[ i ].value.fields );
-                                    // Make sure an agreement date is available or default to 0000-00-00
+                                    // Make sure a derecognition date is available or default to 0000-00-00
                                     entry.derecognition_date = entry.derecognition_date ? convertDateToYyyyMmDdFormat( entry.derecognition_date ) : '0000-00-00';
                                     if (
                                         entry.recognition_status === 'derecognised'
