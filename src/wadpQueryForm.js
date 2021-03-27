@@ -2253,14 +2253,21 @@
                                     entry = cleanRawEntry( entries[ i ].value.fields );
                                     // Make sure an agreement date is available or default to 0000-00-00
                                     entry.agreement_date = entry.agreement_date ? convertDateToYyyyMmDdFormat( entry.agreement_date ) : '0000-00-00';
-                                    if (
-                                        entry.recognition_status === 'recognised'
-                                        && entry.org_type === FILTERS["affiliateSearchType"]
-                                        && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                    if ( entry.recognition_status === 'recognised'
                                         && entry.agreement_date >= FILTERS["startDate"]
                                         && entry.agreement_date <= FILTERS["endDate"]
                                     ) {
-                                        QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        } else if (
+                                            entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        }
                                     }
                                 }
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
@@ -2278,14 +2285,20 @@
                                     entry = cleanRawEntry( entries[ i ].value.fields );
                                     // Make sure a derecognition date is available or default to 0000-00-00
                                     entry.derecognition_date = entry.derecognition_date ? convertDateToYyyyMmDdFormat( entry.derecognition_date ) : '0000-00-00';
-                                    if (
-                                        entry.recognition_status === 'derecognised'
-                                        && entry.org_type === FILTERS["affiliateSearchType"]
-                                        && entry.region === FILTERS["affiliateSearchTypeByRegion"]
-                                        && entry.derecognition_date >= FILTERS["startDate"]
-                                        && entry.derecognition_date <= FILTERS["endDate"]
+                                    if ( entry.recognition_status === 'derecognised'
+                                        && entry.agreement_date >= FILTERS["startDate"]
+                                        && entry.agreement_date <= FILTERS["endDate"]
                                     ) {
-                                        QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        } else if ( entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        }
                                     }
                                 }
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
