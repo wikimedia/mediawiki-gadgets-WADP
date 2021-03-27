@@ -2257,7 +2257,15 @@
                                         && entry.agreement_date >= FILTERS["startDate"]
                                         && entry.agreement_date <= FILTERS["endDate"]
                                     ) {
-                                        if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                             && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             && entry.org_type === FILTERS["affiliateSearchType"]
                                         ) {
@@ -2289,7 +2297,15 @@
                                         && entry.agreement_date >= FILTERS["startDate"]
                                         && entry.agreement_date <= FILTERS["endDate"]
                                     ) {
-                                        if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                             && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             && entry.org_type === FILTERS["affiliateSearchType"]
                                         ) {
