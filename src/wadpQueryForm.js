@@ -2024,6 +2024,111 @@
                                 ]
                             }
                         } );
+                    } else if ( trackQueryObject === 'events' ) {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'dynamicContent',
+                            label: gadgetMsg[ 'query-object-default-option' ],
+                            menu: {
+                                items: [
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'conducted-by',
+                                        label: gadgetMsg[ 'query-subject-conducted-by' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'conducted-with',
+                                        label: gadgetMsg[ 'query-subject-conducted-with' ]
+                                    } )
+                                ]
+                            }
+                        } );
+                    } else if ( trackQueryObject === 'partners' ) {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'dynamicContent',
+                            label: gadgetMsg['query-object-default-option'],
+                            menu: {
+                                items: [
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'belongs-to',
+                                        label: gadgetMsg[ 'query-subject-belongs-to' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'participated-in',
+                                        label: gadgetMsg[ 'query-subject-participated-in' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'reported-in',
+                                        label: gadgetMsg[ 'query-subject-reported-in' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'reported-by',
+                                        label: gadgetMsg[ 'query-subject-reported-by' ]
+                                    } )
+                                ]
+                            }
+                        } ) ;
+                    } else if ( trackQueryObject === 'members' ) {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'dynamicContent',
+                            label: gadgetMsg['query-object-default-option'],
+                            menu: {
+                                items: [
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'belongs-to',
+                                        label: gadgetMsg[ 'query-subject-belongs-to' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'with-demographic-of',
+                                        label: gadgetMsg[ 'query-subject-with-demographic-of' ]
+                                    } )
+                                ]
+                            }
+                        } ) ;
+                    } else if ( trackQueryObject === 'finance' ) {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'dynamicContent',
+                            label: gadgetMsg['query-object-default-option'],
+                            menu: {
+                                items: [
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'conducted-by',
+                                        label: gadgetMsg[ 'query-subject-conducted-by' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'conducted-with',
+                                        label: gadgetMsg[ 'query-subject-conducted-with' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'reported-by',
+                                        label: gadgetMsg[ 'query-subject-reported-by' ]
+                                    } )
+                                ]
+                            }
+                        } ) ;
+                    } else if ( trackQueryObject === 'reports' ) {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'dynamicContent',
+                            label: gadgetMsg['query-object-default-option'],
+                            menu: {
+                                items: [
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'belongs-to',
+                                        label: gadgetMsg[ 'query-subject-belongs-to' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'compliant-with-reporting',
+                                        label: gadgetMsg[ 'query-subject-compliant-with-reporting' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'reported-in',
+                                        label: gadgetMsg[ 'query-subject-reported-in' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'reported-by',
+                                        label: gadgetMsg[ 'query-subject-reported-by' ]
+                                    } )
+                                ]
+                            }
+                        } ) ;
                     } else {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'dynamicContent',
@@ -2035,53 +2140,11 @@
                     $( "#dynamicContent" ).empty().append( fieldQuerySubject.$element );
                 } );
 
-                /* this.fieldQuerySubject = new OO.ui.DropdownWidget( {
-                    label: gadgetMsg[ 'query-object-default-option' ],
-                    menu: {
-                        items: [
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'belongs-to',
-                                label: gadgetMsg[ 'query-subject-belongs-to' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'participated-in',
-                                label: gadgetMsg[ 'query-subject-participated-in' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'compliant-with-reporting',
-                                label: gadgetMsg[ 'query-subject-compliant-with-reporting' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'reported-in',
-                                label: gadgetMsg[ 'query-subject-reported-in' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'reported-by',
-                                label: gadgetMsg[ 'query-subject-reported-by' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'conducted-by',
-                                label: gadgetMsg[ 'query-subject-conducted-by' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'conducted-with',
-                                label: gadgetMsg[ 'query-subject-conducted-with' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'with-demographic-of',
-                                label: gadgetMsg[ 'query-subject-with-demographic-of' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'recognised-in-year',
-                                label: gadgetMsg[ 'query-subject-recognised-in-year' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
-                                data: 'derecognised-in-year',
-                                label: gadgetMsg[ 'query-subject-derecognised-in-year' ]
-                            } )
-                        ]
-                    }
-                } );*/
+                fieldQuerySubject = new OO.ui.DropdownWidget( {
+                    id: 'dynamicContent',
+                    label: gadgetMsg['query-object-default-option'],
+                    menu: {}
+                } ) ;
 
                 tmpFieldAffiliateSearchType = this.fieldAffiliateSearchType = new OO.ui.DropdownWidget( {
                     label: gadgetMsg[ 'type-of-affiliate-to-query' ],
