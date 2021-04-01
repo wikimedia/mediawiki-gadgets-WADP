@@ -52,7 +52,9 @@
             queryCountriesPage,
             getContentList,
             CountryLookupTextInputWidget,
-            convertDateToYyyyMmDdFormat;
+            convertDateToYyyyMmDdFormat,
+            trackQueryObject = '',
+            fieldQuerySubject;
 
         userLang = mw.config.get( 'wgUserLanguage' );
         if ( userLang === 'en' ) {
@@ -1923,7 +1925,8 @@
                     fieldSpecificAffiliate,
                     fieldSpecificCountry,
                     tmpFieldAffiliateSearchType,
-                    tmpFieldAffiliateSearchTypeByRegion;
+                    tmpFieldAffiliateSearchTypeByRegion,
+                    tmpFieldQueryObject;
 
                 dialog = this;
 
@@ -1953,7 +1956,7 @@
                     }
                 } );
 
-                this.fieldQueryObject = new OO.ui.DropdownWidget( {
+                tmpFieldQueryObject = this.fieldQueryObject = new OO.ui.DropdownWidget( {
                     label: gadgetMsg[ 'query-object-default-option' ],
                     menu: {
                         items: [
@@ -1985,7 +1988,54 @@
                     }
                 } );
 
-                this.fieldQuerySubject = new OO.ui.DropdownWidget( {
+                tmpFieldQueryObject.on( 'labelChange', function() {
+                    trackQueryObject = tmpFieldQueryObject.getMenu().findSelectedItem().getData();
+
+                    if ( trackQueryObject === 'affiliates' ) {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'dynamicContent',
+                            label: gadgetMsg[ 'query-object-default-option' ],
+                            menu: {
+                                items: [
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'belongs-to',
+                                        label: gadgetMsg[ 'query-subject-belongs-to' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'participated-in',
+                                        label: gadgetMsg[ 'query-subject-participated-in' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'compliant-with-reporting',
+                                        label: gadgetMsg[ 'query-subject-compliant-with-reporting' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'with-demographic-of',
+                                        label: gadgetMsg[ 'query-subject-with-demographic-of' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'recognised-in-year',
+                                        label: gadgetMsg[ 'query-subject-recognised-in-year' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'derecognised-in-year',
+                                        label: gadgetMsg[ 'query-subject-derecognised-in-year' ]
+                                    } )
+                                ]
+                            }
+                        } );
+                    } else {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'dynamicContent',
+                            label: gadgetMsg['query-object-default-option'],
+                            menu: {}
+                        } ) ;
+                    }
+
+                    $( "#dynamicContent" ).empty().append( fieldQuerySubject.$element );
+                } );
+
+                /* this.fieldQuerySubject = new OO.ui.DropdownWidget( {
                     label: gadgetMsg[ 'query-object-default-option' ],
                     menu: {
                         items: [
@@ -2031,7 +2081,7 @@
                             } )
                         ]
                     }
-                } );
+                } );*/
 
                 tmpFieldAffiliateSearchType = this.fieldAffiliateSearchType = new OO.ui.DropdownWidget( {
                     label: gadgetMsg[ 'type-of-affiliate-to-query' ],
@@ -2148,7 +2198,7 @@
                             }
                         ),
                         new OO.ui.FieldLayout(
-                            this.fieldQuerySubject,
+                            fieldQuerySubject,
                             {
                                 label: gadgetMsg[ 'advance-step-three-label' ],
                                 align: 'top'
@@ -2233,7 +2283,7 @@
                 STRUCTURE = dialog.fieldQuantitativeSearchType.getMenu().findSelectedItem().getData();
 
                 QUERY["queryObject"] = dialog.fieldQueryObject.getMenu().findSelectedItem().getData();
-                QUERY["querySubject"] = dialog.fieldQuerySubject.getMenu().findSelectedItem().getData();
+                QUERY["querySubject"] = fieldQuerySubject.getMenu().findSelectedItem().getData();
 
                 FILTERS["affiliateSearchType"] = dialog.fieldAffiliateSearchType.getMenu().findSelectedItem().getData();
                 FILTERS["affiliateSearchTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
