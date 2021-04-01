@@ -1993,7 +1993,7 @@
 
                     if ( trackQueryObject === 'affiliates' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'dynamicContent',
+                            id: 'querySubjectOptions',
                             label: gadgetMsg[ 'query-object-default-option' ],
                             menu: {
                                 items: [
@@ -2026,7 +2026,7 @@
                         } );
                     } else if ( trackQueryObject === 'events' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'dynamicContent',
+                            id: 'querySubjectOptions',
                             label: gadgetMsg[ 'query-object-default-option' ],
                             menu: {
                                 items: [
@@ -2043,7 +2043,7 @@
                         } );
                     } else if ( trackQueryObject === 'partners' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'dynamicContent',
+                            id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
                             menu: {
                                 items: [
@@ -2068,7 +2068,7 @@
                         } ) ;
                     } else if ( trackQueryObject === 'members' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'dynamicContent',
+                            id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
                             menu: {
                                 items: [
@@ -2085,7 +2085,7 @@
                         } ) ;
                     } else if ( trackQueryObject === 'finance' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'dynamicContent',
+                            id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
                             menu: {
                                 items: [
@@ -2106,7 +2106,7 @@
                         } ) ;
                     } else if ( trackQueryObject === 'reports' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'dynamicContent',
+                            id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
                             menu: {
                                 items: [
@@ -2131,17 +2131,17 @@
                         } ) ;
                     } else {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'dynamicContent',
+                            id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
                             menu: {}
                         } ) ;
                     }
 
-                    $( "#dynamicContent" ).empty().append( fieldQuerySubject.$element );
+                    $( "#querySubjectOptions" ).empty().append( fieldQuerySubject.$element );
                 } );
 
                 fieldQuerySubject = new OO.ui.DropdownWidget( {
-                    id: 'dynamicContent',
+                    id: 'querySubjectOptions',
                     label: gadgetMsg['query-object-default-option'],
                     menu: {}
                 } ) ;
