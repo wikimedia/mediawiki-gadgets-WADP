@@ -2233,15 +2233,13 @@
                 this.fieldStartDate = new mw.widgets.DateInputWidget( {
                     icon: 'calendar',
                     classes: [ 'full-width' ],
-                    placeholderLabel: gadgetMsg[ 'start-date-placeholder' ],
-                    required: true
+                    placeholderLabel: gadgetMsg[ 'start-date-placeholder' ]
                 } );
 
                 this.fieldEndDate = new mw.widgets.DateInputWidget( {
                     icon: 'calendar',
                     classes: [ 'full-width' ],
-                    placeholderLabel: gadgetMsg[ 'end-date-placeholder' ],
-                    required: true
+                    placeholderLabel: gadgetMsg[ 'end-date-placeholder' ]
                 } );
 
                 this.fieldSet = new OO.ui.FieldsetLayout( {
@@ -2409,6 +2407,43 @@
                                     if ( entry.recognition_status === 'derecognised'
                                         && entry.agreement_date >= FILTERS["startDate"]
                                         && entry.agreement_date <= FILTERS["endDate"]
+                                    ) {
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        } else if ( entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        }
+                                    }
+                                }
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        }
+
+                        if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
+                            QUERY_RES = "<br/><br/>";
+                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+
+                                    if ( entry.recognition_status === 'recognised'
+                                        && entry.uptodate_reporting === 'Tick'
                                     ) {
                                         if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
                                             if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
