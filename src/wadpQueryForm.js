@@ -2405,8 +2405,8 @@
                                     // Make sure a derecognition date is available or default to 0000-00-00
                                     entry.derecognition_date = entry.derecognition_date ? convertDateToYyyyMmDdFormat( entry.derecognition_date ) : '0000-00-00';
                                     if ( entry.recognition_status === 'derecognised'
-                                        && entry.agreement_date >= FILTERS["startDate"]
-                                        && entry.agreement_date <= FILTERS["endDate"]
+                                        && entry.derecognition_date >= FILTERS["startDate"]
+                                        && entry.derecognition_date <= FILTERS["endDate"]
                                     ) {
                                         if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
                                             if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
@@ -2443,7 +2443,7 @@
                                     entry = cleanRawEntry( entries[ i ].value.fields );
 
                                     if ( entry.recognition_status === 'recognised'
-                                        && entry.uptodate_reporting === 'Tick'
+                                        && ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
                                     ) {
                                         if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
                                             if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
