@@ -2330,7 +2330,7 @@
                 this.$body.append( this.content.$element );
             };
 
-            AdvanceArpQueryForm.prototype.executeSearch = function ( deleteFlag ) {
+            AdvanceArpQueryForm.prototype.executeSearch = function () {
                 /* Advance query has 3 parts: result structure, actual query & filters */
                 var STRUCTURE,
                     QUERY = {},
@@ -2470,6 +2470,8 @@
                             } );
                         }
                     }
+                } else {
+                    alert( "Work In Progress..." );
                 }
 
                 // "Total number of" data structure
@@ -2487,8 +2489,6 @@
                     QUERY,
                     FILTERS
                 );
-
-                alert( "Work In Progress..." );
             };
 
 
