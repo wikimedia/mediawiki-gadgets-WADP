@@ -2469,6 +2469,41 @@
                                 openLeafWindow( {} );
                             } );
                         }
+
+                        if ( QUERY["querySubject"] === 'belongs-to' ) {
+                            QUERY_RES = "<br/><br/>";
+                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+
+                                    if ( entry.recognition_status === 'recognised' ) {
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        } else if ( entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                        }
+                                    }
+                                }
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        }
                     }
                 } else {
                     alert( "Work In Progress..." );
