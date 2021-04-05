@@ -2354,6 +2354,7 @@
                 // "List" data structure
                 if ( STRUCTURE === 'list' ) {
                     QUERY_RES = "<br/><br/>";
+                    var i, j;
                     if ( QUERY["queryObject"] === 'affiliates' ) {
                         if ( QUERY["querySubject"] === 'recognised-in-year' ) {
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
@@ -2372,29 +2373,27 @@
                                             if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                 && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             }
                                         } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                             && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             && entry.org_type === FILTERS["affiliateSearchType"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         } else if (
                                             entry.org_type === FILTERS["affiliateSearchType"]
                                             && entry.region === FILTERS["affiliateSearchTypeByRegion"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         }
                                     }
                                 }
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } );
-                        }
-
-                        if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
+                        } else if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
@@ -2411,28 +2410,26 @@
                                             if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                 && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             }
                                         } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                             && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             && entry.org_type === FILTERS["affiliateSearchType"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         } else if ( entry.org_type === FILTERS["affiliateSearchType"]
                                             && entry.region === FILTERS["affiliateSearchTypeByRegion"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         }
                                     }
                                 }
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } );
-                        }
-
-                        if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
+                        } else if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
@@ -2447,28 +2444,26 @@
                                             if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                 && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             }
                                         } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                             && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             && entry.org_type === FILTERS["affiliateSearchType"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         } else if ( entry.org_type === FILTERS["affiliateSearchType"]
                                             && entry.region === FILTERS["affiliateSearchTypeByRegion"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         }
                                     }
                                 }
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } );
-                        }
-
-                        if ( QUERY["querySubject"] === 'belongs-to' ) {
+                        } else if ( QUERY["querySubject"] === 'belongs-to' ) {
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
@@ -2481,29 +2476,66 @@
                                             if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                 && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                QUERY_RES += "* " + entry.group_name + "<br/>";
+                                                QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                             }
                                         } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                             && entry.group_country === dialog.fieldSpecificCountry.getValue()
                                             && entry.org_type === FILTERS["affiliateSearchType"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         } else if ( entry.org_type === FILTERS["affiliateSearchType"]
                                             && entry.region === FILTERS["affiliateSearchTypeByRegion"]
                                         ) {
-                                            QUERY_RES += "* " + entry.group_name + "<br/>";
+                                            QUERY_RES += "✦ " + entry.group_name + "<br/>";
                                         }
                                     }
                                 }
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } );
+                        } else {
+                            alert( "Work In Progress..." );
+                        }
+                    } else if ( QUERY["queryObject"] === 'reports' ) {
+                        if ( QUERY["querySubject"] === 'reported-by' ) {
+                            var apiObject = new mw.Api();
+                            apiObject.get( getActivitiesReportsContentModuleQuery() ).done( function ( reports ) {
+                                var reportsEntries, reportEntry;
+                                reportsEntries = parseContentModule( reports.query.pages );
+
+                                if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
+                                    for ( j = 0; j < reportsEntries.length; j++ ) {
+                                        reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
+                                        if ( reportEntry.group_name === dialog.fieldSpecificAffiliate.getValue() ) {
+                                            if ( typeof FILTERS["startDate"] !== 'undefined'
+                                                && typeof FILTERS["endDate"] !== 'undefined'
+                                                && FILTERS["startDate"] >= reportEntry.dos_stamp
+                                                && FILTERS["endDate"] <= reportEntry.dos_stamp
+                                            ) {
+                                                QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + reportEntry.group_name + "'s activity report </a><br/>";
+                                            } else {
+                                                QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + reportEntry.group_name + "'s activity report </a><br/>";
+                                            }
+                                        }
+                                    }
+                                }
+
+                                /* for ( i = 0; i < affiliatesEntries.length; i++ ) {
+                                    affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
+                                    for ( j = 0; j < reportsEntries.length; j++ ) {
+                                        reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
+                                        if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
+
+                                        }
+                                    }
+                                } */
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
                         }
                     }
-                } else {
-                    alert( "Work In Progress..." );
                 }
 
                 // "Total number of" data structure
