@@ -2353,9 +2353,9 @@
 
                 // "List" data structure
                 if ( STRUCTURE === 'list' ) {
+                    QUERY_RES = "<br/><br/>";
                     if ( QUERY["queryObject"] === 'affiliates' ) {
                         if ( QUERY["querySubject"] === 'recognised-in-year' ) {
-                            QUERY_RES = "<br/><br/>";
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
@@ -2395,7 +2395,6 @@
                         }
 
                         if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
-                            QUERY_RES = "<br/><br/>";
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
@@ -2434,7 +2433,6 @@
                         }
 
                         if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
-                            QUERY_RES = "<br/><br/>";
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
@@ -2471,7 +2469,6 @@
                         }
 
                         if ( QUERY["querySubject"] === 'belongs-to' ) {
-                            QUERY_RES = "<br/><br/>";
                             new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
