@@ -2346,8 +2346,15 @@
                 QUERY["queryObject"] = dialog.fieldQueryObject.getMenu().findSelectedItem().getData();
                 QUERY["querySubject"] = fieldQuerySubject.getMenu().findSelectedItem().getData();
 
+                /* Filters are options so let's make sure it's the case all the time */
                 FILTERS["affiliateSearchType"] = dialog.fieldAffiliateSearchType.getMenu().findSelectedItem().getData();
-                FILTERS["affiliateSearchTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
+                if ( dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem() === null ) {
+                    // Default this field to anything as it could be optional in some cases.
+                    dialog.fieldAffiliateSearchTypeByRegion.getMenu().selectItemByData( 'MENA' );
+                    FILTERS["affiliateSearchTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
+                } else {
+                    FILTERS["affiliateSearchTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
+                }
                 FILTERS["startDate"] = dialog.fieldStartDate.getValue();
                 FILTERS["endDate"] = dialog.fieldEndDate.getValue();
 
@@ -2508,9 +2515,10 @@
                                 if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
                                     for ( j = 0; j < reportsEntries.length; j++ ) {
                                         reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
+
                                         if ( reportEntry.group_name === dialog.fieldSpecificAffiliate.getValue() ) {
-                                            if ( typeof FILTERS["startDate"] !== 'undefined'
-                                                && typeof FILTERS["endDate"] !== 'undefined'
+                                            if ( typeof dialog.fieldStartDate !== 'undefined'
+                                                && typeof dialog.fieldEndDate !== 'undefined'
                                                 && FILTERS["startDate"] >= reportEntry.dos_stamp
                                                 && FILTERS["endDate"] <= reportEntry.dos_stamp
                                             ) {
@@ -2521,7 +2529,6 @@
                                         }
                                     }
                                 }
-
                                 /* for ( i = 0; i < affiliatesEntries.length; i++ ) {
                                     affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
                                     for ( j = 0; j < reportsEntries.length; j++ ) {
@@ -2534,6 +2541,8 @@
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } );
+                        } else {
+                            alert( "Work In Progress..." );
                         }
                     }
                 }
