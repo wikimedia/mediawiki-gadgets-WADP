@@ -2509,35 +2509,60 @@
                         if ( QUERY["querySubject"] === 'reported-by' ) {
                             var apiObject = new mw.Api();
                             apiObject.get( getActivitiesReportsContentModuleQuery() ).done( function ( reports ) {
-                                var reportsEntries, reportEntry;
+                                var reportsEntries, reportEntry, affiliateName;
                                 reportsEntries = parseContentModule( reports.query.pages );
 
                                 if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
                                     for ( j = 0; j < reportsEntries.length; j++ ) {
                                         reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
+                                        affiliateName = dialog.fieldSpecificAffiliate.getValue();
+                                        if ( reportEntry.group_name === dialog.fieldSpecificAffiliate.getValue()
+                                            && reportEntry.dos_stamp >= FILTERS["startDate"]
+                                            && reportEntry.dos_stamp <= FILTERS["endDate"]
+                                        ) {
+                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report </a><br/>";
+                                        } else if ( reportEntry.group_name === affiliateName ) {
+                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report </a><br/>";
+                                        }
+                                    }
+                                } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                    apiObject.get( getOrgInfoContentModuleQuery() ).done( function ( affiliates ) {
+                                        var affiliatesEntries, affiliateEntry;
 
-                                        if ( reportEntry.group_name === dialog.fieldSpecificAffiliate.getValue() ) {
-                                            if ( typeof dialog.fieldStartDate !== 'undefined'
-                                                && typeof dialog.fieldEndDate !== 'undefined'
-                                                && FILTERS["startDate"] >= reportEntry.dos_stamp
-                                                && FILTERS["endDate"] <= reportEntry.dos_stamp
-                                            ) {
-                                                QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + reportEntry.group_name + "'s activity report </a><br/>";
-                                            } else {
-                                                QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + reportEntry.group_name + "'s activity report </a><br/>";
+                                        affiliatesEntries = parseContentModule( affiliates.query.pages );
+                                        for ( i = 0; i < affiliatesEntries.length; i++ ) {
+                                            affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
+                                            for ( j = 0; j < reportsEntries.length; j++ ) {
+                                                reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
+                                                if ( affiliateEntry.group_name === reportEntry.group_name
+                                                    && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                                    && reportEntry.dos_stamp >= FILTERS["startDate"]
+                                                    && reportEntry.dos_stamp <= FILTERS["endDate"]
+                                                ) {
+                                                    QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                } else if ( affiliateEntry.group_name === reportEntry.group_name
+                                                    && dialog.fieldSpecificCountry.getValue() === 'specific-country'
+                                                ) {
+                                                    if ( reportEntry.dos_stamp >= FILTERS["startDate"]
+                                                        && reportEntry.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                    } else {
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                    }
+                                                } else if ( affiliateEntry.group_name === reportEntry.group_name
+                                                    && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                                ) {
+                                                    QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                } else {
+                                                    QUERY_RES += "<p>(0 count set) No results for this query!</p>";
+                                                }
                                             }
                                         }
-                                    }
+                                    } );
+                                } else {
+                                    alert( "Work In Progress..." );
                                 }
-                                /* for ( i = 0; i < affiliatesEntries.length; i++ ) {
-                                    affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
-                                    for ( j = 0; j < reportsEntries.length; j++ ) {
-                                        reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
-                                        if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
-
-                                        }
-                                    }
-                                } */
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } );
