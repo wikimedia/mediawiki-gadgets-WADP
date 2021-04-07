@@ -2516,13 +2516,18 @@
                                     for ( j = 0; j < reportsEntries.length; j++ ) {
                                         reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
                                         affiliateName = dialog.fieldSpecificAffiliate.getValue();
-                                        if ( reportEntry.group_name === dialog.fieldSpecificAffiliate.getValue()
+                                        if ( reportEntry.group_name === affiliateName
                                             && reportEntry.dos_stamp >= FILTERS["startDate"]
                                             && reportEntry.dos_stamp <= FILTERS["endDate"]
                                         ) {
                                             QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report </a><br/>";
-                                        } else if ( reportEntry.group_name === affiliateName ) {
+                                        } else if ( reportEntry.group_name === affiliateName
+                                            && FILTERS["startDate"] === ''
+                                            && FILTERS["endDate"] === ''
+                                        ) {
                                             QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report </a><br/>";
+                                        } else {
+                                            QUERY_RES += "<p>(0 count set) No results for this query!</p>";
                                         }
                                     }
                                 } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
