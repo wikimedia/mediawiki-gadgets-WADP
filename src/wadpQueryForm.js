@@ -2526,8 +2526,6 @@
                                             && FILTERS["endDate"] === ''
                                         ) {
                                             QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report </a><br/>";
-                                        } else {
-                                            QUERY_RES += "<p>(0 count set) No results for this query!</p>";
                                         }
                                     }
                                 } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
@@ -2539,28 +2537,39 @@
                                             affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
                                             for ( j = 0; j < reportsEntries.length; j++ ) {
                                                 reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
-                                                if ( affiliateEntry.group_name === reportEntry.group_name
-                                                    && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
-                                                    && reportEntry.dos_stamp >= FILTERS["startDate"]
-                                                    && reportEntry.dos_stamp <= FILTERS["endDate"]
+                                                if ( dialog.fieldStartDate.getValue() !== ''
+                                                    && dialog.fieldEndDate.getValue() !== ''
                                                 ) {
-                                                    QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                } else if ( affiliateEntry.group_name === reportEntry.group_name
-                                                    && dialog.fieldSpecificCountry.getValue() === 'specific-country'
-                                                ) {
-                                                    if ( reportEntry.dos_stamp >= FILTERS["startDate"]
+                                                    if ( affiliateEntry.group_name === reportEntry.group_name
+                                                        && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                                        && reportEntry.dos_stamp >= FILTERS["startDate"]
                                                         && reportEntry.dos_stamp <= FILTERS["endDate"]
                                                     ) {
                                                         QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                    } else {
-                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                    } else if ( affiliateEntry.group_name === reportEntry.group_name
+                                                        && dialog.fieldSpecificCountry.getValue() === 'specific-country'
+                                                    ) {
+                                                        if ( affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"]
+                                                            && reportEntry.dos_stamp >= FILTERS["startDate"]
+                                                            && reportEntry.dos_stamp <= FILTERS["endDate"]
+                                                        ) {
+                                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                        }
                                                     }
-                                                } else if ( affiliateEntry.group_name === reportEntry.group_name
-                                                    && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                                } else if ( dialog.fieldStartDate.getValue() === ''
+                                                    && dialog.fieldEndDate.getValue() === ''
                                                 ) {
-                                                    QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                } else {
-                                                    QUERY_RES += "<p>(0 count set) No results for this query!</p>";
+                                                    if ( affiliateEntry.group_name === reportEntry.group_name
+                                                        && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                                    ) {
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                    } else if ( affiliateEntry.group_name === reportEntry.group_name
+                                                        && dialog.fieldSpecificCountry.getValue() === 'specific-country'
+                                                    ) {
+                                                        if ( affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
