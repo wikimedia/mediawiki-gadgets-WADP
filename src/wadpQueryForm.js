@@ -2509,26 +2509,27 @@
                         if ( QUERY["querySubject"] === 'reported-by' ) {
                             var apiObject = new mw.Api();
                             apiObject.get( getActivitiesReportsContentModuleQuery() ).done( function ( reports ) {
-                                var reportsEntries, reportEntry, affiliateName;
+                                var reportsEntries, reportEntry, affiliateName, reportYear;
                                 reportsEntries = parseContentModule( reports.query.pages );
 
                                 if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
                                     for ( j = 0; j < reportsEntries.length; j++ ) {
                                         reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
                                         affiliateName = dialog.fieldSpecificAffiliate.getValue();
+                                        reportYear = reportEntry.end_date.split( "/" )[2];
                                         if ( reportEntry.group_name === affiliateName
                                             && reportEntry.dos_stamp >= FILTERS["startDate"]
                                             && reportEntry.dos_stamp <= FILTERS["endDate"]
                                         ) {
-                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report </a><br/>";
+                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report (" + reportYear + ")</a><br/>";
                                         } else if ( reportEntry.group_name === affiliateName
                                             && FILTERS["startDate"] === ''
                                             && FILTERS["endDate"] === ''
                                         ) {
-                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report </a><br/>";
+                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report (" + reportYear + ")</a><br/>";
                                         }
                                     }
-                                } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                } else if ( FILTERS["affiliateSearchType"] === 'User Group' ) {
                                     apiObject.get( getOrgInfoContentModuleQuery() ).done( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
@@ -2539,6 +2540,7 @@
                                                 reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
                                                 if ( dialog.fieldStartDate.getValue() !== ''
                                                     && dialog.fieldEndDate.getValue() !== ''
+                                                    && affiliateEntry.org_type === 'User Group'
                                                 ) {
                                                     if ( affiliateEntry.group_name === reportEntry.group_name
                                                         && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
@@ -2558,6 +2560,7 @@
                                                     }
                                                 } else if ( dialog.fieldStartDate.getValue() === ''
                                                     && dialog.fieldEndDate.getValue() === ''
+                                                    && affiliateEntry.org_type === 'User Group'
                                                 ) {
                                                     if ( affiliateEntry.group_name === reportEntry.group_name
                                                         && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
