@@ -1964,7 +1964,8 @@
                                 data: 'affiliates',
                                 label: gadgetMsg[ 'query-object-affiliates' ]
                             } ),
-                            new OO.ui.MenuOptionWidget( {
+                            /* TODO: To be activated once AIU dataset is available */
+                            /* new OO.ui.MenuOptionWidget( {
                                 data: 'events',
                                 label: gadgetMsg[ 'query-object-events' ]
                             } ),
@@ -1975,7 +1976,7 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'members',
                                 label: gadgetMsg[ 'query-object-members' ]
-                            } ),
+                            } ), */
                             new OO.ui.MenuOptionWidget( {
                                 data: 'finance',
                                 label: gadgetMsg[ 'query-object-finance' ]
@@ -1997,22 +1998,23 @@
                             label: gadgetMsg[ 'query-object-default-option' ],
                             menu: {
                                 items: [
+                                    // TODO: Waiting on AIU data-set for some query subjects -- commented.
                                     new OO.ui.MenuOptionWidget( {
                                         data: 'belongs-to',
                                         label: gadgetMsg[ 'query-subject-belongs-to' ]
                                     } ),
-                                    new OO.ui.MenuOptionWidget( {
+                                    /* new OO.ui.MenuOptionWidget( {
                                         data: 'participated-in',
                                         label: gadgetMsg[ 'query-subject-participated-in' ]
-                                    } ),
+                                    } ), */
                                     new OO.ui.MenuOptionWidget( {
                                         data: 'compliant-with-reporting',
                                         label: gadgetMsg[ 'query-subject-compliant-with-reporting' ]
                                     } ),
-                                    new OO.ui.MenuOptionWidget( {
+                                    /* new OO.ui.MenuOptionWidget( {
                                         data: 'with-demographic-of',
                                         label: gadgetMsg[ 'query-subject-with-demographic-of' ]
-                                    } ),
+                                    } ), */
                                     new OO.ui.MenuOptionWidget( {
                                         data: 'recognised-in-year',
                                         label: gadgetMsg[ 'query-subject-recognised-in-year' ]
@@ -2024,7 +2026,7 @@
                                 ]
                             }
                         } );
-                    } else if ( trackQueryObject === 'events' ) {
+                    } /* else if ( trackQueryObject === 'events' ) { // TODO: Waiting on AIU data-set
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'querySubjectOptions',
                             label: gadgetMsg[ 'query-object-default-option' ],
@@ -2041,7 +2043,7 @@
                                 ]
                             }
                         } );
-                    } else if ( trackQueryObject === 'partners' ) {
+                    } else if ( trackQueryObject === 'partners' ) { // TODO: Waiting on AIU data-set
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
@@ -2066,7 +2068,7 @@
                                 ]
                             }
                         } ) ;
-                    } else if ( trackQueryObject === 'members' ) {
+                    } else if ( trackQueryObject === 'members' ) { // TODO: Waiting on AIU data-set
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
@@ -2083,20 +2085,21 @@
                                 ]
                             }
                         } ) ;
-                    } else if ( trackQueryObject === 'finance' ) {
+                    } */ else if ( trackQueryObject === 'finance' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
                             menu: {
                                 items: [
-                                    new OO.ui.MenuOptionWidget( {
+                                    // TODO: Waiting on AIU data-set for some query subjects -- commented.
+                                    /* new OO.ui.MenuOptionWidget( {
                                         data: 'conducted-by',
                                         label: gadgetMsg[ 'query-subject-conducted-by' ]
                                     } ),
                                     new OO.ui.MenuOptionWidget( {
                                         data: 'conducted-with',
                                         label: gadgetMsg[ 'query-subject-conducted-with' ]
-                                    } ),
+                                    } ), */
                                     new OO.ui.MenuOptionWidget( {
                                         data: 'reported-by',
                                         label: gadgetMsg[ 'query-subject-reported-by' ]
@@ -2110,18 +2113,6 @@
                             label: gadgetMsg['query-object-default-option'],
                             menu: {
                                 items: [
-                                    new OO.ui.MenuOptionWidget( {
-                                        data: 'belongs-to',
-                                        label: gadgetMsg[ 'query-subject-belongs-to' ]
-                                    } ),
-                                    new OO.ui.MenuOptionWidget( {
-                                        data: 'compliant-with-reporting',
-                                        label: gadgetMsg[ 'query-subject-compliant-with-reporting' ]
-                                    } ),
-                                    new OO.ui.MenuOptionWidget( {
-                                        data: 'reported-in',
-                                        label: gadgetMsg[ 'query-subject-reported-in' ]
-                                    } ),
                                     new OO.ui.MenuOptionWidget( {
                                         data: 'reported-by',
                                         label: gadgetMsg[ 'query-subject-reported-by' ]
@@ -2538,40 +2529,29 @@
                                             affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
                                             for ( j = 0; j < reportsEntries.length; j++ ) {
                                                 reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
-                                                if ( dialog.fieldStartDate.getValue() !== ''
-                                                    && dialog.fieldEndDate.getValue() !== ''
+                                                if ( affiliateEntry.group_name === reportEntry.group_name
                                                     && affiliateEntry.org_type === 'User Group'
+                                                    && reportEntry.dos_stamp >= FILTERS["startDate"]
+                                                    && reportEntry.dos_stamp <= FILTERS["endDate"]
                                                 ) {
-                                                    if ( affiliateEntry.group_name === reportEntry.group_name
-                                                        && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
-                                                        && reportEntry.dos_stamp >= FILTERS["startDate"]
-                                                        && reportEntry.dos_stamp <= FILTERS["endDate"]
+                                                    if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                    } else if ( dialog.fieldSpecificCountry.getValue() === 'specific-country'
+                                                        && affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"]
                                                     ) {
                                                         QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                    } else if ( affiliateEntry.group_name === reportEntry.group_name
-                                                        && dialog.fieldSpecificCountry.getValue() === 'specific-country'
-                                                    ) {
-                                                        if ( affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"]
-                                                            && reportEntry.dos_stamp >= FILTERS["startDate"]
-                                                            && reportEntry.dos_stamp <= FILTERS["endDate"]
-                                                        ) {
-                                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                        }
                                                     }
-                                                } else if ( dialog.fieldStartDate.getValue() === ''
-                                                    && dialog.fieldEndDate.getValue() === ''
+                                                } else if ( affiliateEntry.group_name === reportEntry.group_name
                                                     && affiliateEntry.org_type === 'User Group'
+                                                    && dialog.fieldStartDate.getValue() === ''
+                                                    && dialog.fieldEndDate.getValue() === ''
                                                 ) {
-                                                    if ( affiliateEntry.group_name === reportEntry.group_name
-                                                        && affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                                    if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                    } else if ( dialog.fieldSpecificCountry.getValue() === 'specific-country'
+                                                        && affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"]
                                                     ) {
                                                         QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                    } else if ( affiliateEntry.group_name === reportEntry.group_name
-                                                        && dialog.fieldSpecificCountry.getValue() === 'specific-country'
-                                                    ) {
-                                                        if ( affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                            QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                        }
                                                     }
                                                 }
                                             }
