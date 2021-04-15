@@ -2533,7 +2533,6 @@
                                                 reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
                                                 reportYear = reportEntry.end_date.split( "/" )[2];
                                                 if ( affiliateEntry.group_name === reportEntry.group_name
-                                                    && affiliateEntry.org_type === 'all-affiliates'
                                                     && reportEntry.dos_stamp >= FILTERS["startDate"]
                                                     && reportEntry.dos_stamp <= FILTERS["endDate"]
                                                 ) {
@@ -2545,7 +2544,6 @@
                                                         QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report (" + reportYear + ")</a><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === reportEntry.group_name
-                                                    && affiliateEntry.org_type === 'all-affiliates'
                                                     && dialog.fieldStartDate.getValue() === ''
                                                     && dialog.fieldEndDate.getValue() === ''
                                                 ) {
