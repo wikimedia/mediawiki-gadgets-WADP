@@ -2520,6 +2520,8 @@
                                             QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateName + "'s activity report (" + reportYear + ")</a><br/>";
                                         }
                                     }
+                                    leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                    openLeafWindow( {} );
                                 } else if ( FILTERS["affiliateSearchType"] === 'User Group' ) {
                                     apiObject.get( getOrgInfoContentModuleQuery() ).done( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
@@ -2529,17 +2531,18 @@
                                             affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
                                             for ( j = 0; j < reportsEntries.length; j++ ) {
                                                 reportEntry = cleanRawEntry( reportsEntries[ j ].value.fields );
+                                                reportYear = reportEntry.end_date.split( "/" )[2];
                                                 if ( affiliateEntry.group_name === reportEntry.group_name
                                                     && affiliateEntry.org_type === 'User Group'
                                                     && reportEntry.dos_stamp >= FILTERS["startDate"]
                                                     && reportEntry.dos_stamp <= FILTERS["endDate"]
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                    } else if ( dialog.fieldSpecificCountry.getValue() === 'specific-country'
-                                                        && affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"]
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report (" + reportYear + ")</a><br/>";
+                                                    } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                        && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report (" + reportYear + ")</a><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === reportEntry.group_name
                                                     && affiliateEntry.org_type === 'User Group'
@@ -2547,21 +2550,21 @@
                                                     && dialog.fieldEndDate.getValue() === ''
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
-                                                    } else if ( dialog.fieldSpecificCountry.getValue() === 'specific-country'
-                                                        && affiliateEntry.group_country === FILTERS["affiliateSearchTypeByRegion"]
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report (" + reportYear + ")</a><br/>";
+                                                    } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                        && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report </a><br/>";
+                                                        QUERY_RES += "✦ <a href=" + reportEntry.report_link + " target='_blank'>" + affiliateEntry.group_name + "'s activity report (" + reportYear + ")</a><br/>";
                                                     }
                                                 }
                                             }
                                         }
+                                        leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                        openLeafWindow( {} );
                                     } );
                                 } else {
                                     alert( "Work In Progress..." );
                                 }
-                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
-                                openLeafWindow( {} );
                             } );
                         } else {
                             alert( "Work In Progress..." );
