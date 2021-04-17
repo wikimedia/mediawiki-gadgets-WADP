@@ -2514,7 +2514,7 @@
                                         }
 
                                         for ( j = 0; j < financialReportEntries.length; j++ ) {
-                                            financialReportEntry = cleanRawEntry( financialReportEntry[ j ].value.fields );
+                                            financialReportEntry = cleanRawEntry( financialReportEntries[ j ].value.fields );
                                             affiliateName = dialog.fieldSpecificAffiliate.getValue();
                                             financialReportYear = financialReportEntry.end_date.split( "/" )[2];
 
