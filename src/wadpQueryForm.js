@@ -26,6 +26,7 @@
             openAdvanceWindow,
             windowManager,
             getOrgInfoContentModuleQuery,
+            getDataFromLuaTables,
             parseContentModule,
             cleanRawEntry,
             /* Cache `counter` variable */ counter = 0,
@@ -129,9 +130,25 @@
             };
 
             /**
+             * Get data from Lua database tables using the module name.
+             *
+             * @param luaModule
+             * @returns {{rvlimit: number, prop: string, action: string, titles: string, rvprop: string}}
+             */
+            getDataFromLuaTables = function ( luaModule ) {
+                return {
+                    action: 'query',
+                    prop: 'revisions',
+                    titles: 'Module:' + luaModule,
+                    rvprop: 'content',
+                    rvlimit: 1
+                };
+            };
+
+            /**
              * Provides API parameters for getting the content from
              * [[Module:Organizational_Informations]].
-             *
+             * @deprecated Use getDataFromLuaTables() with module name as argument.
              * @return {Object}
              */
             getOrgInfoContentModuleQuery = function () {
@@ -147,7 +164,7 @@
             /**
              * Provides API parameters for getting the content from
              * [[Module:Activities_Reports]].
-             *
+             * @deprecated Use getDataFromLuaTables() with module name as argument.
              * @return {Object}
              */
             getActivitiesReportsContentModuleQuery = function () {
@@ -981,850 +998,850 @@
              * Execute the search query - from Layer II to Layer III
              */
             ArpSubQueryForm.prototype.executeSearch = function () {
-                var dialog = this, content, activities_reports, count;
+                var dialog = this, activities_reports, count;
                 var messageDialog = new OO.ui.MessageDialog();
 
                 dialog.pushPending();
 
-                new mw.Api().get( getActivitiesReportsContentModuleQuery() ).done( function ( data ) {
+                new mw.Api().get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( data ) {
                     activities_reports = parseContentModule( data.query.pages );
-                } );
 
-                new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
-                    var i, j, entries, entry, a_report, list, affiliate_structures;
-                    var windowManager = new OO.ui.WindowManager();
+                    new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        var i, j, entries, entry, a_report, list, affiliate_structures;
+                        var windowManager = new OO.ui.WindowManager();
 
-                    /** ARP-Q1.x implementations */
-                    if ( dialog.fieldAffiliateCountSubQueries !== null
-                        && dialog.fieldAffiliateCountSubQueries.findSelectedItem() !== null
-                    ) {
-                        var region = '';
-                        region = dialog.fieldAffiliateCountSubQueries.findSelectedItem().getData().toString();
-                        entries = parseContentModule( data.query.pages );
+                        /** ARP-Q1.x implementations */
+                        if ( dialog.fieldAffiliateCountSubQueries !== null
+                            && dialog.fieldAffiliateCountSubQueries.findSelectedItem() !== null
+                        ) {
+                            var region = '';
+                            region = dialog.fieldAffiliateCountSubQueries.findSelectedItem().getData().toString();
+                            entries = parseContentModule( data.query.pages );
 
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.region === region && entry.recognition_status !== 'derecognised' ) {
-                                counter = counter + 1;
-                            }
-                        }
-
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q1s-results' ] + ' ' + region
-                        );
-
-                        dialog.close();
-                        clearCounterCache();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldLegalStatusSubQueries1 !== null
-                        && dialog.fieldLegalStatusSubQueries1.isSelected()
-                        && dialog.fieldLegalStatusSubQueries1.getValue() === 'ARP-Q2.1'
-                    ) {
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' && entry.recognition_status !== 'derecognised' ) {
-                                counter = counter + 1;
-                            }
-                        }
-
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q21-results' ]
-                        );
-
-                        dialog.close();
-                        clearCounterCache();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldLegalStatusSubQueries2 !== null
-                        && dialog.fieldLegalStatusSubQueries2.isSelected()
-                        && dialog.fieldLegalStatusSubQueries2.getValue() === 'ARP-Q2.2'
-                    ) {
-                        /** TODO: Algorithm for this query can be improved */
-                        var list_africa = "<br/>",
-                            list_asia = "<br/>",
-                            list_EU = "<br/>",
-                            list_NA = "<br/>",
-                            list_SA = "<br/>",
-                            list_Int = "<br/>",
-                            list_MENA = "<br/>";
-
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' && entry.recognition_status !== 'derecognised' )
-                                || entry.org_type === 'Chapter' || entry.org_type === 'Thematic Organization'
-                            ) {
-                                if ( entry.region === 'Sub-Saharan Africa' ) {
-                                    list_africa += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'Asia/Pacific' ) {
-                                    list_asia += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'Europe' ) {
-                                    list_EU += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'North America' ) {
-                                    list_NA += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'South/Latin America'	) {
-                                    list_SA += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'International' ) {
-                                    list_Int += '* ' + entry.group_name + '<br/>';
-                                } else if ( entry.region === 'MENA' ) {
-                                    list_MENA += '* ' + entry.group_name + '<br/>';
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.region === region && entry.recognition_status !== 'derecognised' ) {
+                                    counter = counter + 1;
                                 }
                             }
-                        }
 
-                        // Cache the results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<b style="text-align: center;">' + gadgetMsg[ 'arp-q22-results' ] + '</b><br/><br/>'
-                            + '<b><i>Sub-Saharan Africa</i></b>' + list_africa + '<br/>'
-                            + '<b><i>Asia/Pacific</i></b>' + list_asia + '<br/>'
-                            + '<b><i>Europe</i></b>' + list_EU + '<br/>'
-                            + '<b><i>North America</i></b>' + list_NA + '<br/>'
-                            + '<b><i>South/Latin America</i></b>' + list_SA + '<br/>'
-                            + '<b><i>International</i></b>' + list_Int + '<br/>'
-                            + '<b><i>MENA</i></b>' + list_MENA + '<br/>'
-                        );
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q1s-results' ] + ' ' + region
+                            );
 
-                        dialog.close();
-                        clearCounterCache();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldComplianceStatusSubQueries1 !== null
-                        && dialog.fieldComplianceStatusSubQueries1.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries1.getValue() === 'ARP-Q3.1'
-                    ) {
-                        entries = parseContentModule( data.query.pages );
+                            dialog.close();
+                            clearCounterCache();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldLegalStatusSubQueries1 !== null
+                            && dialog.fieldLegalStatusSubQueries1.isSelected()
+                            && dialog.fieldLegalStatusSubQueries1.getValue() === 'ARP-Q2.1'
+                        ) {
+                            entries = parseContentModule( data.query.pages );
 
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
-                                && entry.org_type === 'User Group' && entry.recognition_status !== 'derecognised'
-                            ) {
-                                percentage = percentage + 1;
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' && entry.recognition_status !== 'derecognised' ) {
+                                    counter = counter + 1;
+                                }
                             }
 
-                            if ( entry.org_type === 'User Group' && entry.recognition_status !== 'derecognised' ) {
-                                counter = counter + 1;
-                            }
-                        }
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q21-results' ]
+                            );
 
-                        // Compute compliance percentage
-                        percentage = ( ( percentage / counter ) * 100 ).toFixed(0);
-                        percentage = Math.ceil( percentage );
-
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/>' + gadgetMsg[ 'arp-q31-results' ] + ' <b>' + percentage.toString()
-                            + '%</b>.'
-                        );
-
-                        dialog.close();
-                        openLeafWindow( {} );
-                        clearCounterCache();
-                        percentage = 0;
-                    } else if ( dialog.fieldComplianceStatusSubQueries2 !== null
-                        && dialog.fieldComplianceStatusSubQueries2.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries2.getValue() === 'ARP-Q3.2'
-                    ) {
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
-                                && entry.org_type === 'Chapter' && entry.recognition_status !== 'derecognised'
-                            ) {
-                                percentage = percentage + 1;
-                            }
-
-                            if ( entry.org_type === 'Chapter' && entry.recognition_status !== 'derecognised' ) {
-                                counter = counter + 1;
-                            }
-                        }
-
-                        // Compute compliance percentage
-                        percentage = ( ( percentage / counter ) * 100 ).toFixed(0);
-                        percentage = Math.ceil( percentage );
-
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/>' + gadgetMsg[ 'arp-q32-results' ] + ' <b>' + percentage.toString()
-                            + '%</b>.'
-                        );
-
-                        dialog.close();
-                        openLeafWindow( {} );
-                        clearCounterCache();
-                        percentage = 0;
-                    } else if ( dialog.fieldComplianceStatusSubQueries3 !== null
-                        && dialog.fieldComplianceStatusSubQueries3.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries3.getValue() === 'ARP-Q3.3'
-                    ) {
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
-                                && entry.org_type === 'Thematic Organization' && entry.recognition_status !== 'derecognised'
-                            ) {
-                                percentage = percentage + 1;
-                            }
-
-                            if ( entry.org_type === 'Thematic Organization' && entry.recognition_status !== 'derecognised' ) {
-                                counter = counter + 1;
-                            }
-                        }
-
-                        // Compute compliance percentage
-                        percentage = ( ( percentage / counter ) * 100 ).toFixed(0);
-                        percentage = Math.ceil( percentage );
-
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/>' + gadgetMsg[ 'arp-q33-results' ] + ' <b>' + percentage.toString()
-                            + '%</b>.'
-                        );
-
-                        dialog.close();
-                        openLeafWindow( {} );
-                        clearCounterCache();
-                        percentage = 0;
-                    } else if ( dialog.fieldComplianceStatusSubQueries4 !== null
-                        && dialog.fieldComplianceStatusSubQueries4.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries4.getValue() === 'ARP-Q3.4'
-                    ) {
-                        list = "<br/>";
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
-                                && entry.recognition_status !== 'derecognised'
-                            ) {
-                                list += "* " + entry.group_name + "<br/>";
-                            }
-                        }
-
-                        list = new OO.ui.HtmlSnippet( '<b style="text-align: center;">' + gadgetMsg[ 'arp-q34-results' ] + '</b><br/><br/>' + list );
-
-                        // Cache the results
-                        leafWindowResults = list;
-                        dialog.close();
-
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldComplianceStatusSubQueries5 !== null
-                        && dialog.fieldComplianceStatusSubQueries5.isSelected()
-                        && dialog.fieldComplianceStatusSubQueries5.getValue() === 'ARP-Q3.5'
-                    ) {
-                        list = "<br/>";
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( ( entry.uptodate_reporting === 'Cross' || entry.uptodate_reporting === 'Cross-N' )
-                                && entry.recognition_status !== 'derecognised'
-                            ) {
-                                list += "* " + entry.group_name + "<br/>";
-                            }
-                        }
-
-                        list = new OO.ui.HtmlSnippet( '<b style="text-align: center;">' + gadgetMsg[ 'arp-q35-results' ] + '</b><br/><br/>' + list );
-
-                        // Cache the results
-                        leafWindowResults = list;
-                        dialog.close();
-
-                        openLeafWindow( {} );
-                    } else if (
-                        dialog.fieldProgramsSubQueries !== null
-                        && dialog.fieldProgramsSubQueries.findSelectedItem() !== null
-                    ) {
-                        if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q5.1' ) {
+                            dialog.close();
+                            clearCounterCache();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldLegalStatusSubQueries2 !== null
+                            && dialog.fieldLegalStatusSubQueries2.isSelected()
+                            && dialog.fieldLegalStatusSubQueries2.getValue() === 'ARP-Q2.2'
+                        ) {
                             /** TODO: Algorithm for this query can be improved */
-                            var list_glam_africa = "<br/>",
-                                list_glam_asia = "<br/>",
-                                list_glam_EU = "<br/>",
-                                list_glam_NA = "<br/>",
-                                list_glam_SA = "<br/>",
-                                list_glam_Int = "<br/>",
-                                list_glam_MENA = "<br/>";
+                            var list_africa = "<br/>",
+                                list_asia = "<br/>",
+                                list_EU = "<br/>",
+                                list_NA = "<br/>",
+                                list_SA = "<br/>",
+                                list_Int = "<br/>",
+                                list_MENA = "<br/>";
 
                             entries = parseContentModule( data.query.pages );
 
                             for ( i = 0; i < entries.length; i++ ) {
                                 entry = cleanRawEntry( entries[ i ].value.fields );
-                                for ( j = 0; j < activities_reports.length; j++ ) {
-                                    a_report = cleanRawEntry( activities_reports[j].value.fields );
-                                    if (
-                                        entry.group_name === a_report.group_name
-                                        && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
-                                        && a_report.partnership_info.includes( "GLAM Institutions" )
-                                        && entry.recognition_status !== 'derecognised'
-                                    ) {
-                                        if ( entry.region === 'Sub-Saharan Africa' ) {
-                                            list_glam_africa += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Asia/Pacific' ) {
-                                            list_glam_asia += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Europe' ) {
-                                            list_glam_EU += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'North America' ) {
-                                            list_glam_NA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'South/Latin America' ) {
-                                            list_glam_SA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'International' ) {
-                                            list_glam_Int += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'MENA' ) {
-                                            list_glam_MENA += '* ' + entry.group_name + '<br/>';
-                                        }
-                                        break;
+                                if ( ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' && entry.recognition_status !== 'derecognised' )
+                                    || entry.org_type === 'Chapter' || entry.org_type === 'Thematic Organization'
+                                ) {
+                                    if ( entry.region === 'Sub-Saharan Africa' ) {
+                                        list_africa += '* ' + entry.group_name + '<br/>';
+                                    } else if ( entry.region === 'Asia/Pacific' ) {
+                                        list_asia += '* ' + entry.group_name + '<br/>';
+                                    } else if ( entry.region === 'Europe' ) {
+                                        list_EU += '* ' + entry.group_name + '<br/>';
+                                    } else if ( entry.region === 'North America' ) {
+                                        list_NA += '* ' + entry.group_name + '<br/>';
+                                    } else if ( entry.region === 'South/Latin America'	) {
+                                        list_SA += '* ' + entry.group_name + '<br/>';
+                                    } else if ( entry.region === 'International' ) {
+                                        list_Int += '* ' + entry.group_name + '<br/>';
+                                    } else if ( entry.region === 'MENA' ) {
+                                        list_MENA += '* ' + entry.group_name + '<br/>';
                                     }
                                 }
                             }
 
                             // Cache the results
                             leafWindowResults = new OO.ui.HtmlSnippet(
-                                '<b>' + gadgetMsg[ 'arp-q51-results' ] + '</b><br/><br/>'
-                                + '<b><i>Sub-Saharan Africa</i></b>' + list_glam_africa + '<br/>'
-                                + '<b><i>Asia/Pacific</i></b>' + list_glam_asia + '<br/>'
-                                + '<b><i>Europe</i></b>' + list_glam_EU + '<br/>'
-                                + '<b><i>North America</i></b>' + list_glam_NA + '<br/>'
-                                + '<b><i>South/Latin America</i></b>' + list_glam_SA + '<br/>'
-                                + '<b><i>International</i></b>' + list_glam_Int + '<br/>'
-                                + '<b><i>MENA</i></b>' + list_glam_MENA + '<br/>'
+                                '<b style="text-align: center;">' + gadgetMsg[ 'arp-q22-results' ] + '</b><br/><br/>'
+                                + '<b><i>Sub-Saharan Africa</i></b>' + list_africa + '<br/>'
+                                + '<b><i>Asia/Pacific</i></b>' + list_asia + '<br/>'
+                                + '<b><i>Europe</i></b>' + list_EU + '<br/>'
+                                + '<b><i>North America</i></b>' + list_NA + '<br/>'
+                                + '<b><i>South/Latin America</i></b>' + list_SA + '<br/>'
+                                + '<b><i>International</i></b>' + list_Int + '<br/>'
+                                + '<b><i>MENA</i></b>' + list_MENA + '<br/>'
                             );
-                            dialog.close();
-                            openLeafWindow( {} );
-                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q5.2' ) {
-                            var list_glam_ugs = '<br/>',
-                                list_glam_chpts = '<br/>',
-                                list_glam_thorgs = '<br/>';
 
+                            dialog.close();
+                            clearCounterCache();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldComplianceStatusSubQueries1 !== null
+                            && dialog.fieldComplianceStatusSubQueries1.isSelected()
+                            && dialog.fieldComplianceStatusSubQueries1.getValue() === 'ARP-Q3.1'
+                        ) {
                             entries = parseContentModule( data.query.pages );
 
                             for ( i = 0; i < entries.length; i++ ) {
                                 entry = cleanRawEntry( entries[ i ].value.fields );
-                                for ( j = 0; j < activities_reports.length; j++ ) {
-                                    a_report = cleanRawEntry( activities_reports[j].value.fields );
-                                    if (
-                                        entry.group_name === a_report.group_name
-                                        && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
-                                        && a_report.partnership_info.includes( "GLAM Institutions" )
-                                        && entry.recognition_status !== 'derecognised'
-                                    ) {
-                                        if ( entry.org_type === 'User Group' ) {
-                                            list_glam_ugs += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type === 'Chapter' ) {
-                                            list_glam_chpts += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type === 'Thematic Organization' ) {
-                                            list_glam_thorgs += '* ' + entry.group_name + '<br/>';
-                                        }
-                                        break;
-                                    }
+                                if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                    && entry.org_type === 'User Group' && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    percentage = percentage + 1;
+                                }
+
+                                if ( entry.org_type === 'User Group' && entry.recognition_status !== 'derecognised' ) {
+                                    counter = counter + 1;
                                 }
                             }
 
-                            // Cache the results
+                            // Compute compliance percentage
+                            percentage = ( ( percentage / counter ) * 100 ).toFixed(0);
+                            percentage = Math.ceil( percentage );
+
                             leafWindowResults = new OO.ui.HtmlSnippet(
-                                '<b>' + gadgetMsg[ 'arp-q52-results' ] + '</b><br/>'
-                                + '<b><i>User Groups</i></b>' + list_glam_ugs + '<br/>'
-                                + '<b><i>Chapters</i></b>' + list_glam_chpts + '<br/>'
-                                + '<b><i>Thematic Organizations</i></b>' + list_glam_thorgs + '<br/>'
+                                '<br/><br/>' + gadgetMsg[ 'arp-q31-results' ] + ' <b>' + percentage.toString()
+                                + '%</b>.'
                             );
+
                             dialog.close();
                             openLeafWindow( {} );
-                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q6.1' ) {
-                            /** TODO: Algorithm for this query can be improved */
-                            var list_education_africa = "<br/>",
-                                list_education_asia = "<br/>",
-                                list_education_EU = "<br/>",
-                                list_education_NA = "<br/>",
-                                list_education_SA = "<br/>",
-                                list_education_Oc = "<br/>",
-                                list_education_Int = "<br/>",
-                                list_education_MENA = "<br/>";
-
+                            clearCounterCache();
+                            percentage = 0;
+                        } else if ( dialog.fieldComplianceStatusSubQueries2 !== null
+                            && dialog.fieldComplianceStatusSubQueries2.isSelected()
+                            && dialog.fieldComplianceStatusSubQueries2.getValue() === 'ARP-Q3.2'
+                        ) {
                             entries = parseContentModule( data.query.pages );
 
                             for ( i = 0; i < entries.length; i++ ) {
                                 entry = cleanRawEntry( entries[ i ].value.fields );
-                                for ( j = 0; j < activities_reports.length; j++ ) {
-                                    a_report = cleanRawEntry( activities_reports[j].value.fields );
-                                    if (
-                                        entry.group_name === a_report.group_name
-                                        && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
-                                        && a_report.partnership_info.includes( "Educational Institutions" )
-                                        && entry.recognition_status !== 'derecognised'
-                                    ) {
-                                        if ( entry.region === 'Sub-Saharan Africa' ) {
-                                            list_education_africa += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Asia/Pacific' ) {
-                                            list_education_asia += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'Europe' ) {
-                                            list_education_EU += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'North America' ) {
-                                            list_education_NA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'South/Latin America' ) {
-                                            list_education_SA += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'International' ) {
-                                            list_education_Int += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.region === 'MENA' ) {
-                                            list_education_MENA += '* ' + entry.group_name + '<br/>';
-                                        }
-                                        break;
-                                    }
+                                if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                    && entry.org_type === 'Chapter' && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    percentage = percentage + 1;
+                                }
+
+                                if ( entry.org_type === 'Chapter' && entry.recognition_status !== 'derecognised' ) {
+                                    counter = counter + 1;
                                 }
                             }
 
-                            // Cache the results
+                            // Compute compliance percentage
+                            percentage = ( ( percentage / counter ) * 100 ).toFixed(0);
+                            percentage = Math.ceil( percentage );
+
                             leafWindowResults = new OO.ui.HtmlSnippet(
-                                '<b>' + gadgetMsg[ 'arp-q61-results' ] + '</b><br/><br/>'
-                                + '<b><i>Sub-Saharan Africa</i></b>' + list_education_africa + '<br/>'
-                                + '<b><i>Asia/Pacific</i></b>' + list_education_asia + '<br/>'
-                                + '<b><i>Europe</i></b>' + list_education_EU + '<br/>'
-                                + '<b><i>North America</i></b>' + list_education_NA + '<br/>'
-                                + '<b><i>South/Latin America</i></b>' + list_education_SA + '<br/>'
-                                + '<b><i>International</i></b>' + list_education_Int + '<br/>'
-                                + '<b><i>MENA</i></b>' + list_education_MENA + '<br/>'
+                                '<br/><br/>' + gadgetMsg[ 'arp-q32-results' ] + ' <b>' + percentage.toString()
+                                + '%</b>.'
                             );
+
                             dialog.close();
                             openLeafWindow( {} );
-                        } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q6.2' ) {
-                            var list_education_ugs = '<br/>',
-                                list_education_chpts = '<br/>',
-                                list_education_thorgs = '<br/>';
-
+                            clearCounterCache();
+                            percentage = 0;
+                        } else if ( dialog.fieldComplianceStatusSubQueries3 !== null
+                            && dialog.fieldComplianceStatusSubQueries3.isSelected()
+                            && dialog.fieldComplianceStatusSubQueries3.getValue() === 'ARP-Q3.3'
+                        ) {
                             entries = parseContentModule( data.query.pages );
 
                             for ( i = 0; i < entries.length; i++ ) {
                                 entry = cleanRawEntry( entries[ i ].value.fields );
-                                for ( j = 0; j < activities_reports.length; j++ ) {
-                                    a_report = cleanRawEntry( activities_reports[j].value.fields );
-                                    if (
-                                        entry.group_name === a_report.group_name
-                                        && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
-                                        && a_report.partnership_info.includes( "Educational Institutions" )
-                                        && entry.recognition_status !== 'derecognised'
-                                    ) {
-                                        if ( entry.org_type === 'User Group' ) {
-                                            list_education_ugs += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type === 'Chapter' ) {
-                                            list_education_chpts += '* ' + entry.group_name + '<br/>';
-                                        } else if ( entry.org_type === 'Thematic Organization' ) {
-                                            list_education_thorgs += '* ' + entry.group_name + '<br/>';
-                                        }
-                                        break;
-                                    }
+                                if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                    && entry.org_type === 'Thematic Organization' && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    percentage = percentage + 1;
+                                }
+
+                                if ( entry.org_type === 'Thematic Organization' && entry.recognition_status !== 'derecognised' ) {
+                                    counter = counter + 1;
                                 }
                             }
 
-                            // Cache the results
+                            // Compute compliance percentage
+                            percentage = ( ( percentage / counter ) * 100 ).toFixed(0);
+                            percentage = Math.ceil( percentage );
+
                             leafWindowResults = new OO.ui.HtmlSnippet(
-                                '<b>' + gadgetMsg[ 'arp-q62-results' ] + '</b><br/><br/>'
-                                + '<b><i>User Groups</i></b>' + list_education_ugs + '<br/>'
-                                + '<b><i>Chapters</i></b>' + list_education_chpts + '<br/>'
-                                + '<b><i>Thematic Organizations</i></b>' + list_education_thorgs + '<br/>'
+                                '<br/><br/>' + gadgetMsg[ 'arp-q33-results' ] + ' <b>' + percentage.toString()
+                                + '%</b>.'
+                            );
+
+                            dialog.close();
+                            openLeafWindow( {} );
+                            clearCounterCache();
+                            percentage = 0;
+                        } else if ( dialog.fieldComplianceStatusSubQueries4 !== null
+                            && dialog.fieldComplianceStatusSubQueries4.isSelected()
+                            && dialog.fieldComplianceStatusSubQueries4.getValue() === 'ARP-Q3.4'
+                        ) {
+                            list = "<br/>";
+                            entries = parseContentModule( data.query.pages );
+
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                    && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    list += "* " + entry.group_name + "<br/>";
+                                }
+                            }
+
+                            list = new OO.ui.HtmlSnippet( '<b style="text-align: center;">' + gadgetMsg[ 'arp-q34-results' ] + '</b><br/><br/>' + list );
+
+                            // Cache the results
+                            leafWindowResults = list;
+                            dialog.close();
+
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldComplianceStatusSubQueries5 !== null
+                            && dialog.fieldComplianceStatusSubQueries5.isSelected()
+                            && dialog.fieldComplianceStatusSubQueries5.getValue() === 'ARP-Q3.5'
+                        ) {
+                            list = "<br/>";
+                            entries = parseContentModule( data.query.pages );
+
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( ( entry.uptodate_reporting === 'Cross' || entry.uptodate_reporting === 'Cross-N' )
+                                    && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    list += "* " + entry.group_name + "<br/>";
+                                }
+                            }
+
+                            list = new OO.ui.HtmlSnippet( '<b style="text-align: center;">' + gadgetMsg[ 'arp-q35-results' ] + '</b><br/><br/>' + list );
+
+                            // Cache the results
+                            leafWindowResults = list;
+                            dialog.close();
+
+                            openLeafWindow( {} );
+                        } else if (
+                            dialog.fieldProgramsSubQueries !== null
+                            && dialog.fieldProgramsSubQueries.findSelectedItem() !== null
+                        ) {
+                            if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q5.1' ) {
+                                /** TODO: Algorithm for this query can be improved */
+                                var list_glam_africa = "<br/>",
+                                    list_glam_asia = "<br/>",
+                                    list_glam_EU = "<br/>",
+                                    list_glam_NA = "<br/>",
+                                    list_glam_SA = "<br/>",
+                                    list_glam_Int = "<br/>",
+                                    list_glam_MENA = "<br/>";
+
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    for ( j = 0; j < activities_reports.length; j++ ) {
+                                        a_report = cleanRawEntry( activities_reports[j].value.fields );
+                                        if (
+                                            entry.group_name === a_report.group_name
+                                            && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
+                                            && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
+                                            && a_report.partnership_info.includes( "GLAM Institutions" )
+                                            && entry.recognition_status !== 'derecognised'
+                                        ) {
+                                            if ( entry.region === 'Sub-Saharan Africa' ) {
+                                                list_glam_africa += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'Asia/Pacific' ) {
+                                                list_glam_asia += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'Europe' ) {
+                                                list_glam_EU += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'North America' ) {
+                                                list_glam_NA += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'South/Latin America' ) {
+                                                list_glam_SA += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'International' ) {
+                                                list_glam_Int += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'MENA' ) {
+                                                list_glam_MENA += '* ' + entry.group_name + '<br/>';
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Cache the results
+                                leafWindowResults = new OO.ui.HtmlSnippet(
+                                    '<b>' + gadgetMsg[ 'arp-q51-results' ] + '</b><br/><br/>'
+                                    + '<b><i>Sub-Saharan Africa</i></b>' + list_glam_africa + '<br/>'
+                                    + '<b><i>Asia/Pacific</i></b>' + list_glam_asia + '<br/>'
+                                    + '<b><i>Europe</i></b>' + list_glam_EU + '<br/>'
+                                    + '<b><i>North America</i></b>' + list_glam_NA + '<br/>'
+                                    + '<b><i>South/Latin America</i></b>' + list_glam_SA + '<br/>'
+                                    + '<b><i>International</i></b>' + list_glam_Int + '<br/>'
+                                    + '<b><i>MENA</i></b>' + list_glam_MENA + '<br/>'
+                                );
+                                dialog.close();
+                                openLeafWindow( {} );
+                            } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q5.2' ) {
+                                var list_glam_ugs = '<br/>',
+                                    list_glam_chpts = '<br/>',
+                                    list_glam_thorgs = '<br/>';
+
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    for ( j = 0; j < activities_reports.length; j++ ) {
+                                        a_report = cleanRawEntry( activities_reports[j].value.fields );
+                                        if (
+                                            entry.group_name === a_report.group_name
+                                            && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
+                                            && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
+                                            && a_report.partnership_info.includes( "GLAM Institutions" )
+                                            && entry.recognition_status !== 'derecognised'
+                                        ) {
+                                            if ( entry.org_type === 'User Group' ) {
+                                                list_glam_ugs += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.org_type === 'Chapter' ) {
+                                                list_glam_chpts += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.org_type === 'Thematic Organization' ) {
+                                                list_glam_thorgs += '* ' + entry.group_name + '<br/>';
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Cache the results
+                                leafWindowResults = new OO.ui.HtmlSnippet(
+                                    '<b>' + gadgetMsg[ 'arp-q52-results' ] + '</b><br/>'
+                                    + '<b><i>User Groups</i></b>' + list_glam_ugs + '<br/>'
+                                    + '<b><i>Chapters</i></b>' + list_glam_chpts + '<br/>'
+                                    + '<b><i>Thematic Organizations</i></b>' + list_glam_thorgs + '<br/>'
+                                );
+                                dialog.close();
+                                openLeafWindow( {} );
+                            } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q6.1' ) {
+                                /** TODO: Algorithm for this query can be improved */
+                                var list_education_africa = "<br/>",
+                                    list_education_asia = "<br/>",
+                                    list_education_EU = "<br/>",
+                                    list_education_NA = "<br/>",
+                                    list_education_SA = "<br/>",
+                                    list_education_Oc = "<br/>",
+                                    list_education_Int = "<br/>",
+                                    list_education_MENA = "<br/>";
+
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    for ( j = 0; j < activities_reports.length; j++ ) {
+                                        a_report = cleanRawEntry( activities_reports[j].value.fields );
+                                        if (
+                                            entry.group_name === a_report.group_name
+                                            && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
+                                            && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
+                                            && a_report.partnership_info.includes( "Educational Institutions" )
+                                            && entry.recognition_status !== 'derecognised'
+                                        ) {
+                                            if ( entry.region === 'Sub-Saharan Africa' ) {
+                                                list_education_africa += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'Asia/Pacific' ) {
+                                                list_education_asia += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'Europe' ) {
+                                                list_education_EU += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'North America' ) {
+                                                list_education_NA += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'South/Latin America' ) {
+                                                list_education_SA += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'International' ) {
+                                                list_education_Int += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.region === 'MENA' ) {
+                                                list_education_MENA += '* ' + entry.group_name + '<br/>';
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Cache the results
+                                leafWindowResults = new OO.ui.HtmlSnippet(
+                                    '<b>' + gadgetMsg[ 'arp-q61-results' ] + '</b><br/><br/>'
+                                    + '<b><i>Sub-Saharan Africa</i></b>' + list_education_africa + '<br/>'
+                                    + '<b><i>Asia/Pacific</i></b>' + list_education_asia + '<br/>'
+                                    + '<b><i>Europe</i></b>' + list_education_EU + '<br/>'
+                                    + '<b><i>North America</i></b>' + list_education_NA + '<br/>'
+                                    + '<b><i>South/Latin America</i></b>' + list_education_SA + '<br/>'
+                                    + '<b><i>International</i></b>' + list_education_Int + '<br/>'
+                                    + '<b><i>MENA</i></b>' + list_education_MENA + '<br/>'
+                                );
+                                dialog.close();
+                                openLeafWindow( {} );
+                            } else if ( dialog.fieldProgramsSubQueries.findSelectedItem().getData() === 'ARP-Q6.2' ) {
+                                var list_education_ugs = '<br/>',
+                                    list_education_chpts = '<br/>',
+                                    list_education_thorgs = '<br/>';
+
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    for ( j = 0; j < activities_reports.length; j++ ) {
+                                        a_report = cleanRawEntry( activities_reports[j].value.fields );
+                                        if (
+                                            entry.group_name === a_report.group_name
+                                            && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
+                                            && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
+                                            && a_report.partnership_info.includes( "Educational Institutions" )
+                                            && entry.recognition_status !== 'derecognised'
+                                        ) {
+                                            if ( entry.org_type === 'User Group' ) {
+                                                list_education_ugs += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.org_type === 'Chapter' ) {
+                                                list_education_chpts += '* ' + entry.group_name + '<br/>';
+                                            } else if ( entry.org_type === 'Thematic Organization' ) {
+                                                list_education_thorgs += '* ' + entry.group_name + '<br/>';
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Cache the results
+                                leafWindowResults = new OO.ui.HtmlSnippet(
+                                    '<b>' + gadgetMsg[ 'arp-q62-results' ] + '</b><br/><br/>'
+                                    + '<b><i>User Groups</i></b>' + list_education_ugs + '<br/>'
+                                    + '<b><i>Chapters</i></b>' + list_education_chpts + '<br/>'
+                                    + '<b><i>Thematic Organizations</i></b>' + list_education_thorgs + '<br/>'
+                                );
+                                dialog.close();
+                                openLeafWindow( {} );
+                            }
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries1 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries1.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries1.getValue() === 'ARP-Q7.1'
+                        ) {
+                            count = 0;
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                count = parseInt( entry.member_count );
+                                if ( entry.org_type === "Chapter" && count > 0 && entry.recognition_status !== 'derecognised' ) {
+                                    counter += count;
+                                }
+                            }
+
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q71-results' ]
                             );
                             dialog.close();
                             openLeafWindow( {} );
-                        }
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries1 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries1.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries1.getValue() === 'ARP-Q7.1'
-                    ) {
-                        count = 0;
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            count = parseInt( entry.member_count );
-                            if ( entry.org_type === "Chapter" && count > 0 && entry.recognition_status !== 'derecognised' ) {
-                                counter += count;
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries2 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries2.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries2.getValue() === 'ARP-Q7.2'
+                        ) {
+                            count = 0;
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                count = parseInt( entry.member_count );
+                                if ( entry.org_type === "Thematic Organization" && count > 0 && entry.recognition_status !== 'derecognised' ) {
+                                    counter += count;
+                                }
                             }
-                        }
 
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q71-results' ]
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries2 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries2.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries2.getValue() === 'ARP-Q7.2'
-                    ) {
-                        count = 0;
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            count = parseInt( entry.member_count );
-                            if ( entry.org_type === "Thematic Organization" && count > 0 && entry.recognition_status !== 'derecognised' ) {
-                                counter += count;
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q72-results' ]
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries3 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries3.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries3.getValue() === 'ARP-Q7.3'
+                        ) {
+                            count = 0;
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                count = parseInt( entry.member_count );
+                                if ( entry.org_type === "User Group" && count > 0 && entry.recognition_status !== 'derecognised' ) {
+                                    counter += count;
+                                }
                             }
-                        }
 
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q72-results' ]
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries3 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries3.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries3.getValue() === 'ARP-Q7.3'
-                    ) {
-                        count = 0;
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            count = parseInt( entry.member_count );
-                            if ( entry.org_type === "User Group" && count > 0 && entry.recognition_status !== 'derecognised' ) {
-                                counter += count;
-                            }
-                        }
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q73-results' ]
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries4 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries4.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries4.getValue() === 'ARP-Q7.4'
+                        ) {
+                            entries = parseContentModule( data.query.pages );
 
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q73-results' ]
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries4 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries4.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries4.getValue() === 'ARP-Q7.4'
-                    ) {
-                        entries = parseContentModule( data.query.pages );
-
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<b>' + gadgetMsg[ 'arp-q74-results' ] + '</b><br/><br/>' +
-                            '* Sub-Saharan Africa - <b>' + luaTableCounterByAffiliateRegion( entries, 'Sub-Saharan Africa' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* Asia/Pacific - <b>' + luaTableCounterByAffiliateRegion( entries, 'Asia/Pacific' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* Europe - <b>' + luaTableCounterByAffiliateRegion( entries, 'Europe' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* North America - <b>' + luaTableCounterByAffiliateRegion( entries, 'North America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* South/Latin America - <b>' + luaTableCounterByAffiliateRegion( entries, 'South/Latin America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* International - <b>' + luaTableCounterByAffiliateRegion( entries, 'International' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
-                            '* MENA - <b>' + luaTableCounterByAffiliateRegion( entries, 'MENA' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>'
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries5 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries5.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries5.getValue() === 'ARP-Q7.5'
-                    ) {
-                        list = '';
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.group_page !== undefined && entry.recognition_status !== 'derecognised' ) {
-                                list += '* ' + entry.group_page + '<br/>';
-                            } else {
-                                list += '* [TBA]<br/>';
-                            }
-                        }
-
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<b>' + gadgetMsg[ 'arp-q75-results' ] + '</b><br/><br/>' + list
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries6 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries6.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries6.getValue() === 'ARP-Q7.6'
-                    ) {
-                        list = '';
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.group_name !== undefined && entry.recognition_status !== 'derecognised' ) {
-                                if ( entry.member_count !== undefined && entry.member_count !== '-99' ) {
-                                    list += '* ' + entry.group_name + '  ---  ' + entry.member_count + ' members<br/>';
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<b>' + gadgetMsg[ 'arp-q74-results' ] + '</b><br/><br/>' +
+                                '* Sub-Saharan Africa - <b>' + luaTableCounterByAffiliateRegion( entries, 'Sub-Saharan Africa' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                                '* Asia/Pacific - <b>' + luaTableCounterByAffiliateRegion( entries, 'Asia/Pacific' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                                '* Europe - <b>' + luaTableCounterByAffiliateRegion( entries, 'Europe' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                                '* North America - <b>' + luaTableCounterByAffiliateRegion( entries, 'North America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                                '* South/Latin America - <b>' + luaTableCounterByAffiliateRegion( entries, 'South/Latin America' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                                '* International - <b>' + luaTableCounterByAffiliateRegion( entries, 'International' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>' +
+                                '* MENA - <b>' + luaTableCounterByAffiliateRegion( entries, 'MENA' ) + '</b> ' + gadgetMsg[ 'query-results-members' ] + '<br/>'
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries5 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries5.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries5.getValue() === 'ARP-Q7.5'
+                        ) {
+                            list = '';
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.group_page !== undefined && entry.recognition_status !== 'derecognised' ) {
+                                    list += '* ' + entry.group_page + '<br/>';
                                 } else {
-                                    list += '* ' + entry.group_name + '  ---  ' + 'N/A members<br/>';
+                                    list += '* [TBA]<br/>';
                                 }
                             }
-                        }
 
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<b>' + gadgetMsg[ 'arp-q76-results' ] + '</b><br/><br/>' + list
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries1 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries1.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries1.getValue() === 'ARP-Q8.1'
-                    ) {
-                        list = "<br/>";
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.dm_structure.includes( "Board" ) && entry.recognition_status !== 'derecognised' ) {
-                                list += "* " + entry.group_name + "<br/>";
-                            }
-                        }
-
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><b>' + gadgetMsg[ 'arp-q81-results' ] + '</b><br/>' + list
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries2 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries2.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries2.getValue() === 'ARP-Q8.2'
-                    ) {
-                        list = "<br/>";
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.dm_structure.includes( "Democratic Process" ) && entry.recognition_status !== 'derecognised' ) {
-                                list += "* " + entry.group_name + "<br/>";
-                            }
-                        }
-
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><b>' + gadgetMsg[ 'arp-q82-results' ] + '</b><br/>' + list
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries3 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries3.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries3.getValue() === 'ARP-Q8.3'
-                    ) {
-                        list = "<br/>";
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.dm_structure.includes( "Consensus Decision Making" ) && entry.recognition_status !== 'derecognised' ) {
-                                list += "* " + entry.group_name + "<br/>";
-                            }
-                        }
-
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><b>' + gadgetMsg[ 'arp-q83-results' ] + '</b><br/>' + list
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries4 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries4.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries4.getValue() === 'ARP-Q8.4'
-                    ) {
-                        list = "<br/>";
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.dm_structure.includes( "No Shared Structure" ) && entry.recognition_status !== 'derecognised' ) {
-                                list += "* " + entry.group_name + "<br/>";
-                            }
-                        }
-
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><b>' + gadgetMsg[ 'arp-q84-results' ] + '</b><br/>' + list
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries5 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries5.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries5.getValue() === 'ARP-Q8.5'
-                    ) {
-                        affiliate_structures = {
-                            'board': 0,
-                            'democratic_process': 0,
-                            'consensus_decision': 0,
-                            'no_shared_structure': 0
-                        };
-
-                        entries = parseContentModule( data.query.pages );
-                        counter = luaTableCounterForAffiliateType( entries, 'Chapter' );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if (
-                                entry.dm_structure !== undefined
-                                && entry.dm_structure.length > 0
-                                && entry.org_type === "Chapter"
-                                && entry.recognition_status !== 'derecognised'
-                            ) {
-                                /* For board structures */
-                                if ( entry.dm_structure.includes( "Board" ) ) {
-                                    affiliate_structures.board += 1;
-                                }
-                                /* For democratic process structures */
-                                else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
-                                    affiliate_structures.democratic_process += 1;
-                                }
-                                /* For consensus decision structures */
-                                else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
-                                    affiliate_structures.consensus_decision += 1;
-                                }
-                                /* For no shared structures */
-                                else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
-                                    affiliate_structures.no_shared_structure += 1;
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<b>' + gadgetMsg[ 'arp-q75-results' ] + '</b><br/><br/>' + list
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries6 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries6.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries6.getValue() === 'ARP-Q7.6'
+                        ) {
+                            list = '';
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.group_name !== undefined && entry.recognition_status !== 'derecognised' ) {
+                                    if ( entry.member_count !== undefined && entry.member_count !== '-99' ) {
+                                        list += '* ' + entry.group_name + '  ---  ' + entry.member_count + ' members<br/>';
+                                    } else {
+                                        list += '* ' + entry.group_name + '  ---  ' + 'N/A members<br/>';
+                                    }
                                 }
                             }
-                        }
 
-                        /* Compute the percentages */
-                        affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<b>' + gadgetMsg[ 'arp-q76-results' ] + '</b><br/><br/>' + list
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries1 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries1.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries1.getValue() === 'ARP-Q8.1'
+                        ) {
+                            list = "<br/>";
+                            entries = parseContentModule( data.query.pages );
 
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + gadgetMsg[ 'arp-q85-results' ] + '</b><br/><br/>'
-                            + '* <b>' + affiliate_structures.board.toString() + '%</b> - Board<br/>'
-                            + '* <b>' + affiliate_structures.democratic_process.toString() + '%</b> - Democratic process<br/>'
-                            + '* <b>' + affiliate_structures.consensus_decision.toString() + '%</b> - Consensus decision<br/>'
-                            + '* <b>' + affiliate_structures.no_shared_structure.toString() + '%</b> - No shared structure<br/>'
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                        clearCounterCache();
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries6 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries6.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries6.getValue() === 'ARP-Q8.6'
-                    ) {
-                        affiliate_structures = {
-                            'board': 0,
-                            'democratic_process': 0,
-                            'consensus_decision': 0,
-                            'no_shared_structure': 0
-                        };
-
-                        entries = parseContentModule( data.query.pages );
-                        counter = luaTableCounterForAffiliateType( entries, 'Thematic Organization' );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if (
-                                entry.dm_structure !== undefined
-                                && entry.dm_structure.length > 0
-                                && entry.org_type === "Thematic Organization"
-                                && entry.recognition_status !== 'derecognised'
-                            ) {
-                                /* For board structures */
-                                if ( entry.dm_structure.includes( "Board" ) ) {
-                                    affiliate_structures.board += 1;
-                                }
-                                /* For democratic process structures */
-                                else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
-                                    affiliate_structures.democratic_process += 1;
-                                }
-                                /* For consensus decision structures */
-                                else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
-                                    affiliate_structures.consensus_decision += 1;
-                                }
-                                /* For no shared structures */
-                                else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
-                                    affiliate_structures.no_shared_structure += 1;
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.dm_structure.includes( "Board" ) && entry.recognition_status !== 'derecognised' ) {
+                                    list += "* " + entry.group_name + "<br/>";
                                 }
                             }
-                        }
 
-                        /* Compute the percentages */
-                        affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><b>' + gadgetMsg[ 'arp-q81-results' ] + '</b><br/>' + list
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries2 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries2.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries2.getValue() === 'ARP-Q8.2'
+                        ) {
+                            list = "<br/>";
+                            entries = parseContentModule( data.query.pages );
 
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + gadgetMsg[ 'arp-q86-results' ] + '</b><br/><br/>'
-                            + '* <b>' + affiliate_structures.board.toString() + '%</b> - Board<br/>'
-                            + '* <b>' + affiliate_structures.democratic_process.toString() + '%</b> - Democratic process<br/>'
-                            + '* <b>' + affiliate_structures.consensus_decision.toString() + '%</b> - Consensus decision<br/>'
-                            + '* <b>' + affiliate_structures.no_shared_structure.toString() + '%</b> - No shared structure<br/>'
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                        clearCounterCache();
-                    } else if ( dialog.fieldAffiliateCompositionSubQueries7 !== null
-                        && dialog.fieldAffiliateCompositionSubQueries7.isSelected()
-                        && dialog.fieldAffiliateCompositionSubQueries7.getValue() === 'ARP-Q8.7'
-                    ) {
-                        affiliate_structures = {
-                            'board': 0,
-                            'democratic_process': 0,
-                            'consensus_decision': 0,
-                            'no_shared_structure': 0
-                        };
-
-                        entries = parseContentModule( data.query.pages );
-                        counter = luaTableCounterForAffiliateType( entries, 'User Group' );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if (
-                                entry.dm_structure !== undefined
-                                && entry.dm_structure.length > 0
-                                && entry.org_type === "User Group"
-                                && entry.recognition_status !== 'derecognised'
-                            ) {
-                                /* For board structures */
-                                if ( entry.dm_structure.includes( "Board" ) ) {
-                                    affiliate_structures.board += 1;
-                                }
-                                /* For democratic process structures */
-                                else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
-                                    affiliate_structures.democratic_process += 1;
-                                }
-                                /* For consensus decision structures */
-                                else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
-                                    affiliate_structures.consensus_decision += 1;
-                                }
-                                /* For no shared structures */
-                                else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
-                                    affiliate_structures.no_shared_structure += 1;
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.dm_structure.includes( "Democratic Process" ) && entry.recognition_status !== 'derecognised' ) {
+                                    list += "* " + entry.group_name + "<br/>";
                                 }
                             }
-                        }
 
-                        /* Compute the percentages */
-                        affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><b>' + gadgetMsg[ 'arp-q82-results' ] + '</b><br/>' + list
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries3 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries3.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries3.getValue() === 'ARP-Q8.3'
+                        ) {
+                            list = "<br/>";
+                            entries = parseContentModule( data.query.pages );
 
-                        // Cache results
-                        leafWindowResults = new OO.ui.HtmlSnippet(
-                            '<br/><br/><b>' + gadgetMsg[ 'arp-q87-results' ] + '</b><br/><br/>'
-                            + '* <b>' + affiliate_structures.board.toString() + '%</b> - Board<br/>'
-                            + '* <b>' + affiliate_structures.democratic_process.toString() + '%</b> - Democratic process<br/>'
-                            + '* <b>' + affiliate_structures.consensus_decision.toString() + '%</b> - Consensus decision<br/>'
-                            + '* <b>' + affiliate_structures.no_shared_structure.toString() + '%</b> - No shared structure<br/>'
-                        );
-                        dialog.close();
-                        openLeafWindow( {} );
-                        clearCounterCache();
-                    } else {
-                        dialog.close();
-
-                        $( 'body' ).append( windowManager.$element );
-                        // Add the dialog to the window manager.
-                        windowManager.addWindows( [ messageDialog ] );
-
-                        // Configure the message dialog when it is opened with the window manager's openWindow() method.
-                        windowManager.openWindow( messageDialog, {
-                            title: gadgetMsg[ 'wad-query-404' ],
-                            message: gadgetMsg[ 'wadp-404-response-message-body' ],
-                            actions: [
-                                {
-                                    action: 'accept',
-                                    label: 'Dismiss',
-                                    flags: 'primary'
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.dm_structure.includes( "Consensus Decision Making" ) && entry.recognition_status !== 'derecognised' ) {
+                                    list += "* " + entry.group_name + "<br/>";
                                 }
-                            ]
-                        });
-                    }
+                            }
+
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><b>' + gadgetMsg[ 'arp-q83-results' ] + '</b><br/>' + list
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries4 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries4.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries4.getValue() === 'ARP-Q8.4'
+                        ) {
+                            list = "<br/>";
+                            entries = parseContentModule( data.query.pages );
+
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.dm_structure.includes( "No Shared Structure" ) && entry.recognition_status !== 'derecognised' ) {
+                                    list += "* " + entry.group_name + "<br/>";
+                                }
+                            }
+
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><b>' + gadgetMsg[ 'arp-q84-results' ] + '</b><br/>' + list
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries5 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries5.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries5.getValue() === 'ARP-Q8.5'
+                        ) {
+                            affiliate_structures = {
+                                'board': 0,
+                                'democratic_process': 0,
+                                'consensus_decision': 0,
+                                'no_shared_structure': 0
+                            };
+
+                            entries = parseContentModule( data.query.pages );
+                            counter = luaTableCounterForAffiliateType( entries, 'Chapter' );
+
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if (
+                                    entry.dm_structure !== undefined
+                                    && entry.dm_structure.length > 0
+                                    && entry.org_type === "Chapter"
+                                    && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    /* For board structures */
+                                    if ( entry.dm_structure.includes( "Board" ) ) {
+                                        affiliate_structures.board += 1;
+                                    }
+                                    /* For democratic process structures */
+                                    else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
+                                        affiliate_structures.democratic_process += 1;
+                                    }
+                                    /* For consensus decision structures */
+                                    else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
+                                        affiliate_structures.consensus_decision += 1;
+                                    }
+                                    /* For no shared structures */
+                                    else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
+                                        affiliate_structures.no_shared_structure += 1;
+                                    }
+                                }
+                            }
+
+                            /* Compute the percentages */
+                            affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + gadgetMsg[ 'arp-q85-results' ] + '</b><br/><br/>'
+                                + '* <b>' + affiliate_structures.board.toString() + '%</b> - Board<br/>'
+                                + '* <b>' + affiliate_structures.democratic_process.toString() + '%</b> - Democratic process<br/>'
+                                + '* <b>' + affiliate_structures.consensus_decision.toString() + '%</b> - Consensus decision<br/>'
+                                + '* <b>' + affiliate_structures.no_shared_structure.toString() + '%</b> - No shared structure<br/>'
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                            clearCounterCache();
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries6 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries6.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries6.getValue() === 'ARP-Q8.6'
+                        ) {
+                            affiliate_structures = {
+                                'board': 0,
+                                'democratic_process': 0,
+                                'consensus_decision': 0,
+                                'no_shared_structure': 0
+                            };
+
+                            entries = parseContentModule( data.query.pages );
+                            counter = luaTableCounterForAffiliateType( entries, 'Thematic Organization' );
+
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if (
+                                    entry.dm_structure !== undefined
+                                    && entry.dm_structure.length > 0
+                                    && entry.org_type === "Thematic Organization"
+                                    && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    /* For board structures */
+                                    if ( entry.dm_structure.includes( "Board" ) ) {
+                                        affiliate_structures.board += 1;
+                                    }
+                                    /* For democratic process structures */
+                                    else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
+                                        affiliate_structures.democratic_process += 1;
+                                    }
+                                    /* For consensus decision structures */
+                                    else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
+                                        affiliate_structures.consensus_decision += 1;
+                                    }
+                                    /* For no shared structures */
+                                    else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
+                                        affiliate_structures.no_shared_structure += 1;
+                                    }
+                                }
+                            }
+
+                            /* Compute the percentages */
+                            affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + gadgetMsg[ 'arp-q86-results' ] + '</b><br/><br/>'
+                                + '* <b>' + affiliate_structures.board.toString() + '%</b> - Board<br/>'
+                                + '* <b>' + affiliate_structures.democratic_process.toString() + '%</b> - Democratic process<br/>'
+                                + '* <b>' + affiliate_structures.consensus_decision.toString() + '%</b> - Consensus decision<br/>'
+                                + '* <b>' + affiliate_structures.no_shared_structure.toString() + '%</b> - No shared structure<br/>'
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                            clearCounterCache();
+                        } else if ( dialog.fieldAffiliateCompositionSubQueries7 !== null
+                            && dialog.fieldAffiliateCompositionSubQueries7.isSelected()
+                            && dialog.fieldAffiliateCompositionSubQueries7.getValue() === 'ARP-Q8.7'
+                        ) {
+                            affiliate_structures = {
+                                'board': 0,
+                                'democratic_process': 0,
+                                'consensus_decision': 0,
+                                'no_shared_structure': 0
+                            };
+
+                            entries = parseContentModule( data.query.pages );
+                            counter = luaTableCounterForAffiliateType( entries, 'User Group' );
+
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if (
+                                    entry.dm_structure !== undefined
+                                    && entry.dm_structure.length > 0
+                                    && entry.org_type === "User Group"
+                                    && entry.recognition_status !== 'derecognised'
+                                ) {
+                                    /* For board structures */
+                                    if ( entry.dm_structure.includes( "Board" ) ) {
+                                        affiliate_structures.board += 1;
+                                    }
+                                    /* For democratic process structures */
+                                    else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
+                                        affiliate_structures.democratic_process += 1;
+                                    }
+                                    /* For consensus decision structures */
+                                    else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
+                                        affiliate_structures.consensus_decision += 1;
+                                    }
+                                    /* For no shared structures */
+                                    else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
+                                        affiliate_structures.no_shared_structure += 1;
+                                    }
+                                }
+                            }
+
+                            /* Compute the percentages */
+                            affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+
+                            // Cache results
+                            leafWindowResults = new OO.ui.HtmlSnippet(
+                                '<br/><br/><b>' + gadgetMsg[ 'arp-q87-results' ] + '</b><br/><br/>'
+                                + '* <b>' + affiliate_structures.board.toString() + '%</b> - Board<br/>'
+                                + '* <b>' + affiliate_structures.democratic_process.toString() + '%</b> - Democratic process<br/>'
+                                + '* <b>' + affiliate_structures.consensus_decision.toString() + '%</b> - Consensus decision<br/>'
+                                + '* <b>' + affiliate_structures.no_shared_structure.toString() + '%</b> - No shared structure<br/>'
+                            );
+                            dialog.close();
+                            openLeafWindow( {} );
+                            clearCounterCache();
+                        } else {
+                            dialog.close();
+
+                            $( 'body' ).append( windowManager.$element );
+                            // Add the dialog to the window manager.
+                            windowManager.addWindows( [ messageDialog ] );
+
+                            // Configure the message dialog when it is opened with the window manager's openWindow() method.
+                            windowManager.openWindow( messageDialog, {
+                                title: gadgetMsg[ 'wad-query-404' ],
+                                message: gadgetMsg[ 'wadp-404-response-message-body' ],
+                                actions: [
+                                    {
+                                        action: 'accept',
+                                        label: 'Dismiss',
+                                        flags: 'primary'
+                                    }
+                                ]
+                            });
+                        }
+                    } );
                 } );
             };
 
@@ -2355,7 +2372,7 @@
                     var i, j;
                     if ( QUERY["queryObject"] === 'affiliates' ) {
                         if ( QUERY["querySubject"] === 'recognised-in-year' ) {
-                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
 
@@ -2392,7 +2409,7 @@
                                 openLeafWindow( {} );
                             } );
                         } else if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
-                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
 
@@ -2428,7 +2445,7 @@
                                 openLeafWindow( {} );
                             } );
                         } else if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
-                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
 
@@ -2462,7 +2479,7 @@
                                 openLeafWindow( {} );
                             } );
                         } else if ( QUERY["querySubject"] === 'belongs-to' ) {
-                            new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
                                 var entries, entry;
                                 entries = parseContentModule( data.query.pages );
 
@@ -2499,7 +2516,7 @@
                     } else if ( QUERY["queryObject"] === 'reports' ) {
                         if ( QUERY["querySubject"] === 'reported-by' ) {
                             var apiObject = new mw.Api();
-                            apiObject.get( getActivitiesReportsContentModuleQuery() ).done( function ( reports ) {
+                            apiObject.get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( reports ) {
                                 var reportsEntries, reportEntry, affiliateName, reportYear;
                                 reportsEntries = parseContentModule( reports.query.pages );
 
@@ -2523,7 +2540,7 @@
                                     leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                     openLeafWindow( {} );
                                 } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
-                                    apiObject.get( getOrgInfoContentModuleQuery() ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2561,7 +2578,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'User Group' ) {
-                                    apiObject.get( getOrgInfoContentModuleQuery() ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2601,7 +2618,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'Chapter' ) {
-                                    apiObject.get( getOrgInfoContentModuleQuery() ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2641,7 +2658,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'Thematic Organization' ) {
-                                    apiObject.get( getOrgInfoContentModuleQuery() ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2875,273 +2892,270 @@
 
                 dialog.pushPending();
 
-                new mw.Api().get( getActivitiesReportsContentModuleQuery() ).done( function ( data ) {
+                new mw.Api().get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( data ) {
                     activities_reports = parseContentModule( data.query.pages );
-                } );
 
-                new mw.Api().get( getOrgInfoContentModuleQuery() ).done( function ( data ) {
-                    var i, j, entries, entry, a_report;
-                    var windowManager = new OO.ui.WindowManager();
+                    new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        var i, j, entries, entry, a_report;
+                        var windowManager = new OO.ui.WindowManager();
 
-                    /** ARP-Q1 implementation */
-                    if ( dialog.fieldAffiliateCount.isSelected() && dialog.fieldAffiliateCount.getValue() === 'ARP-Q1' ) {
-                        var ug_count = 0, chpt_count = 0, thorg_count = 0;
-                        entries = parseContentModule( data.query.pages );
-                        counter = luaTableCounter( entries );
+                        /** ARP-Q1 implementation */
+                        if ( dialog.fieldAffiliateCount.isSelected() && dialog.fieldAffiliateCount.getValue() === 'ARP-Q1' ) {
+                            var ug_count = 0, chpt_count = 0, thorg_count = 0;
+                            entries = parseContentModule( data.query.pages );
+                            counter = luaTableCounter( entries );
 
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.recognition_status !== 'derecognised' ) {
-                                if ( entry.org_type === 'User Group' ) {
-                                    ug_count = ug_count + 1;
-                                }
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.recognition_status !== 'derecognised' ) {
+                                    if ( entry.org_type === 'User Group' ) {
+                                        ug_count = ug_count + 1;
+                                    }
 
-                                if ( entry.org_type === 'Chapter' ) {
-                                    chpt_count = chpt_count + 1;
-                                }
+                                    if ( entry.org_type === 'Chapter' ) {
+                                        chpt_count = chpt_count + 1;
+                                    }
 
-                                if ( entry.org_type === 'Thematic Organization' ) {
-                                    thorg_count = thorg_count + 1;
+                                    if ( entry.org_type === 'Thematic Organization' ) {
+                                        thorg_count = thorg_count + 1;
+                                    }
                                 }
                             }
-                        }
 
-                        dialog.close();
+                            dialog.close();
 
-                        queryInfo = [
-                            dialog.fieldAffiliateCount.getValue(),
-                            gadgetMsg[ 'affiliate-count-question' ],
-                            counter.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s1' ] + ' '
-                            + chpt_count.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s2' ] + ' '
-                            + thorg_count.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s3' ] + ' '
-                            + ug_count.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s4' ]
-                        ];
+                            queryInfo = [
+                                dialog.fieldAffiliateCount.getValue(),
+                                gadgetMsg[ 'affiliate-count-question' ],
+                                counter.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s1' ] + ' '
+                                + chpt_count.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s2' ] + ' '
+                                + thorg_count.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s3' ] + ' '
+                                + ug_count.toString() + ' ' + gadgetMsg[ 'arp-q1-results-s4' ]
+                            ];
 
-                        clearCounterCache();
-                        openSubWindow( {} );
-                    } else if ( dialog.fieldLegalStatus.isSelected() && dialog.fieldLegalStatus.getValue() === 'ARP-Q2' ) {
-                        var notLegalEntitiesCount = 0, orgInfoCount = 0;
+                            clearCounterCache();
+                            openSubWindow( {} );
+                        } else if ( dialog.fieldLegalStatus.isSelected() && dialog.fieldLegalStatus.getValue() === 'ARP-Q2' ) {
+                            var orgInfoCount = 0;
 
-                        entries = parseContentModule( data.query.pages );
-                        orgInfoCount = luaTableCounter( entries ); // cache in `counter`
+                            entries = parseContentModule( data.query.pages );
+                            orgInfoCount = luaTableCounter( entries ); // cache in `counter`
 
-                        clearCounterCache();
+                            clearCounterCache();
 
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if (
-                                ( entry.org_type === 'Thematic Organization' || entry.org_type === 'Chapter'
-                                    || ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' ) )
-                                && entry.recognition_status !== 'derecognised'
-                            ) {
-                                counter = counter + 1;
-                            }
-                        }
-
-                        // Get count of entities that are not registered as legal entities
-                        notLegalEntitiesCount = orgInfoCount - counter;
-
-                        dialog.close();
-
-                        queryInfo = [
-                            dialog.fieldLegalStatus.getValue(),
-                            gadgetMsg[ 'legal-status-query-question' ],
-                            counter.toString() + ' ' + gadgetMsg[ 'arp-q2-results' ]
-                        ];
-
-                        clearCounterCache();
-                        openSubWindow( {} );
-                    } else if ( dialog.fieldComplianceStatus.isSelected() && dialog.fieldComplianceStatus.getValue() === 'ARP-Q3' ) {
-                        entries = parseContentModule( data.query.pages );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if (
-                                ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N')
-                                && entry.recognition_status !== 'derecognised'
-                            ) {
-                                percentage = percentage + 1;
-                            }
-                        }
-
-                        // Compute compliance percentage
-                        percentage = ( ( percentage / luaTableCounter(entries) ) * 100 ).toFixed(0);
-                        percentage = Math.ceil( percentage );
-
-                        dialog.close();
-
-                        queryInfo = [
-                            dialog.fieldComplianceStatus.getValue(),
-                            gadgetMsg[ 'compliance-status-question' ],
-                            '<b>' + percentage.toString() + '%</b> ' + gadgetMsg[ 'arp-q3-results' ]
-                        ];
-
-                        clearCounterCache();
-                        percentage = 0;
-                        openSubWindow( {} );
-                    } else if ( dialog.fieldPrograms1.isSelected() && dialog.fieldPrograms1.getValue() === 'ARP-Q5' ) {
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            for ( j = 0; j < activities_reports.length; j++ ) {
-                                a_report = cleanRawEntry( activities_reports[j].value.fields );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
                                 if (
-                                    entry.group_name === a_report.group_name
-                                    && entry.org_type !== 'Allied or other organization'
-                                    && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                    && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
-                                    && a_report.partnership_info.includes( "GLAM Institutions" )
+                                    ( entry.org_type === 'Thematic Organization' || entry.org_type === 'Chapter'
+                                        || ( entry.org_type === 'User Group' && entry.legal_entity === 'Yes' ) )
                                     && entry.recognition_status !== 'derecognised'
                                 ) {
                                     counter = counter + 1;
-                                    break;
                                 }
                             }
-                        }
 
-                        // Calculate current year and use as FY end date
-                        endFY = parseInt( new Date().getFullYear() ) - 1;
-                        fyIdentifier = endFY - 1;
+                            dialog.close();
 
-                        dialog.close();
+                            queryInfo = [
+                                dialog.fieldLegalStatus.getValue(),
+                                gadgetMsg[ 'legal-status-query-question' ],
+                                counter.toString() + ' ' + gadgetMsg[ 'arp-q2-results' ]
+                            ];
 
-                        queryInfo = [
-                            dialog.fieldPrograms1.getValue(),
-                            gadgetMsg[ 'how-many-affiliates-with-glam-partnerships-past-year' ],
-                            '<b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q5-results' ] + ' (' + fyIdentifier + '-' + endFY +')'
-                        ];
+                            clearCounterCache();
+                            openSubWindow( {} );
+                        } else if ( dialog.fieldComplianceStatus.isSelected() && dialog.fieldComplianceStatus.getValue() === 'ARP-Q3' ) {
+                            entries = parseContentModule( data.query.pages );
 
-                        clearCounterCache();
-                        openSubWindow( {} );
-                    } else if ( dialog.fieldPrograms2.isSelected() && dialog.fieldPrograms2.getValue() === 'ARP-Q6' ) {
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            for ( j = 0; j < activities_reports.length; j++ ) {
-                                a_report = cleanRawEntry( activities_reports[j].value.fields );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
                                 if (
-                                    entry.group_name === a_report.group_name
-                                    && entry.org_type !== 'Allied or other organization'
-                                    && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
-                                    && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
-                                    && a_report.partnership_info.includes( "Educational Institutions" )
+                                    ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N')
                                     && entry.recognition_status !== 'derecognised'
                                 ) {
-                                    counter = counter + 1;
-                                    break;
+                                    percentage = percentage + 1;
                                 }
                             }
-                        }
 
-                        // Calculate current year and use as FY end date
-                        endFY = parseInt( new Date().getFullYear() ) - 1;
-                        fyIdentifier = endFY - 1;
+                            // Compute compliance percentage
+                            percentage = ( ( percentage / luaTableCounter(entries) ) * 100 ).toFixed(0);
+                            percentage = Math.ceil( percentage );
 
-                        dialog.close();
+                            dialog.close();
 
-                        queryInfo = [
-                            dialog.fieldPrograms2.getValue(),
-                            gadgetMsg[ 'how-many-affiliates-with-education-partnerships-past-year' ],
-                            '<b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q6-results' ] + ' (' + fyIdentifier + '-' + endFY +')'
-                        ];
+                            queryInfo = [
+                                dialog.fieldComplianceStatus.getValue(),
+                                gadgetMsg[ 'compliance-status-question' ],
+                                '<b>' + percentage.toString() + '%</b> ' + gadgetMsg[ 'arp-q3-results' ]
+                            ];
 
-                        clearCounterCache();
-                        openSubWindow( {} );
-                    } else if ( dialog.fieldAffiliateComposition1.isSelected() && dialog.fieldAffiliateComposition1.getValue() === 'ARP-Q7' ) {
-                        var count = 0;
-                        entries = parseContentModule( data.query.pages );
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            count = parseInt( entry.member_count );
-                            if ( entry.org_type !== 'Allied or other organization' && count > 0 && entry.recognition_status !== 'derecognised' ) {
-                                counter += count;
-                            }
-                        }
-
-                        dialog.close();
-
-                        queryInfo = [
-                            dialog.fieldAffiliateComposition1.getValue(),
-                            gadgetMsg[ 'affiliate-composition-question-one' ],
-                            gadgetMsg[ 'arp-q7-results' ] + ' <b>' + counter.toString() + '</b>'
-                        ];
-
-                        clearCounterCache();
-                        openSubWindow( {} );
-                    } else if ( dialog.fieldAffiliateComposition2.isSelected() && dialog.fieldAffiliateComposition2.getValue() === 'ARP-Q8' ) {
-                        var affiliate_structures = {
-                            'board': 0,
-                            'democratic_process': 0,
-                            'consensus_decision': 0,
-                            'no_shared_structure': 0
-                        };
-
-                        entries = parseContentModule( data.query.pages );
-                        counter = luaTableCounter( entries );
-
-                        for ( i = 0; i < entries.length; i++ ) {
-                            entry = cleanRawEntry( entries[ i ].value.fields );
-                            if ( entry.org_type !== 'Allied or other organization' || entry.recognition_status !== 'derecognised' ) {
-                                if ( entry.dm_structure !== undefined && entry.dm_structure.length > 0 ) {
-                                    /* For board structures */
-                                    if ( entry.dm_structure.includes( "Board" ) ) {
-                                        affiliate_structures.board += 1;
-                                    }
-                                    /* For democratic process structures */
-                                    else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
-                                        affiliate_structures.democratic_process += 1;
-                                    }
-                                    /* For consensus decision structures */
-                                    else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
-                                        affiliate_structures.consensus_decision += 1;
-                                    }
-                                    /* For no shared structures */
-                                    else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
-                                        affiliate_structures.no_shared_structure += 1;
+                            clearCounterCache();
+                            percentage = 0;
+                            openSubWindow( {} );
+                        } else if ( dialog.fieldPrograms1.isSelected() && dialog.fieldPrograms1.getValue() === 'ARP-Q5' ) {
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                for ( j = 0; j < activities_reports.length; j++ ) {
+                                    a_report = cleanRawEntry( activities_reports[j].value.fields );
+                                    if (
+                                        entry.group_name === a_report.group_name
+                                        && entry.org_type !== 'Allied or other organization'
+                                        && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
+                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
+                                        && a_report.partnership_info.includes( "GLAM Institutions" )
+                                        && entry.recognition_status !== 'derecognised'
+                                    ) {
+                                        counter = counter + 1;
+                                        break;
                                     }
                                 }
                             }
-                        }
 
-                        dialog.close();
+                            // Calculate current year and use as FY end date
+                            endFY = parseInt( new Date().getFullYear() ) - 1;
+                            fyIdentifier = endFY - 1;
 
-                        /* Compute the percentages */
-                        affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
-                        affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+                            dialog.close();
 
-                        queryInfo = [
-                            dialog.fieldAffiliateComposition2.getValue(),
-                            gadgetMsg[ 'affiliate-composition-question-two' ],
-                            gadgetMsg[ 'arp-q8-results' ]+ ' <br/><b> ' + affiliate_structures.board.toString() + gadgetMsg[ 'arp-q8-board' ] + '</b><br/><b>'
-                            + affiliate_structures.democratic_process.toString() + gadgetMsg[ 'arp-q8-democratic-process' ] + '</b><br/><b>'
-                            + affiliate_structures.consensus_decision.toString() + gadgetMsg[ 'arp-q8-consensus' ] + '</b><br/><b>'
-                            + affiliate_structures.no_shared_structure.toString() + gadgetMsg[ 'arp-q8-no-shared-structure' ] + '</b>'
-                        ];
+                            queryInfo = [
+                                dialog.fieldPrograms1.getValue(),
+                                gadgetMsg[ 'how-many-affiliates-with-glam-partnerships-past-year' ],
+                                '<b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q5-results' ] + ' (' + fyIdentifier + '-' + endFY +')'
+                            ];
 
-                        clearCounterCache();
-                        openSubWindow( {} );
-                    } else {
-                        dialog.close();
-
-                        $( 'body' ).append( windowManager.$element );
-                        // Add the dialog to the window manager.
-                        windowManager.addWindows( [ messageDialog ] );
-
-                        // Configure the message dialog when it is opened with the window manager's openWindow() method.
-                        windowManager.openWindow( messageDialog, {
-                            title: gadgetMsg[ 'wad-query-404' ],
-                            message: gadgetMsg[ 'wadp-404-response-message-body' ],
-                            actions: [
-                                {
-                                    action: 'accept',
-                                    label: 'Dismiss',
-                                    flags: 'primary'
+                            clearCounterCache();
+                            openSubWindow( {} );
+                        } else if ( dialog.fieldPrograms2.isSelected() && dialog.fieldPrograms2.getValue() === 'ARP-Q6' ) {
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                for ( j = 0; j < activities_reports.length; j++ ) {
+                                    a_report = cleanRawEntry( activities_reports[j].value.fields );
+                                    if (
+                                        entry.group_name === a_report.group_name
+                                        && entry.org_type !== 'Allied or other organization'
+                                        && ( a_report.partnership_info !== undefined && a_report.partnership_info.length > 0 )
+                                        && ( a_report.end_date.split("/")[2] == parseInt( new Date().getFullYear() ) - 1 )
+                                        && a_report.partnership_info.includes( "Educational Institutions" )
+                                        && entry.recognition_status !== 'derecognised'
+                                    ) {
+                                        counter = counter + 1;
+                                        break;
+                                    }
                                 }
-                            ]
-                        });
-                    }
+                            }
+
+                            // Calculate current year and use as FY end date
+                            endFY = parseInt( new Date().getFullYear() ) - 1;
+                            fyIdentifier = endFY - 1;
+
+                            dialog.close();
+
+                            queryInfo = [
+                                dialog.fieldPrograms2.getValue(),
+                                gadgetMsg[ 'how-many-affiliates-with-education-partnerships-past-year' ],
+                                '<b>' + counter.toString() + '</b> ' + gadgetMsg[ 'arp-q6-results' ] + ' (' + fyIdentifier + '-' + endFY +')'
+                            ];
+
+                            clearCounterCache();
+                            openSubWindow( {} );
+                        } else if ( dialog.fieldAffiliateComposition1.isSelected() && dialog.fieldAffiliateComposition1.getValue() === 'ARP-Q7' ) {
+                            var count = 0;
+                            entries = parseContentModule( data.query.pages );
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                count = parseInt( entry.member_count );
+                                if ( entry.org_type !== 'Allied or other organization' && count > 0 && entry.recognition_status !== 'derecognised' ) {
+                                    counter += count;
+                                }
+                            }
+
+                            dialog.close();
+
+                            queryInfo = [
+                                dialog.fieldAffiliateComposition1.getValue(),
+                                gadgetMsg[ 'affiliate-composition-question-one' ],
+                                gadgetMsg[ 'arp-q7-results' ] + ' <b>' + counter.toString() + '</b>'
+                            ];
+
+                            clearCounterCache();
+                            openSubWindow( {} );
+                        } else if ( dialog.fieldAffiliateComposition2.isSelected() && dialog.fieldAffiliateComposition2.getValue() === 'ARP-Q8' ) {
+                            var affiliate_structures = {
+                                'board': 0,
+                                'democratic_process': 0,
+                                'consensus_decision': 0,
+                                'no_shared_structure': 0
+                            };
+
+                            entries = parseContentModule( data.query.pages );
+                            counter = luaTableCounter( entries );
+
+                            for ( i = 0; i < entries.length; i++ ) {
+                                entry = cleanRawEntry( entries[ i ].value.fields );
+                                if ( entry.org_type !== 'Allied or other organization' || entry.recognition_status !== 'derecognised' ) {
+                                    if ( entry.dm_structure !== undefined && entry.dm_structure.length > 0 ) {
+                                        /* For board structures */
+                                        if ( entry.dm_structure.includes( "Board" ) ) {
+                                            affiliate_structures.board += 1;
+                                        }
+                                        /* For democratic process structures */
+                                        else if ( entry.dm_structure.includes( "Democratic Process" ) ) {
+                                            affiliate_structures.democratic_process += 1;
+                                        }
+                                        /* For consensus decision structures */
+                                        else if ( entry.dm_structure.includes( "Consensus Decision Making" ) ) {
+                                            affiliate_structures.consensus_decision += 1;
+                                        }
+                                        /* For no shared structures */
+                                        else if ( entry.dm_structure.includes( "No Shared Structure" ) ) {
+                                            affiliate_structures.no_shared_structure += 1;
+                                        }
+                                    }
+                                }
+                            }
+
+                            dialog.close();
+
+                            /* Compute the percentages */
+                            affiliate_structures.board = ( ( affiliate_structures.board / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.democratic_process = ( ( affiliate_structures.democratic_process / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.consensus_decision = ( ( affiliate_structures.consensus_decision / counter ) * 100 ).toFixed( 0 );
+                            affiliate_structures.no_shared_structure = ( ( affiliate_structures.no_shared_structure / counter ) * 100 ).toFixed( 0 );
+
+                            queryInfo = [
+                                dialog.fieldAffiliateComposition2.getValue(),
+                                gadgetMsg[ 'affiliate-composition-question-two' ],
+                                gadgetMsg[ 'arp-q8-results' ]+ ' <br/><b> ' + affiliate_structures.board.toString() + gadgetMsg[ 'arp-q8-board' ] + '</b><br/><b>'
+                                + affiliate_structures.democratic_process.toString() + gadgetMsg[ 'arp-q8-democratic-process' ] + '</b><br/><b>'
+                                + affiliate_structures.consensus_decision.toString() + gadgetMsg[ 'arp-q8-consensus' ] + '</b><br/><b>'
+                                + affiliate_structures.no_shared_structure.toString() + gadgetMsg[ 'arp-q8-no-shared-structure' ] + '</b>'
+                            ];
+
+                            clearCounterCache();
+                            openSubWindow( {} );
+                        } else {
+                            dialog.close();
+
+                            $( 'body' ).append( windowManager.$element );
+                            // Add the dialog to the window manager.
+                            windowManager.addWindows( [ messageDialog ] );
+
+                            // Configure the message dialog when it is opened with the window manager's openWindow() method.
+                            windowManager.openWindow( messageDialog, {
+                                title: gadgetMsg[ 'wad-query-404' ],
+                                message: gadgetMsg[ 'wadp-404-response-message-body' ],
+                                actions: [
+                                    {
+                                        action: 'accept',
+                                        label: 'Dismiss',
+                                        flags: 'primary'
+                                    }
+                                ]
+                            });
+                        }
+                    } );
                 } );
             };
 
