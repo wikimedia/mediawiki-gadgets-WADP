@@ -25,7 +25,6 @@
             openLeafWindow,
             openAdvanceWindow,
             windowManager,
-            getOrgInfoContentModuleQuery,
             getDataFromLuaTables,
             parseContentModule,
             cleanRawEntry,
@@ -35,7 +34,6 @@
             luaTableCounterForAffiliateType,
             luaTableCounterByAffiliateRegion,
             /* Cache `percentage` variable */ percentage = 0,
-            getActivitiesReportsContentModuleQuery,
             /*
              * Keep track of query information in the format:
              *   code - the query code e.g. ARP-Q6
@@ -140,38 +138,6 @@
                     action: 'query',
                     prop: 'revisions',
                     titles: 'Module:' + luaModule,
-                    rvprop: 'content',
-                    rvlimit: 1
-                };
-            };
-
-            /**
-             * Provides API parameters for getting the content from
-             * [[Module:Organizational_Informations]].
-             * @deprecated Use getDataFromLuaTables() with module name as argument.
-             * @return {Object}
-             */
-            getOrgInfoContentModuleQuery = function () {
-                return {
-                    action: 'query',
-                    prop: 'revisions',
-                    titles: 'Module:Organizational_Informations',
-                    rvprop: 'content',
-                    rvlimit: 1
-                };
-            };
-
-            /**
-             * Provides API parameters for getting the content from
-             * [[Module:Activities_Reports]].
-             * @deprecated Use getDataFromLuaTables() with module name as argument.
-             * @return {Object}
-             */
-            getActivitiesReportsContentModuleQuery = function () {
-                return {
-                    action: 'query',
-                    prop: 'revisions',
-                    titles: 'Module:Activities_Reports',
                     rvprop: 'content',
                     rvlimit: 1
                 };
