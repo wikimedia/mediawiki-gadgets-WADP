@@ -1967,6 +1967,10 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'reports',
                                 label: gadgetMsg[ 'query-object-reports' ]
+                            } ),
+                            new OO.ui.MenuOptionWidget( {
+                               data: 'partnerships',
+                               label: gadgetMsg[ 'query-object-partnerships' ]
                             } )
                         ]
                     }
@@ -2091,6 +2095,19 @@
                             }
                         } ) ;
                     } else if ( trackQueryObject === 'reports' ) {
+                        fieldQuerySubject = new OO.ui.DropdownWidget( {
+                            id: 'querySubjectOptions',
+                            label: gadgetMsg['query-object-default-option'],
+                            menu: {
+                                items: [
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'reported-by',
+                                        label: gadgetMsg[ 'query-subject-reported-by' ]
+                                    } )
+                                ]
+                            }
+                        } ) ;
+                    } else if ( trackQueryObject === 'partnerships' ) {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
