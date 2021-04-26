@@ -2829,6 +2829,42 @@
                                 } );
                             } );
                         }
+                    } else if ( QUERY["queryObject"] === 'finance' ) {
+                        if ( QUERY["querySubject"] === 'reported-by' ) {
+                            var api = new mw.Api(),
+                                financialReports,
+                                financialReport;
+                            api.get( getDataFromLuaTables( 'Financial_Reports' ) ).done( function ( reports ) {
+                                financialReports = parseContentModule( reports.query.pages );
+
+                                if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
+                                    var affiliateName;
+                                    affiliateName = dialog.fieldSpecificAffiliate.getValue();
+                                    for ( j = 0; j < financialReports.length; j++ ) {
+                                        financialReport = cleanRawEntry( financialReports[ j ].value.fields );
+
+                                        if ( financialReport.group_name === affiliateName
+                                            && financialReport.dos_stamp >= FILTERS["startDate"]
+                                            && financialReport.dos_stamp <= FILTERS["endDate"]
+                                        ) {
+                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue() + " (" + financialReport.end_date.split( "/" )[2]
+                                                + ") ☉ Budg: " + financialReport.total_budget
+                                                + " ☉ Exp: " + financialReport.total_expense + " (in " + financialReport.currency + ")<br/>";
+                                        } else if ( financialReport.group_name === affiliateName
+                                            && FILTERS["startDate"] === ''
+                                            && FILTERS["endDate"] === ''
+                                        ) {
+                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue() + " (" + financialReport.end_date.split( "/" )[2]
+                                                + ") ☉ Budg: " + financialReport.total_budget
+                                                + " ☉ Exp: " + financialReport.total_expense + " (in " + financialReport.currency + ")<br/>";
+                                        }
+                                    }
+
+                                    leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                    openLeafWindow( {} );
+                                }
+                            } );
+                        }
                     }
                 }
 
