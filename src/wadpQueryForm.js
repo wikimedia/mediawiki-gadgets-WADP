@@ -2848,14 +2848,14 @@
                                             && financialReport.dos_stamp <= FILTERS["endDate"]
                                         ) {
                                             QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue() + " ☉ Budg: " + financialReport.total_budget
-                                                + " ☉ Exp: " + financialReport.total_expense + " (in " + financialReport.currency + " - in the year "
+                                                + " ☉ Exp: " + financialReport.total_expense + "<br/>(in " + financialReport.currency + " - in the year "
                                                 + financialReport.end_date.split( "/" )[2] + ")<br/>";
                                         } else if ( financialReport.group_name === affiliateName
                                             && FILTERS["startDate"] === ''
                                             && FILTERS["endDate"] === ''
                                         ) {
-                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue() + ") ☉ Budg: " + financialReport.total_budget
-                                                + " ☉ Exp: " + financialReport.total_expense + " (in " + financialReport.currency + " - in the year "
+                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue() + " ☉ Budg: " + financialReport.total_budget
+                                                + " ☉ Exp: " + financialReport.total_expense + "<br/>(in " + financialReport.currency + " - in the year "
                                                 + financialReport.end_date.split( "/" )[2] + ")<br/>";
                                         }
                                     }
