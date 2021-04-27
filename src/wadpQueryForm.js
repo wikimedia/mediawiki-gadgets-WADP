@@ -1967,11 +1967,11 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'reports',
                                 label: gadgetMsg[ 'query-object-reports' ]
-                            } ),
-                            new OO.ui.MenuOptionWidget( {
+                            } )
+                            /* new OO.ui.MenuOptionWidget( {
                                data: 'partnerships',
                                label: gadgetMsg[ 'query-object-partnerships' ]
-                            } )
+                            } ) */
                         ]
                     }
                 } );
@@ -2107,7 +2107,7 @@
                                 ]
                             }
                         } ) ;
-                    } else if ( trackQueryObject === 'partnerships' ) {
+                    } /* else if ( trackQueryObject === 'partnerships' ) { // TODO: Awaiting confirmation
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
@@ -2116,11 +2116,15 @@
                                     new OO.ui.MenuOptionWidget( {
                                         data: 'reported-by',
                                         label: gadgetMsg[ 'query-subject-reported-by' ]
+                                    } ),
+                                    new OO.ui.MenuOptionWidget( {
+                                        data: 'belongs-to',
+                                        label: gadgetMsg[ 'query-subject-belongs-to' ]
                                     } )
                                 ]
                             }
                         } ) ;
-                    } else {
+                    }*/ else {
                         fieldQuerySubject = new OO.ui.DropdownWidget( {
                             id: 'querySubjectOptions',
                             label: gadgetMsg['query-object-default-option'],
