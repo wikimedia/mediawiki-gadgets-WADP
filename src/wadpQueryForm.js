@@ -2497,8 +2497,6 @@
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } );
-                        } else {
-                            alert( "Work In Progress..." );
                         }
                     } else if ( QUERY["queryObject"] === 'reports' ) {
                         if ( QUERY["querySubject"] === 'reported-by' ) {
@@ -3064,19 +3062,499 @@
 
                 // "Total number of" data structure
                 if ( STRUCTURE === 'number' ) {
-                    // code goes here...
+                    QUERY_RES = "<br/><br/>";
+
+                    var counter = 0;
+                    if ( QUERY["queryObject"] === 'affiliates' ) {
+                        if ( QUERY["querySubject"] === 'recognised-in-year' ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    // Make sure an agreement date is available or default to 0000-00-00
+                                    entry.agreement_date = entry.agreement_date ? convertDateToYyyyMmDdFormat( entry.agreement_date ) : '0000-00-00';
+                                    if ( entry.recognition_status === 'recognised'
+                                        && entry.agreement_date >= FILTERS["startDate"]
+                                        && entry.agreement_date <= FILTERS["endDate"]
+                                    ) {
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                counter += 1;
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                counter += 1;
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            counter += 1;
+                                        } else if (
+                                            entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            counter += 1;
+                                        }
+                                    }
+                                }
+                                QUERY_RES += "<p>" + counter + " affiliates got recognized.</p>";
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        } else if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+                                    // Make sure a derecognition date is available or default to 0000-00-00
+                                    entry.derecognition_date = entry.derecognition_date ? convertDateToYyyyMmDdFormat( entry.derecognition_date ) : '0000-00-00';
+                                    if ( entry.recognition_status === 'derecognised'
+                                        && entry.derecognition_date >= FILTERS["startDate"]
+                                        && entry.derecognition_date <= FILTERS["endDate"]
+                                    ) {
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                counter += 1;
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                counter += 1;
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            counter += 1;
+                                        } else if ( entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            counter += 1;
+                                        }
+                                    }
+                                }
+                                QUERY_RES += "<p>" + counter + " affiliates got derecognized.</p>";
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        } else if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+
+                                    if ( entry.recognition_status === 'recognised'
+                                        && ( entry.uptodate_reporting === 'Tick' || entry.uptodate_reporting === 'Tick-N' )
+                                    ) {
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                counter += 1;
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                counter += 1;
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            counter += 1;
+                                        } else if ( entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            counter += 1;
+                                        }
+                                    }
+                                }
+                                QUERY_RES += "<p>" + counter + " affiliates are compliant with reporting.</p>";
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        } else if ( QUERY["querySubject"] === 'belongs-to' ) {
+                            new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                                var entries, entry;
+                                entries = parseContentModule( data.query.pages );
+
+                                for ( i = 0; i < entries.length; i++ ) {
+                                    entry = cleanRawEntry( entries[ i ].value.fields );
+
+                                    if ( entry.recognition_status === 'recognised' ) {
+                                        if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                            if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            ) {
+                                                counter += 1;
+                                            } else if ( entry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                counter += 1;
+                                            }
+                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                            && entry.group_country === dialog.fieldSpecificCountry.getValue()
+                                            && entry.org_type === FILTERS["affiliateSearchType"]
+                                        ) {
+                                            counter += 1;
+                                        } else if ( entry.org_type === FILTERS["affiliateSearchType"]
+                                            && entry.region === FILTERS["affiliateSearchTypeByRegion"]
+                                        ) {
+                                            counter += 1;
+                                        }
+                                    }
+                                }
+                                QUERY_RES += "<p>" + counter + " affiliates</p>";
+                                leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                openLeafWindow( {} );
+                            } );
+                        }
+                    } else if ( QUERY["queryObject"] === 'reports' ) {
+                        if ( QUERY["querySubject"] === 'reported-by' ) {
+                            var apiObject = new mw.Api(),
+                                financialReports,
+                                activityReportsEntries,
+                                activityReportEntry,
+                                financialReport,
+                                affiliateName,
+                                activityReportYear,
+                                financialReportYear;
+                            apiObject.get( getDataFromLuaTables( 'Financial_Reports' ) ).done( function ( fReports ) {
+                                financialReports = parseContentModule( fReports.query.pages );
+                                apiObject.get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( aReports ) {
+                                    activityReportsEntries = parseContentModule( aReports.query.pages );
+
+                                    if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
+                                        for ( j = 0; j < activityReportsEntries.length; j++ ) {
+                                            activityReportEntry = cleanRawEntry( activityReportsEntries[ j ].value.fields );
+                                            affiliateName = dialog.fieldSpecificAffiliate.getValue();
+                                            activityReportYear = activityReportEntry.end_date.split( "/" )[2];
+
+                                            if ( activityReportEntry.group_name === affiliateName
+                                                && activityReportEntry.dos_stamp >= FILTERS["startDate"]
+                                                && activityReportEntry.dos_stamp <= FILTERS["endDate"]
+                                            ) {
+                                                counter += 1;
+                                            } else if ( activityReportEntry.group_name === affiliateName
+                                                && FILTERS["startDate"] === ''
+                                                && FILTERS["endDate"] === ''
+                                            ) {
+                                                counter += 1;
+                                            }
+                                        }
+
+                                        for ( j = 0; j < financialReports.length; j++ ) {
+                                            financialReport = cleanRawEntry( financialReports[ j ].value.fields );
+                                            affiliateName = dialog.fieldSpecificAffiliate.getValue();
+                                            financialReportYear = financialReport.end_date.split( "/" )[2];
+
+                                            if ( financialReport.group_name === affiliateName
+                                                && financialReport.dos_stamp >= FILTERS["startDate"]
+                                                && financialReport.dos_stamp <= FILTERS["endDate"]
+                                            ) {
+                                                counter += 1;
+                                            } else if ( activityReportEntry.group_name === affiliateName
+                                                && FILTERS["startDate"] === ''
+                                                && FILTERS["endDate"] === ''
+                                            ) {
+                                                counter += 1;
+                                            }
+                                        }
+                                        QUERY_RES += "<p>" + counter + " reports reported by " + affiliateName + ".</p>"
+                                        leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                        openLeafWindow( {} );
+                                    } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
+                                        apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                            var affiliatesEntries, affiliateEntry;
+
+                                            affiliatesEntries = parseContentModule( affiliates.query.pages );
+                                            for ( i = 0; i < affiliatesEntries.length; i++ ) {
+                                                affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
+                                                for ( j = 0; j < activityReportsEntries.length; j++ ) {
+                                                    activityReportEntry = cleanRawEntry( activityReportsEntries[ j ].value.fields );
+                                                    activityReportYear = activityReportEntry.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && activityReportEntry.dos_stamp >= FILTERS["startDate"]
+                                                        && activityReportEntry.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+
+                                                for ( j = 0; j < financialReports.length; j++ ) {
+                                                    financialReport = cleanRawEntry( financialReports[ j ].value.fields );
+                                                    financialReportYear = financialReport.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && financialReport.dos_stamp >= FILTERS["startDate"]
+                                                        && financialReport.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            QUERY_RES += "<p>" + counter + " reports reported by all affiliates.</p>";
+                                            leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                            openLeafWindow( {} );
+                                        } );
+                                    } else if ( FILTERS["affiliateSearchType"] === 'User Group' ) {
+                                        apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                            var affiliatesEntries, affiliateEntry;
+
+                                            affiliatesEntries = parseContentModule( affiliates.query.pages );
+                                            for ( i = 0; i < affiliatesEntries.length; i++ ) {
+                                                affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
+                                                for ( j = 0; j < activityReportsEntries.length; j++ ) {
+                                                    activityReportEntry = cleanRawEntry( activityReportsEntries[ j ].value.fields );
+                                                    activityReportYear = activityReportEntry.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && affiliateEntry.org_type === 'User Group'
+                                                        && activityReportEntry.dos_stamp >= FILTERS["startDate"]
+                                                        && activityReportEntry.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && affiliateEntry.org_type === 'User Group'
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+
+                                                for ( j = 0; j < financialReports.length; j++ ) {
+                                                    financialReport = cleanRawEntry( financialReports[ j ].value.fields );
+                                                    financialReportYear = financialReport.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && affiliateEntry.org_type === 'User Group'
+                                                        && financialReport.dos_stamp >= FILTERS["startDate"]
+                                                        && financialReport.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && affiliateEntry.org_type === 'User Group'
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            QUERY_RES += "<p>" + counter + " reports reported by user groups.</p>";
+                                            leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                            openLeafWindow( {} );
+                                        } );
+                                    } else if ( FILTERS["affiliateSearchType"] === 'Chapter' ) {
+                                        apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                            var affiliatesEntries, affiliateEntry;
+
+                                            affiliatesEntries = parseContentModule( affiliates.query.pages );
+                                            for ( i = 0; i < affiliatesEntries.length; i++ ) {
+                                                affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
+                                                for ( j = 0; j < activityReportsEntries.length; j++ ) {
+                                                    activityReportEntry = cleanRawEntry( activityReportsEntries[ j ].value.fields );
+                                                    activityReportYear = activityReportEntry.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && affiliateEntry.org_type === 'Chapter'
+                                                        && activityReportEntry.dos_stamp >= FILTERS["startDate"]
+                                                        && activityReportEntry.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && affiliateEntry.org_type === 'Chapter'
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+
+                                                for ( j = 0; j < financialReports.length; j++ ) {
+                                                    financialReport = cleanRawEntry( financialReports[ j ].value.fields );
+                                                    financialReportYear = financialReport.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && affiliateEntry.org_type === 'Chapter'
+                                                        && financialReport.dos_stamp >= FILTERS["startDate"]
+                                                        && financialReport.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && affiliateEntry.org_type === 'Chapter'
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            QUERY_RES += "<p>" + counter + " reports reported by Chapters.</p>";
+                                            leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                            openLeafWindow( {} );
+                                        } );
+                                    } else if ( FILTERS["affiliateSearchType"] === 'Thematic Organization' ) {
+                                        apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                            var affiliatesEntries, affiliateEntry;
+
+                                            affiliatesEntries = parseContentModule( affiliates.query.pages );
+                                            for ( i = 0; i < affiliatesEntries.length; i++ ) {
+                                                affiliateEntry = cleanRawEntry( affiliatesEntries[ i ].value.fields );
+                                                for ( j = 0; j < activityReportsEntries.length; j++ ) {
+                                                    activityReportEntry = cleanRawEntry( activityReportsEntries[ j ].value.fields );
+                                                    activityReportYear = activityReportEntry.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && affiliateEntry.org_type === 'Thematic Organization'
+                                                        && activityReportEntry.dos_stamp >= FILTERS["startDate"]
+                                                        && activityReportEntry.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === activityReportEntry.group_name
+                                                        && affiliateEntry.org_type === 'Thematic Organization'
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+
+                                                for ( j = 0; j < financialReports.length; j++ ) {
+                                                    financialReport = cleanRawEntry( financialReports[ j ].value.fields );
+                                                    financialReportYear = financialReport.end_date.split( "/" )[2];
+                                                    if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && affiliateEntry.org_type === 'Thematic Organization'
+                                                        && financialReport.dos_stamp >= FILTERS["startDate"]
+                                                        && financialReport.dos_stamp <= FILTERS["endDate"]
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    } else if ( affiliateEntry.group_name === financialReport.group_name
+                                                        && affiliateEntry.org_type === 'Thematic Organization'
+                                                        && dialog.fieldStartDate.getValue() === ''
+                                                        && dialog.fieldEndDate.getValue() === ''
+                                                    ) {
+                                                        if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
+                                                            counter += 1;
+                                                        } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
+                                                            && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
+                                                        ) {
+                                                            counter += 1;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            QUERY_RES += "<p>" + counter + " reports reported by Thematic organizations.</p>";
+                                            leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                            openLeafWindow( {} );
+                                        } );
+                                    }
+                                } );
+                            } );
+                        }
+                    }
                 }
 
                 // "Percentage of" data structure
                 if ( STRUCTURE === 'percentage' ) {
                     // code goes here...
                 }
-
-                console.log(
-                    STRUCTURE,
-                    QUERY,
-                    FILTERS
-                );
             };
 
 
