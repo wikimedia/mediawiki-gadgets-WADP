@@ -2132,7 +2132,7 @@
                         } ) ;
                     }
 
-                    $( "#querySubjectOptions" ).empty().append( fieldQuerySubject.$element );
+                    $( "#querySubjectOptions" ).parent().empty().append( fieldQuerySubject.$element );
                 } );
 
                 fieldQuerySubject = new OO.ui.DropdownWidget( {
