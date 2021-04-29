@@ -524,6 +524,7 @@
                     openBasicWindow( {} );
                 } else {
                     return new OO.ui.Process( function () {
+                        $( '.oo-ui-windowManager' ).remove();
                         dialog.close();
                     } );
                 }
@@ -607,6 +608,7 @@
                     openBasicWindow( {} );
                 } else {
                     return new OO.ui.Process( function () {
+                        $( '.oo-ui-windowManager' ).remove();
                         dialog.close();
                     } );
                 }
@@ -1894,6 +1896,7 @@
                     } );
                 } else {
                     return new OO.ui.Process( function () {
+                        $( '.oo-ui-windowManager' ).remove();
                         dialog.close();
                     } );
                 }
@@ -2124,13 +2127,7 @@
                                 ]
                             }
                         } ) ;
-                    }*/ else {
-                        fieldQuerySubject = new OO.ui.DropdownWidget( {
-                            id: 'querySubjectOptions',
-                            label: gadgetMsg['query-object-default-option'],
-                            menu: {}
-                        } ) ;
-                    }
+                    }*/
 
                     $( "#querySubjectOptions" ).parent().empty().append( fieldQuerySubject.$element );
                 } );
