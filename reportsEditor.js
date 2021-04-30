@@ -12,7 +12,7 @@
 
     if ( mw.config.values.wgPageName.startsWith( 'Wikimedia_Affiliates_Data_Portal' ) ) {
         /* Load Organizational Info Form (module) */
-        mw.loader.load( 'ext.gadget.reportOrgInfoForm' );
+        mw.loader.load( 'ext.gadget.wadpOrgInfoForm' );
 
         /* Load Affiliates Indicator Upload form to M&E staff */
         mw.loader.load( 'ext.gadget.wadpAIUForm' );
@@ -32,6 +32,6 @@
 
     if ( mw.config.values.wgPageName.split( 'Wikimedia_Affiliates_Data_Portal/' )[1] === 'Organizations_Information' ) {
         /* Load the org info form for end users to update affiliate info */
-        mw.loader.load( 'ext.gadget.reportOrgInfoForm' );
+        mw.loader.load( 'ext.gadget.wadpOrgInfoForm' );
     }
 }() );
