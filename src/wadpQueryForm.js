@@ -2846,16 +2846,18 @@
                                             && financialReport.dos_stamp >= FILTERS["startDate"]
                                             && financialReport.dos_stamp <= FILTERS["endDate"]
                                         ) {
-                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue() + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue()
+                                                + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                         } else if ( financialReport.group_name === affiliateName
                                             && FILTERS["startDate"] === ''
                                             && FILTERS["endDate"] === ''
                                         ) {
-                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue() + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                            QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue()
+                                                + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                         }
                                     }
 
@@ -2876,30 +2878,34 @@
                                                     && financialReport.dos_stamp <= FILTERS["endDate"]
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && dialog.fieldStartDate.getValue() === ''
                                                     && dialog.fieldEndDate.getValue() === ''
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 }
                                             }
@@ -2923,15 +2929,17 @@
                                                     && financialReport.dos_stamp <= FILTERS["endDate"]
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && affiliateEntry.org_type === 'User Group'
@@ -2939,15 +2947,17 @@
                                                     && dialog.fieldEndDate.getValue() === ''
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 }
                                             }
@@ -2971,15 +2981,17 @@
                                                     && financialReport.dos_stamp <= FILTERS["endDate"]
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && affiliateEntry.org_type === 'Chapter'
@@ -2987,15 +2999,17 @@
                                                     && dialog.fieldEndDate.getValue() === ''
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + daffiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 }
                                             }
@@ -3019,15 +3033,17 @@
                                                     && financialReport.dos_stamp <= FILTERS["endDate"]
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && affiliateEntry.org_type === 'Thematic Organization'
@@ -3035,15 +3051,17 @@
                                                     && dialog.fieldEndDate.getValue() === ''
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
-                                                        QUERY_RES += "✦ " + affiliateEntry.group_name + " ☉ <b>Budg:</b> " + financialReport.total_budget
-                                                            + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/>(currency: " + financialReport.currency + " - in the year "
-                                                            + financialReport.end_date.split( "/" )[2] + ")<br/><br/>";
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
+                                                            + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
+                                                            + financialReport.end_date.split( "/" )[2] + ")<br/>"
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
                                                     }
                                                 }
                                             }
