@@ -24,7 +24,7 @@
         mw.loader.load( 'ext.gadget.reportFinancialForm' );
 
         /* Load Activities Report Form (module) */
-        mw.loader.load( 'ext.gadget.reportActivitiesForm' );
+        mw.loader.load( 'ext.gadget.wadpActivitiesReportForm' );
 
         /* Load the WADP Query Form (module) */
         mw.loader.load( 'ext.gadget.wadpQueryForm' );
