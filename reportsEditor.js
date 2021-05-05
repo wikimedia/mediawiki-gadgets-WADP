@@ -18,7 +18,7 @@
         mw.loader.load( 'ext.gadget.wadpAIUForm' );
 
         /* Load Grants Report Form (module) */
-        mw.loader.load( 'ext.gadget.reportGrantsForm' );
+        mw.loader.load( 'ext.gadget.wadpGrantReportForm' );
 
         /* Load Financial Report Form (module) */
         mw.loader.load( 'ext.gadget.wadpFinancialReportForm' );
