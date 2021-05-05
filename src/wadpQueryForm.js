@@ -4,7 +4,7 @@
  * would/can be used interchangeably when referring to this
  * system.
  *
- * This is loaded from <https://meta.wikimedia.org/wiki/MediaWiki:Gadget-reportEditor.js>.
+ * This is loaded from <https://meta.wikimedia.org/wiki/MediaWiki:Gadget-wadpGadgetsLoader.js>.
  *
  * @author Derick Alangi (WMF)
  */
