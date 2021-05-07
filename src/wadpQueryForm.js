@@ -2999,7 +2999,7 @@
                                                     && dialog.fieldEndDate.getValue() === ''
                                                 ) {
                                                     if ( affiliateEntry.region === FILTERS["affiliateSearchTypeByRegion"] ) {
-                                                        QUERY_RES += "✦ " + daffiliateEntry.group_name
+                                                        QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
                                                             + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
@@ -3561,6 +3561,48 @@
                                         } );
                                     }
                                 } );
+                            } );
+                        }
+                    } else if ( QUERY["queryObject"] === 'finance' ) {
+                        if ( QUERY["querySubject"] === 'reported-by' ) {
+                            var api = new mw.Api(),
+                                financialReports,
+                                financialReport,
+                                totalBudget = 0,
+                                totalExpenses = 0,
+                                currencyCode;
+                            api.get( getDataFromLuaTables( 'Financial_Reports' ) ).done( function ( reports ) {
+                                financialReports = parseContentModule( reports.query.pages );
+
+                                if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
+                                    var affiliateName;
+                                    affiliateName = dialog.fieldSpecificAffiliate.getValue();
+                                    for ( j = 0; j < financialReports.length; j++ ) {
+                                        financialReport = cleanRawEntry( financialReports[j].value.fields );
+
+                                        if ( financialReport.group_name === affiliateName
+                                            && financialReport.dos_stamp >= FILTERS["startDate"]
+                                            && financialReport.dos_stamp <= FILTERS["endDate"]
+                                        ) {
+                                            totalBudget += isNaN( parseInt( financialReport.total_budget ) ) ? 0 : parseInt( financialReport.total_budget );
+                                            totalExpenses += isNaN( parseInt( financialReport.total_expense ) ) ? 0 : parseInt( financialReport.total_expense );
+                                            currencyCode = financialReport.currency;
+                                        } else if (financialReport.group_name === affiliateName
+                                            && FILTERS["startDate"] === ''
+                                            && FILTERS["endDate"] === ''
+                                        ) {
+                                            totalBudget += isNaN( parseInt( financialReport.total_budget ) ) ? 0 : parseInt( financialReport.total_budget );
+                                            totalExpenses += isNaN( parseInt( financialReport.total_expense ) ) ? 0 : parseInt( financialReport.total_expense );
+                                            currencyCode = financialReport.currency;
+                                        }
+                                    }
+
+                                    QUERY_RES += affiliateName
+                                        + "<br/><b>Total Budg:</b> " + totalBudget + " ☉ <b>Total Exp:</b> " + totalExpenses
+                                        + "<br/>( currency: " + currencyCode + " )<br/>";
+                                    leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
+                                    openLeafWindow( {} );
+                                }
                             } );
                         }
                     }
