@@ -432,12 +432,14 @@
                 } );
 
                 this.fieldTotalBudget = new OO.ui.TextInputWidget( {
+                    type: 'number',
                     value: this.total_budget,
                     indicator: 'required',
                     required: true,
                     placeholder: gadgetMsg[ 'total-budget-placeholder' ]
                 } );
                 this.fieldTotalExpense = new OO.ui.TextInputWidget( {
+                    type: 'number',
                     value: this.total_expense,
                     indicator: 'required',
                     required: true,
@@ -508,11 +510,6 @@
                 fieldImportedReportDate.toggle();
                 this.fieldImportedReportCB.on( 'change', function ( isSelected ) {
                     fieldImportedReportDate.toggle( isSelected );
-                } );
-
-                this.fieldDateOfSubmission = new OO.ui.TextInputWidget ( {
-                    value: this.dos_stamp,
-                    type: 'hidden'
                 } );
 
                 // Append things to fieldSet
