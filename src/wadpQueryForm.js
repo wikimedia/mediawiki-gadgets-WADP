@@ -2849,7 +2849,7 @@
                                             QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue()
                                                 + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                 + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                         } else if ( financialReport.group_name === affiliateName
                                             && FILTERS["startDate"] === ''
                                             && FILTERS["endDate"] === ''
@@ -2857,7 +2857,7 @@
                                             QUERY_RES += "✦ " + dialog.fieldSpecificAffiliate.getValue()
                                                 + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                 + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                         }
                                     }
 
@@ -2881,14 +2881,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && dialog.fieldStartDate.getValue() === ''
@@ -2898,14 +2898,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 }
                                             }
@@ -2932,14 +2932,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && affiliateEntry.org_type === 'User Group'
@@ -2950,14 +2950,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 }
                                             }
@@ -2984,14 +2984,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && affiliateEntry.org_type === 'Chapter'
@@ -3002,14 +3002,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 }
                                             }
@@ -3036,14 +3036,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 } else if ( affiliateEntry.group_name === financialReport.group_name
                                                     && affiliateEntry.org_type === 'Thematic Organization'
@@ -3054,14 +3054,14 @@
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     } else if ( FILTERS["affiliateSearchTypeByRegion"] === 'specific-country'
                                                         && affiliateEntry.group_country === dialog.fieldSpecificCountry.getValue()
                                                     ) {
                                                         QUERY_RES += "✦ " + affiliateEntry.group_name
                                                             + "<br/>&nbsp;&nbsp;&nbsp;(currency: " + financialReport.currency + " - in the year "
                                                             + financialReport.end_date.split( "/" )[2] + ")<br/>"
-                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget + " ☉ <b>Exp:</b> " + financialReport.total_expense + "<br/><br/>";
+                                                            + "&nbsp;&nbsp;&nbsp;<b>Budg:</b> " + financialReport.total_budget.toLocaleString( 'en' ) + " ☉ <b>Exp:</b> " + financialReport.total_expense.toLocaleString( 'en' ) + "<br/><br/>";
                                                     }
                                                 }
                                             }
@@ -3598,7 +3598,7 @@
                                     }
 
                                     QUERY_RES += affiliateName
-                                        + "<br/><b>Total Budg:</b> " + totalBudget + " ☉ <b>Total Exp:</b> " + totalExpenses
+                                        + "<br/><b>Total Budg:</b> " + totalBudget.toLocaleString( 'en' ) + " ☉ <b>Total Exp:</b> " + totalExpenses.toLocaleString( 'en' )
                                         + "<br/>( currency: " + currencyCode + " )<br/>";
                                     leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                     openLeafWindow( {} );
