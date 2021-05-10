@@ -1322,7 +1322,6 @@
                                     list_education_EU = "<br/>",
                                     list_education_NA = "<br/>",
                                     list_education_SA = "<br/>",
-                                    list_education_Oc = "<br/>",
                                     list_education_Int = "<br/>",
                                     list_education_MENA = "<br/>";
 
@@ -2203,6 +2202,10 @@
                             new OO.ui.MenuOptionWidget( {
                                 data: 'MENA',
                                 label: gadgetMsg[ 'affiliate-search-by-region-mena' ]
+                            } ),
+                            new OO.ui.MenuOptionWidget( {
+                                data: 'International',
+                                label: gadgetMsg[ 'international' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
                                 data: 'specific-country',
