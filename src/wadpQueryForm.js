@@ -521,6 +521,7 @@
                 var dialog = this;
                 if ( action === 'continue' ) {
                     dialog.close();
+                    $( '.oo-ui-windowManager' ).remove();
                     openBasicWindow( {} );
                 } else {
                     return new OO.ui.Process( function () {
@@ -3773,6 +3774,7 @@
                     } );
                 } else {
                     return new OO.ui.Process( function () {
+                        $( '.oo-ui-windowManager' ).remove();
                         dialog.close();
                     } );
                 }
