@@ -2201,7 +2201,7 @@
                                 label: gadgetMsg[ 'affiliate-search-by-region-north-america' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
-                                data: 'South America',
+                                data: 'South/Latin America',
                                 label: gadgetMsg[ 'affiliate-search-by-region-south-latin-america' ]
                             } ),
                             new OO.ui.MenuOptionWidget( {
