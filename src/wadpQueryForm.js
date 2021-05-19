@@ -2349,8 +2349,8 @@
                 /* Filters are options so let's make sure it's the case all the time */
                 FILTERS["affiliateSearchType"] = dialog.fieldAffiliateSearchType.getMenu().findSelectedItem().getData();
                 if ( dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem() === null ) {
-                    // Default this field to anything as it could be optional in some cases.
-                    dialog.fieldAffiliateSearchTypeByRegion.getMenu().selectItemByData( 'MENA' );
+                    // Default this field to all regions as it could be optional in some cases.
+                    dialog.fieldAffiliateSearchTypeByRegion.getMenu().selectItemByData( 'all-regions' );
                     FILTERS["affiliateSearchTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
                 } else {
                     FILTERS["affiliateSearchTypeByRegion"] = dialog.fieldAffiliateSearchTypeByRegion.getMenu().findSelectedItem().getData();
