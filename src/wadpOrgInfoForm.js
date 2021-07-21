@@ -782,6 +782,9 @@
                 this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
                     options: [
                         {
+                            data: '0'
+                        },
+                        {
                             data: '1'
                         },
                         {

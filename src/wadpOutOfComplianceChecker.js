@@ -16,7 +16,8 @@
             getOrgInfos,
             parseModuleContent,
             cleanRawEntry,
-            getLatestReport;
+            getLatestReport,
+            getOOCLevel;
 
         /**
          * Provides API parameters for getting the content from [[Module:Activities_Reports]]
@@ -43,6 +44,22 @@
                 action: 'query',
                 prop: 'revisions',
                 titles: 'Module:Organizational_Informations',
+                rvprop: 'content',
+                rvlimit: 1
+            };
+        };
+
+        /**
+         * Provides API parameters for getting the content from
+         * [[Module:Organizational_Informations/Out_Of_Compliance_Level]]
+         *
+         * @return {Object}
+         */
+        getOOCLevel = function () {
+            return {
+                action: 'query',
+                prop: 'revisions',
+                titles: 'Module:Organizational_Informations/Out_Of_Compliance_Level',
                 rvprop: 'content',
                 rvlimit: 1
             };
@@ -161,229 +178,296 @@
         // Let's treat User Groups first before tackling Chapters
         apiObj.get( getActivitiesReports() ).done( function ( activitiesReportsData ) {
             apiObj.get( getOrgInfos() ).done( function ( orgInfosData ) {
-                var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
-                    manifest = [], reportEndYear, reportingEndDate, dateSlice,
-                    todayDate, insertInPlace, latestActivityReport, oocc_manifest = [];
+                apiObj.get( getOOCLevel() ).done( function( oocLevelsData ) {
+                    var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
+                        manifest = [], reportEndYear, reportingEndDate, dateSlice,
+                        todayDate, insertInPlace, latestActivityReport, insertInPlaceOOC,
+                        oocLevels, ooc_manifest = [], oocLevel;
 
-                activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
-                orgInfos = parseModuleContent( orgInfosData.query.pages );
+                    activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
+                    orgInfos = parseModuleContent( orgInfosData.query.pages );
+                    oocLevels = parseModuleContent( oocLevelsData.query.pages );
 
-                for ( var i = 0; i < orgInfos.length; i++ ) {
-                    orgInfo = cleanRawEntry( orgInfos[i].value.fields );
-                    activityReport = cleanRawEntry( activitiesReports[i].value.fields );
+                    // First of all populate the ooc_manifest with existing entries
+                    for (i = 0; i < oocLevels.length; i++ ) {
+                        ooc_manifest.push( cleanRawEntry( oocLevels[i].value.fields ) );
+                    }
 
-                    latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
+                    for ( var i = 0; i < orgInfos.length; i++ ) {
+                        orgInfo = cleanRawEntry( orgInfos[i].value.fields );
+                        activityReport = cleanRawEntry( activitiesReports[i].value.fields );
 
-                    if ( orgInfo.org_type === 'User Group' ||
-                         orgInfo.org_type === 'Chapter' ||
-                         orgInfo.org_type === 'Thematic Organization'
-                    ) {
-                        currentYear = new Date().getFullYear();
-                        reportEndYear = latestActivityReport.end_date.split( "/" )[2];
-                        dateSlice = orgInfo.agreement_date.split( "/" );
-                        // generate reporting end date
-                        reportingEndDate = new Date( currentYear, dateSlice[1], dateSlice[0] )
-                            .toJSON().slice( 0, 10 ).replace( /-/g, '/' );
-                        reportingEndDate = reportingEndDate.split( '/' ).reverse().join( '/' );
-                        // generate today's date as reportingEndDate above
-                        todayDate = new Date().toJSON().slice(0,10).replace(/-/g,'/');
-                        todayDate = todayDate.split( '/' ).reverse().join( '/' );
+                        latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
 
-                        // perform checks to see if activities report is not yet submitted
-                        if ( todayDate > reportingEndDate && reportEndYear < ( currentYear - 1 ) ) {
-                            if ( orgInfo.uptodate_reporting === 'Tick' ) {
-                                orgInfo.uptodate_reporting = 'Cross';
+                        if ( orgInfo.org_type === 'User Group' ||
+                            orgInfo.org_type === 'Chapter' ||
+                            orgInfo.org_type === 'Thematic Organization'
+                        ) {
+                            currentYear = new Date().getFullYear();
+                            reportEndYear = latestActivityReport.end_date.split( "/" )[2];
+                            dateSlice = orgInfo.agreement_date.split( "/" );
+                            // generate reporting end date
+                            reportingEndDate = new Date( currentYear, dateSlice[1], dateSlice[0] )
+                                .toJSON().slice( 0, 10 ).replace( /-/g, '/' );
+                            reportingEndDate = reportingEndDate.split( '/' ).reverse().join( '/' );
+                            // generate today's date as reportingEndDate above
+                            todayDate = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+                            todayDate = todayDate.split( '/' ).reverse().join( '/' );
+
+                            // perform checks to see if activities report is not yet submitted
+                            if ( todayDate > reportingEndDate && reportEndYear < ( currentYear - 1 ) ) {
+                                if ( orgInfo.uptodate_reporting === 'Tick' ) {
+                                    orgInfo.uptodate_reporting = 'Cross';
+                                    orgInfo.out_of_compliance_level = '1';
+                                }
+
+                                if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
+                                    orgInfo.uptodate_reporting = 'Cross-N';
+                                    orgInfo.out_of_compliance_level = '1';
+                                }
+
+                                oocLevel = {
+                                    group_name: orgInfo.group_name,
+                                    out_of_compliance_level: '1',
+                                    financial_year: currentYear.toString(),
+                                    created_at: new Date().toISOString()
+                                };
+
+                                ooc_manifest.push( oocLevel );
                             }
-
-                            if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
-                                orgInfo.uptodate_reporting = 'Cross-N';
-                            }
+                            manifest.push( orgInfo );
+                        } else {
+                            manifest.push( orgInfo );
                         }
-                        manifest.push( orgInfo );
-                    } else {
-                        manifest.push( orgInfo );
                     }
-                }
 
-                // Re-generate the Lua table based on `manifest`
-                insertInPlace = 'return {\n';
-                for ( i = 0; i < manifest.length; i++ ) {
-                    insertInPlace += '\t{\n';
-                    if ( manifest[ i ].unique_id ) {
-                        insertInPlace += generateKeyValuePair(
-                            'unique_id',
-                            manifest[ i ].unique_id
-                        );
-                    }
-                    if ( manifest[ i ].affiliate_code ){
-                        insertInPlace += generateKeyValuePair(
-                            'affiliate_code',
-                            manifest[ i ].affiliate_code
-                        );
-                    }
-                    if ( manifest[ i ].group_name ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_name',
-                            manifest[ i ].group_name
-                        );
-                    }
-                    if ( manifest[ i ].org_type ) {
-                        insertInPlace += generateKeyValuePair(
-                            'org_type',
-                            manifest[ i ].org_type
-                        );
-                    }
-                    if ( manifest[ i ].region ) {
-                        insertInPlace += generateKeyValuePair(
-                            'region',
-                            manifest[ i ].region
-                        );
-                    }
-                    if ( manifest[ i ].group_country ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_country',
-                            manifest[ i ].group_country
-                        );
-                    }
-                    if ( !manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
-                        insertInPlace += generateKeyValuePair(
-                            'legal_entity',
-                            'No'
-                        );
-                    } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
-                        insertInPlace += generateKeyValuePair(
-                            'legal_entity',
-                            manifest[ i ].legal_entity
-                        );
-                    } else {
-                        insertInPlace += generateKeyValuePair(
-                            'legal_entity',
-                            'Yes'
-                        );
-                    }
-                    if ( manifest[ i ].mission_changed ) {
-                        insertInPlace += generateKeyValuePair(
-                            'mission_changed',
-                            manifest[ i ].mission_changed
-                        );
-                    }
-                    if ( manifest[ i ].explanation ) {
-                        insertInPlace += generateKeyValuePair(
-                            'explanation',
-                            manifest[ i ].explanation
-                        );
-                    }
-                    if ( manifest[ i ].group_page ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_page',
-                            manifest[ i ].group_page.trim()
-                        );
-                    }
-                    if ( manifest[ i ].member_count ) {
-                        insertInPlace += generateKeyValuePair(
-                            'member_count',
-                            manifest[ i ].member_count
-                        );
-                    }
-                    if ( manifest[ i ].facebook ) {
-                        insertInPlace += generateKeyValuePair(
-                            'facebook',
-                            manifest[ i ].facebook.trim()
-                        );
-                    }
-                    if ( manifest[ i ].twitter ) {
-                        insertInPlace += generateKeyValuePair(
-                            'twitter',
-                            manifest[ i ].twitter.trim()
-                        );
-                    }
-                    if ( manifest[ i ].other ) {
-                        insertInPlace += generateKeyValuePair(
-                            'other',
-                            manifest[ i ].other.trim()
-                        );
-                    }
-                    if ( manifest[ i ].dm_structure ) {
-                        insertInPlace += generateKeyValuePair(
-                            'dm_structure',
-                            manifest[ i ].dm_structure
-                        );
-                    }
-                    if ( manifest[ i ].board_contacts ) {
-                        insertInPlace += generateKeyValuePair(
-                            'board_contacts',
-                            manifest[ i ].board_contacts
-                        );
-                    }
-                    if ( manifest[ i ].agreement_date ){
-                        insertInPlace += generateKeyValuePair(
-                            'agreement_date',
-                            manifest[ i ].agreement_date
-                        );
-                    }
-                    if ( manifest[ i ].uptodate_reporting ){
-                        insertInPlace += generateKeyValuePair(
-                            'uptodate_reporting',
-                            manifest[ i ].uptodate_reporting
-                        );
-                    }
-                    if ( manifest[ i ].notes_on_reporting ){
-                        insertInPlace += generateKeyValuePair(
-                            'notes_on_reporting',
-                            manifest[ i ].notes_on_reporting
-                        );
-                    } else {
-                        insertInPlace += generateKeyValuePair(
-                            'notes_on_reporting',
-                            ''
-                        );
-                    }
-                    if ( manifest[ i ].recognition_status ){
-                        insertInPlace += generateKeyValuePair(
-                            'recognition_status',
-                            manifest[ i ].recognition_status
-                        );
-                    }
-                    if ( manifest[ i ].out_of_compliance_level ){
-                        insertInPlace += generateKeyValuePair(
-                            'out_of_compliance_level',
-                            manifest[ i ].out_of_compliance_level
-                        );
-                    }
-                    if ( manifest[ i ].derecognition_date ){
-                        insertInPlace += generateKeyValuePair(
-                            'derecognition_date',
-                            manifest[ i ].derecognition_date
-                        );
-                    }
-                    if ( manifest[ i ].derecognition_note ){
-                        insertInPlace += generateKeyValuePair(
-                            'derecognition_note',
-                            manifest[ i ].derecognition_note
-                        );
-                    }
-                    if ( manifest[ i ].dos_stamp ) {
-                        insertInPlace += generateKeyValuePair(
-                            'dos_stamp',
-                            manifest[ i ].dos_stamp
-                        );
-                    }
-                    insertInPlace += '\t},\n';
-                }
-                insertInPlace += '}';
+                    console.log(ooc_manifest);
 
-                // Make changes to the Org Info table as required.
-                apiObj.postWithToken(
-                    'csrf',
-                    {
-                        action: 'edit',
-                        nocreate: true,
-                        summary: '[Automated] M&E compliance automated checks by WAD Portal.',
-                        pageid: 10603224,  // [[Module:Organizational_Informations]]
-                        text: insertInPlace,
-                        contentmodel: 'Scribunto'
+                    // Re-generate the OOC Lua table based on `ooc_manifest`
+                    insertInPlaceOOC = 'return {\n';
+                    for ( i = 0; i < ooc_manifest.length; i++ ) {
+                        insertInPlaceOOC += '\t{\n';
+                        if ( ooc_manifest[ i ].group_name ) {
+                            insertInPlaceOOC += generateKeyValuePair(
+                                'group_name',
+                                ooc_manifest[ i ].group_name
+                            );
+                        }
+                        if ( ooc_manifest[ i ].out_of_compliance_level ) {
+                            insertInPlaceOOC += generateKeyValuePair(
+                                'out_of_compliance_level',
+                                ooc_manifest[ i ].out_of_compliance_level
+                            );
+                        }
+                        if ( ooc_manifest[ i ].financial_year ) {
+                            insertInPlaceOOC += generateKeyValuePair(
+                                'financial_year',
+                                ooc_manifest[ i ].financial_year
+                            );
+                        }
+                        if ( ooc_manifest[ i ].created_at ) {
+                            insertInPlaceOOC += generateKeyValuePair(
+                                'created_at',
+                                ooc_manifest[ i ].created_at
+                            );
+                        }
+                        insertInPlaceOOC += '\t},\n';
                     }
-                );
+                    insertInPlaceOOC += '}';
+
+                    // Make changes to the Org Info table as required.
+                    apiObj.postWithToken(
+                        'csrf',
+                        {
+                            action: 'edit',
+                            nocreate: true,
+                            summary: '[Automated] M&E compliance automated checks by WAD Portal.',
+                            pageid: 11441702,  // [[Module:Organizational_Informations/Out Of Compliance Level]]
+                            text: insertInPlaceOOC,
+                            contentmodel: 'Scribunto'
+                        }
+                    );
+
+                    // Re-generate the Lua table based on `manifest`
+                    insertInPlace = 'return {\n';
+                    for ( i = 0; i < manifest.length; i++ ) {
+                        insertInPlace += '\t{\n';
+                        if ( manifest[ i ].unique_id ) {
+                            insertInPlace += generateKeyValuePair(
+                                'unique_id',
+                                manifest[ i ].unique_id
+                            );
+                        }
+                        if ( manifest[ i ].affiliate_code ){
+                            insertInPlace += generateKeyValuePair(
+                                'affiliate_code',
+                                manifest[ i ].affiliate_code
+                            );
+                        }
+                        if ( manifest[ i ].group_name ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_name',
+                                manifest[ i ].group_name
+                            );
+                        }
+                        if ( manifest[ i ].org_type ) {
+                            insertInPlace += generateKeyValuePair(
+                                'org_type',
+                                manifest[ i ].org_type
+                            );
+                        }
+                        if ( manifest[ i ].region ) {
+                            insertInPlace += generateKeyValuePair(
+                                'region',
+                                manifest[ i ].region
+                            );
+                        }
+                        if ( manifest[ i ].group_country ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_country',
+                                manifest[ i ].group_country
+                            );
+                        }
+                        if ( !manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
+                            insertInPlace += generateKeyValuePair(
+                                'legal_entity',
+                                'No'
+                            );
+                        } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
+                            insertInPlace += generateKeyValuePair(
+                                'legal_entity',
+                                manifest[ i ].legal_entity
+                            );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'legal_entity',
+                                'Yes'
+                            );
+                        }
+                        if ( manifest[ i ].mission_changed ) {
+                            insertInPlace += generateKeyValuePair(
+                                'mission_changed',
+                                manifest[ i ].mission_changed
+                            );
+                        }
+                        if ( manifest[ i ].explanation ) {
+                            insertInPlace += generateKeyValuePair(
+                                'explanation',
+                                manifest[ i ].explanation
+                            );
+                        }
+                        if ( manifest[ i ].group_page ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_page',
+                                manifest[ i ].group_page.trim()
+                            );
+                        }
+                        if ( manifest[ i ].member_count ) {
+                            insertInPlace += generateKeyValuePair(
+                                'member_count',
+                                manifest[ i ].member_count
+                            );
+                        }
+                        if ( manifest[ i ].facebook ) {
+                            insertInPlace += generateKeyValuePair(
+                                'facebook',
+                                manifest[ i ].facebook.trim()
+                            );
+                        }
+                        if ( manifest[ i ].twitter ) {
+                            insertInPlace += generateKeyValuePair(
+                                'twitter',
+                                manifest[ i ].twitter.trim()
+                            );
+                        }
+                        if ( manifest[ i ].other ) {
+                            insertInPlace += generateKeyValuePair(
+                                'other',
+                                manifest[ i ].other.trim()
+                            );
+                        }
+                        if ( manifest[ i ].dm_structure ) {
+                            insertInPlace += generateKeyValuePair(
+                                'dm_structure',
+                                manifest[ i ].dm_structure
+                            );
+                        }
+                        if ( manifest[ i ].board_contacts ) {
+                            insertInPlace += generateKeyValuePair(
+                                'board_contacts',
+                                manifest[ i ].board_contacts
+                            );
+                        }
+                        if ( manifest[ i ].agreement_date ){
+                            insertInPlace += generateKeyValuePair(
+                                'agreement_date',
+                                manifest[ i ].agreement_date
+                            );
+                        }
+                        if ( manifest[ i ].uptodate_reporting ){
+                            insertInPlace += generateKeyValuePair(
+                                'uptodate_reporting',
+                                manifest[ i ].uptodate_reporting
+                            );
+                        }
+                        if ( manifest[ i ].notes_on_reporting ){
+                            insertInPlace += generateKeyValuePair(
+                                'notes_on_reporting',
+                                manifest[ i ].notes_on_reporting
+                            );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'notes_on_reporting',
+                                ''
+                            );
+                        }
+                        if ( manifest[ i ].recognition_status ){
+                            insertInPlace += generateKeyValuePair(
+                                'recognition_status',
+                                manifest[ i ].recognition_status
+                            );
+                        }
+                        if ( manifest[ i ].out_of_compliance_level ){
+                            insertInPlace += generateKeyValuePair(
+                                'out_of_compliance_level',
+                                manifest[ i ].out_of_compliance_level
+                            );
+                        }
+                        if ( manifest[ i ].derecognition_date ){
+                            insertInPlace += generateKeyValuePair(
+                                'derecognition_date',
+                                manifest[ i ].derecognition_date
+                            );
+                        }
+                        if ( manifest[ i ].derecognition_note ){
+                            insertInPlace += generateKeyValuePair(
+                                'derecognition_note',
+                                manifest[ i ].derecognition_note
+                            );
+                        }
+                        if ( manifest[ i ].dos_stamp ) {
+                            insertInPlace += generateKeyValuePair(
+                                'dos_stamp',
+                                manifest[ i ].dos_stamp
+                            );
+                        }
+                        insertInPlace += '\t},\n';
+                    }
+                    insertInPlace += '}';
+
+                    // Make changes to the Org Info table as required.
+                    apiObj.postWithToken(
+                        'csrf',
+                        {
+                            action: 'edit',
+                            nocreate: true,
+                            summary: '[Automated] M&E compliance automated checks by WAD Portal.',
+                            pageid: 10603224,  // [[Module:Organizational_Informations]]
+                            text: insertInPlace,
+                            contentmodel: 'Scribunto'
+                        }
+                    );
+                } );
             } );
         } );
     } );
