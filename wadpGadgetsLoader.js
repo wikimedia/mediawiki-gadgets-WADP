@@ -28,6 +28,13 @@
 
         /* Load the WADP Query Form (module) */
         mw.loader.load( 'ext.gadget.wadpQueryForm' );
+
+        var users = [ 'DAlangi (WMF)', 'DNdubane (WMF)', 'JAnstee (WMF)', 'MKaur (WMF)' ];
+
+        if ( users.indexOf( mw.config.values.wgUserName ) > -1 ) {
+            /* Load the out of compliance checker */
+            mw.loader.load( 'ext.gadget.wadpOutOfComplianceChecker' );
+        }
     }
 
     if ( mw.config.values.wgPageName.split( 'Wikimedia_Affiliates_Data_Portal/' )[1] === 'Organizations_Information' ) {
