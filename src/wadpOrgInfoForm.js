@@ -433,6 +433,7 @@
                 this.agreement_date = '';
                 this.uptodate_reporting = '';
                 this.recognition_status = '';
+                this.out_of_compliance_level = '';
                 this.dos_stamp = '';
 
                 if ( config.unique_id ) {
@@ -491,6 +492,9 @@
                 }
                 if ( config.recognition_status ) {
                     this.recognition_status = config.recognition_status;
+                }
+                if ( config.out_of_compliance_level ) {
+                    this.out_of_compliance_level = config.out_of_compliance_level;
                 }
                 if ( config.derecognition_date ) {
                     this.derecognition_date = config.derecognition_date;
@@ -775,6 +779,25 @@
                     this.fieldRecognitionStatus.setValue( this.recognition_status );
                 }
 
+                this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
+                    options: [
+                        {
+                            data: '1'
+                        },
+                        {
+                            data: '2'
+                        },
+                        {
+                            data: '3'
+                        }
+                    ]
+                } );
+                if ( this.out_of_compliance_level ) {
+                    this.fieldOutOfComplianceLevel.setValue(
+                        this.out_of_compliance_level ? this.out_of_compliance_level : 'N/A'
+                    );
+                }
+
                 fieldDerecognitionDate = this.fieldDerecognitionDate = new mw.widgets.DateInputWidget( {
                     value: this.derecognition_date ? convertDateToYyyyMmDdFormat( this.derecognition_date ) : this.derecognition_date,
                     classes: [ 'full-width' ],
@@ -950,6 +973,13 @@
                             }
                         ),
                         new OO.ui.FieldLayout(
+                            this.fieldOutOfComplianceLevel,
+                            {
+                                label: gadgetMsg[ 'out-of-compliance-level' ],
+                                align: 'top',
+                            }
+                        ),
+                        new OO.ui.FieldLayout(
                             this.fieldDerecognitionDate,
                             {
                                 align: 'top',
@@ -1119,6 +1149,12 @@
                             workingEntry.recognition_status = dialog.fieldRecognitionStatus.getValue();
                         } else if ( !dialog.fieldRecognitionStatus.getValue() && workingEntry.recognition_status ) {
                             delete workingEntry.recognition_status;
+                        }
+
+                        if ( dialog.fieldOutOfComplianceLevel.getValue() ) {
+                            workingEntry.out_of_compliance_level = dialog.fieldOutOfComplianceLevel.getValue();
+                        } else if ( !dialog.fieldOutOfComplianceLevel.getValue() && workingEntry.out_of_compliance_level ) {
+                            delete workingEntry.out_of_compliance_level;
                         }
 
                         if ( dialog.fieldDerecognitionDate.getValue() ) {
@@ -1304,6 +1340,12 @@
                             insertInPlace += generateKeyValuePair(
                                 'recognition_status',
                                 manifest[ i ].recognition_status
+                            );
+                        }
+                        if ( manifest[ i ].out_of_compliance_level ){
+                            insertInPlace += generateKeyValuePair(
+                                'out_of_compliance_level',
+                                manifest[ i ].out_of_compliance_level
                             );
                         }
                         if ( manifest[ i ].derecognition_date ){

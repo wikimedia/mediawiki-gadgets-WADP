@@ -163,7 +163,7 @@
             apiObj.get( getOrgInfos() ).done( function ( orgInfosData ) {
                 var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
                     manifest = [], reportEndYear, reportingEndDate, dateSlice,
-                    todayDate, insertInPlace, latestActivityReport;
+                    todayDate, insertInPlace, latestActivityReport, oocc_manifest = [];
 
                 activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
                 orgInfos = parseModuleContent( orgInfosData.query.pages );
@@ -174,7 +174,10 @@
 
                     latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
 
-                    if ( orgInfo.org_type === 'User Group' ) {
+                    if ( orgInfo.org_type === 'User Group' ||
+                         orgInfo.org_type === 'Chapter' ||
+                         orgInfo.org_type === 'Thematic Organization'
+                    ) {
                         currentYear = new Date().getFullYear();
                         reportEndYear = latestActivityReport.end_date.split( "/" )[2];
                         dateSlice = orgInfo.agreement_date.split( "/" );
@@ -196,7 +199,7 @@
                                 orgInfo.uptodate_reporting = 'Cross-N';
                             }
                         }
-                            manifest.push( orgInfo );
+                        manifest.push( orgInfo );
                     } else {
                         manifest.push( orgInfo );
                     }
@@ -341,6 +344,12 @@
                             manifest[ i ].recognition_status
                         );
                     }
+                    if ( manifest[ i ].out_of_compliance_level ){
+                        insertInPlace += generateKeyValuePair(
+                            'out_of_compliance_level',
+                            manifest[ i ].out_of_compliance_level
+                        );
+                    }
                     if ( manifest[ i ].derecognition_date ){
                         insertInPlace += generateKeyValuePair(
                             'derecognition_date',
@@ -369,7 +378,7 @@
                     {
                         action: 'edit',
                         nocreate: true,
-                        summary: 'M&E compliance automated checks by WAD Portal.',
+                        summary: '[Automated] M&E compliance automated checks by WAD Portal.',
                         pageid: 10603224,  // [[Module:Organizational_Informations]]
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
