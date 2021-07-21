@@ -219,29 +219,36 @@
                                 if ( orgInfo.uptodate_reporting === 'Tick' ) {
                                     orgInfo.uptodate_reporting = 'Cross';
                                     orgInfo.out_of_compliance_level = '1';
+
+                                    oocLevel = {
+                                        group_name: orgInfo.group_name,
+                                        out_of_compliance_level: '1',
+                                        financial_year: currentYear.toString(),
+                                        created_at: new Date().toISOString()
+                                    };
+
+                                    ooc_manifest.push( oocLevel );
                                 }
 
                                 if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
                                     orgInfo.uptodate_reporting = 'Cross-N';
                                     orgInfo.out_of_compliance_level = '1';
+
+                                    oocLevel = {
+                                        group_name: orgInfo.group_name,
+                                        out_of_compliance_level: '1',
+                                        financial_year: currentYear.toString(),
+                                        created_at: new Date().toISOString()
+                                    };
+
+                                    ooc_manifest.push( oocLevel );
                                 }
-
-                                oocLevel = {
-                                    group_name: orgInfo.group_name,
-                                    out_of_compliance_level: '1',
-                                    financial_year: currentYear.toString(),
-                                    created_at: new Date().toISOString()
-                                };
-
-                                ooc_manifest.push( oocLevel );
                             }
                             manifest.push( orgInfo );
                         } else {
                             manifest.push( orgInfo );
                         }
                     }
-
-                    console.log(ooc_manifest);
 
                     // Re-generate the OOC Lua table based on `ooc_manifest`
                     insertInPlaceOOC = 'return {\n';
