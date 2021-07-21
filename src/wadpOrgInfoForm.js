@@ -47,11 +47,9 @@
             /** M&E staff list */
             var users = [
                 'DAlangi (WMF)',
-                'DMccurdy (WMF)',
                 'DNdubane (WMF)',
                 'JAnstee (WMF)',
-                'MKaur (WMF)',
-                'RMaung (WMF)'
+                'MKaur (WMF)'
             ];
 
             var i, res, key, val, gadgetMsg = {};
@@ -766,6 +764,10 @@
                         {
                             data: 'derecognised',
                             label: gadgetMsg[ 'affiliate-derecognised' ]
+                        },
+                        {
+                            data: 'suspended',
+                            label: gadgetMsg[ 'affiliate-suspended' ]
                         }
                     ]
                 } );
@@ -1326,7 +1328,7 @@
                     }
                     insertInPlace += '}';
 
-                    // Add the new Report into the Lua table.
+                    // Make changes to the Org Info table as required.
                     new mw.Api().postWithToken(
                         'csrf',
                         {
