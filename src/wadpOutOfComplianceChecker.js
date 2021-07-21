@@ -199,9 +199,10 @@
 
                         latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
 
-                        if ( orgInfo.org_type === 'User Group' ||
+                        if ( ( orgInfo.org_type === 'User Group' ||
                             orgInfo.org_type === 'Chapter' ||
-                            orgInfo.org_type === 'Thematic Organization'
+                            orgInfo.org_type === 'Thematic Organization' ) &&
+                            orgInfo.recognition_status === 'recognised'
                         ) {
                             currentYear = new Date().getFullYear();
                             reportEndYear = latestActivityReport.end_date.split( "/" )[2];
