@@ -200,9 +200,9 @@
                         latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
 
                         if ( ( orgInfo.org_type === 'User Group' ||
-                            orgInfo.org_type === 'Chapter' ||
-                            orgInfo.org_type === 'Thematic Organization' ) &&
-                            orgInfo.recognition_status === 'recognised'
+                                orgInfo.org_type === 'Chapter' ||
+                                orgInfo.org_type === 'Thematic Organization' )
+                            && orgInfo.recognition_status === 'recognised'
                         ) {
                             currentYear = new Date().getFullYear();
                             reportEndYear = latestActivityReport.end_date.split( "/" )[2];
@@ -212,38 +212,40 @@
                                 .toJSON().slice( 0, 10 ).replace( /-/g, '/' );
                             reportingEndDate = reportingEndDate.split( '/' ).reverse().join( '/' );
                             // generate today's date as reportingEndDate above
-                            todayDate = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+                            todayDate = new Date().toJSON().slice( 0, 10 ).replace(/-/g,'/');
                             todayDate = todayDate.split( '/' ).reverse().join( '/' );
 
-                            // perform checks to see if activities report is not yet submitted
-                            if ( todayDate > reportingEndDate && reportEndYear < ( currentYear - 1 ) ) {
-                                if ( orgInfo.uptodate_reporting === 'Tick' ) {
-                                    orgInfo.uptodate_reporting = 'Cross';
-                                    orgInfo.out_of_compliance_level = '1';
+                            // perform checks to see if activities report is not yet submitted : dateSlice[1] is reporting month
+                            if ( todayDate > reportingEndDate &&
+                                ( parseInt( dateSlice[1] ) < 12 ) &&
+                                reportEndYear < currentYear &&
+                                orgInfo.out_of_compliance_level < '1'
+                            ) {
+                                orgInfo.out_of_compliance_level = '1';
 
-                                    oocLevel = {
-                                        group_name: orgInfo.group_name,
-                                        out_of_compliance_level: '1',
-                                        financial_year: currentYear.toString(),
-                                        created_at: new Date().toISOString()
-                                    };
+                                oocLevel = {
+                                    group_name: orgInfo.group_name,
+                                    out_of_compliance_level: '1',
+                                    financial_year: currentYear.toString(),
+                                    created_at: new Date().toISOString()
+                                };
 
-                                    ooc_manifest.push( oocLevel );
-                                }
+                                ooc_manifest.push( oocLevel );
+                            } else if ( todayDate > reportingEndDate &&
+                                ( parseInt( dateSlice[1] ) > 11 ) &&
+                                reportEndYear < ( currentYear - 1 ) &&
+                                orgInfo.out_of_compliance_level < '1'
+                            ) {
+                                orgInfo.out_of_compliance_level = '1';
 
-                                if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
-                                    orgInfo.uptodate_reporting = 'Cross-N';
-                                    orgInfo.out_of_compliance_level = '1';
+                                oocLevel = {
+                                    group_name: orgInfo.group_name,
+                                    out_of_compliance_level: '1',
+                                    financial_year: currentYear.toString(),
+                                    created_at: new Date().toISOString()
+                                };
 
-                                    oocLevel = {
-                                        group_name: orgInfo.group_name,
-                                        out_of_compliance_level: '1',
-                                        financial_year: currentYear.toString(),
-                                        created_at: new Date().toISOString()
-                                    };
-
-                                    ooc_manifest.push( oocLevel );
-                                }
+                                ooc_manifest.push( oocLevel );
                             }
                             manifest.push( orgInfo );
                         } else {
