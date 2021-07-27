@@ -431,6 +431,8 @@
                 this.dm_structure = []; // dm = decision making
                 this.board_contacts = '';
                 this.agreement_date = '';
+                this.fiscal_year_start = '';
+                this.fiscal_year_end = '';
                 this.uptodate_reporting = '';
                 this.recognition_status = '';
                 this.me_bypass_ooc_autochecks = '';
@@ -487,6 +489,12 @@
                 }
                 if ( config.agreement_date ) {
                     this.agreement_date = config.agreement_date;
+                }
+                if ( config.fiscal_year_start ) {
+                    this.fiscal_year_start = config.fiscal_year_start;
+                }
+                if ( config.fiscal_year_end ) {
+                    this.fiscal_year_end = config.fiscal_year_end;
                 }
                 if ( config.uptodate_reporting ) {
                     this.uptodate_reporting = config.uptodate_reporting;
@@ -732,11 +740,24 @@
                     required: true,
                     placeholder: gadgetMsg[ 'board-contacts' ]
                 } );
+
                 this.fieldAgreementDate = new mw.widgets.DateInputWidget( {
                     value: this.agreement_date ? convertDateToYyyyMmDdFormat( this.agreement_date ) : this.agreement_date,
                     classes: [ 'full-width' ],
                     placeholderLabel: gadgetMsg[ 'agreement-date' ],
                     required: true
+                } );
+
+                this.fieldFiscalYearStart = new OO.ui.TextInputWidget( {
+                    value: this.fiscal_year_start,
+                    classes: [ 'full-width' ],
+                    placeholder: gadgetMsg[ 'fiscal-year-start' ]
+                } );
+
+                this.fieldFiscalYearEnd = new OO.ui.TextInputWidget( {
+                    value: this.fiscal_year_end,
+                    classes: [ 'full-width' ],
+                    placeholder: gadgetMsg[ 'fiscal-year-end' ]
                 } );
 
                 this.fieldUpToDateReporting = new OO.ui.DropdownInputWidget( {
@@ -795,18 +816,10 @@
 
                 this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
                     options: [
-                        {
-                            data: '0'
-                        },
-                        {
-                            data: '1'
-                        },
-                        {
-                            data: '2'
-                        },
-                        {
-                            data: '3'
-                        }
+                        { data: '0' },
+                        { data: '1' },
+                        { data: '2' },
+                        { data: '3' }
                     ]
                 } );
                 if ( this.out_of_compliance_level ) {
@@ -973,6 +986,22 @@
                                 label: gadgetMsg[ 'recognition-date-of-affiliate' ],
                                 align: 'top',
                                 help: gadgetMsg[ 'recognition-date-tip' ]
+                            }
+                        ),
+                        new OO.ui.FieldLayout(
+                            this.fieldFiscalYearStart,
+                            {
+                                label: gadgetMsg[ 'fiscal-year-of-affiliate' ],
+                                align: 'top',
+                                placeholder: gadgetMsg[ 'fiscal-year-start' ]
+                            }
+                        ),
+                        new OO.ui.FieldLayout(
+                            this.fieldFiscalYearEnd,
+                            {
+                                label: '',
+                                align: 'top',
+                                placeholder: gadgetMsg[ 'fiscal-year-end' ]
                             }
                         ),
                         new OO.ui.FieldLayout(
@@ -1163,6 +1192,18 @@
                             delete workingEntry.agreement_date;
                         }
 
+                        if ( dialog.fieldFiscalYearStart.getValue() ) {
+                            workingEntry.fiscal_year_start = dialog.fieldFiscalYearStart.getValue();
+                        } else if ( !dialog.fieldFiscalYearStart.getValue() && workingEntry.fiscal_year_start ) {
+                            delete workingEntry.fiscal_year_start;
+                        }
+
+                        if ( dialog.fieldFiscalYearEnd.getValue() ) {
+                            workingEntry.fiscal_year_end = dialog.fieldFiscalYearEnd.getValue();
+                        } else if ( !dialog.fieldFiscalYearEnd.getValue() && workingEntry.fiscal_year_end ) {
+                            delete workingEntry.fiscal_year_end;
+                        }
+
                         if ( dialog.fieldUpToDateReporting.getValue() ) {
                             workingEntry.uptodate_reporting = dialog.fieldUpToDateReporting.getValue();
                         } else if ( !dialog.fieldUpToDateReporting.getValue() && workingEntry.uptodate_reporting ) {
@@ -1347,6 +1388,18 @@
                             insertInPlace += generateKeyValuePair(
                                 'agreement_date',
                                 manifest[ i ].agreement_date
+                            );
+                        }
+                        if ( manifest[ i ].fiscal_year_start ){
+                            insertInPlace += generateKeyValuePair(
+                                'fiscal_year_start',
+                                manifest[ i ].fiscal_year_start
+                            );
+                        }
+                        if ( manifest[ i ].fiscal_year_end ){
+                            insertInPlace += generateKeyValuePair(
+                                'fiscal_year_end',
+                                manifest[ i ].fiscal_year_end
                             );
                         }
                         if ( manifest[ i ].uptodate_reporting ){
