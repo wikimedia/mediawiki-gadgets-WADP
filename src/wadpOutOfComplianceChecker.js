@@ -203,6 +203,7 @@
                                 orgInfo.org_type === 'Chapter' ||
                                 orgInfo.org_type === 'Thematic Organization' )
                             && orgInfo.recognition_status === 'recognised'
+                            && orgInfo.me_bypass_ooc_autochecks !== 'Yes'
                         ) {
                             currentYear = new Date().getFullYear();
                             reportEndYear = latestActivityReport.end_date.split( "/" )[2];
@@ -435,6 +436,12 @@
                             insertInPlace += generateKeyValuePair(
                                 'recognition_status',
                                 manifest[ i ].recognition_status
+                            );
+                        }
+                        if ( manifest[ i ].me_bypass_ooc_autochecks ){
+                            insertInPlace += generateKeyValuePair(
+                                'me_bypass_ooc_autochecks',
+                                manifest[ i ].me_bypass_ooc_autochecks
                             );
                         }
                         if ( manifest[ i ].out_of_compliance_level ){
