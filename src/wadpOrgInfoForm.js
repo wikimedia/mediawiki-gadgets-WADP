@@ -433,6 +433,7 @@
                 this.agreement_date = '';
                 this.uptodate_reporting = '';
                 this.recognition_status = '';
+                this.me_bypass_ooc_autochecks = '';
                 this.out_of_compliance_level = '';
                 this.dos_stamp = '';
 
@@ -492,6 +493,9 @@
                 }
                 if ( config.recognition_status ) {
                     this.recognition_status = config.recognition_status;
+                }
+                if ( config.me_bypass_ooc_autochecks ) {
+                    this.me_bypass_ooc_autochecks = config.me_bypass_ooc_autochecks;
                 }
                 if ( config.out_of_compliance_level ) {
                     this.out_of_compliance_level = config.out_of_compliance_level;
@@ -688,10 +692,10 @@
 
                 fieldDMStructureSelected = [];
                 for ( i = 0; i < dm_structure.length; i++ ) {
-                    fieldDMStructureSelected.push(
-                        { data: dmstructure[ i ],
-                            label: gadgetMsg[ dm_structure[ i ].toLowerCase().replace( / /g, '-' ) + '-structure' ] }
-                    );
+                    fieldDMStructureSelected.push( {
+                        data: dm_structure[ i ],
+                        label: gadgetMsg[ dm_structure[ i ].toLowerCase().replace( / /g, '-' ) + '-structure' ]
+                    } );
                 }
                 this.fieldDecisionMakingStructure = new OO.ui.CheckboxMultiselectWidget( {
                     classes: [ 'checkbox-inline' ],
@@ -777,6 +781,16 @@
                 } );
                 if ( this.recognition_status ) {
                     this.fieldRecognitionStatus.setValue( this.recognition_status );
+                }
+
+                this.fieldMEByPassOOCAutoChecks = new OO.ui.DropdownInputWidget( {
+                    options: [
+                        { data: 'No', },
+                        { data: 'Yes', }
+                    ]
+                } );
+                if ( this.me_bypass_ooc_autochecks ) {
+                    this.fieldMEByPassOOCAutoChecks.setValue( this.me_bypass_ooc_autochecks );
                 }
 
                 this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
@@ -976,6 +990,13 @@
                             }
                         ),
                         new OO.ui.FieldLayout(
+                            this.fieldMEByPassOOCAutoChecks,
+                            {
+                                label: gadgetMsg[ 'bypass-ooc-autochecks' ],
+                                align: 'top',
+                            }
+                        ),
+                        new OO.ui.FieldLayout(
                             this.fieldOutOfComplianceLevel,
                             {
                                 label: gadgetMsg[ 'out-of-compliance-level' ],
@@ -1152,6 +1173,12 @@
                             workingEntry.recognition_status = dialog.fieldRecognitionStatus.getValue();
                         } else if ( !dialog.fieldRecognitionStatus.getValue() && workingEntry.recognition_status ) {
                             delete workingEntry.recognition_status;
+                        }
+
+                        if ( dialog.fieldMEByPassOOCAutoChecks.getValue() ) {
+                            workingEntry.me_bypass_ooc_autochecks = dialog.fieldMEByPassOOCAutoChecks.getValue();
+                        } else if ( !dialog.fieldMEByPassOOCAutoChecks.getValue() && workingEntry.me_bypass_ooc_autochecks ) {
+                            delete workingEntry.me_bypass_ooc_autochecks;
                         }
 
                         if ( dialog.fieldOutOfComplianceLevel.getValue() ) {
@@ -1343,6 +1370,12 @@
                             insertInPlace += generateKeyValuePair(
                                 'recognition_status',
                                 manifest[ i ].recognition_status
+                            );
+                        }
+                        if ( manifest[i].me_bypass_ooc_autochecks ) {
+                            insertInPlace += generateKeyValuePair(
+                                'me_bypass_ooc_autochecks',
+                                manifest[ i ].me_bypass_ooc_autochecks
                             );
                         }
                         if ( manifest[ i ].out_of_compliance_level ){
