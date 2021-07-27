@@ -983,6 +983,13 @@
                             }
                         ),
                         new OO.ui.FieldLayout(
+                            this.fieldOutOfComplianceLevel,
+                            {
+                                label: gadgetMsg[ 'out-of-compliance-level' ],
+                                align: 'top',
+                            }
+                        ),
+                        new OO.ui.FieldLayout(
                             this.fieldRecognitionStatus,
                             {
                                 label: gadgetMsg[ 'recognition-status-label' ],
@@ -993,13 +1000,6 @@
                             this.fieldMEByPassOOCAutoChecks,
                             {
                                 label: gadgetMsg[ 'bypass-ooc-autochecks' ],
-                                align: 'top',
-                            }
-                        ),
-                        new OO.ui.FieldLayout(
-                            this.fieldOutOfComplianceLevel,
-                            {
-                                label: gadgetMsg[ 'out-of-compliance-level' ],
                                 align: 'top',
                             }
                         ),
