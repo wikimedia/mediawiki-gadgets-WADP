@@ -174,6 +174,15 @@
                 .replace( /\n/g, '<br />' );
         };
 
+        /**
+         * Add an interface to add days to a given date
+         */
+        Date.prototype.addDays = function ( days ) {
+            let date = new Date( this.valueOf() );
+            date.setDate( date.getDate() + days );
+            return date;
+        };
+
         apiObj = new mw.Api();
         // Let's treat User Groups first before tackling Chapters
         apiObj.get( getActivitiesReports() ).done( function ( activitiesReportsData ) {
