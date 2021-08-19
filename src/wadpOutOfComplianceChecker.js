@@ -178,20 +178,19 @@
          * Add an interface to add days to a given date
          */
         Date.prototype.addDays = function ( days ) {
-            let date = new Date( this.valueOf() );
+            var date = new Date( this.valueOf() );
             date.setDate( date.getDate() + days );
+
             return date;
         };
 
         apiObj = new mw.Api();
-        // Let's treat User Groups first before tackling Chapters
         apiObj.get( getActivitiesReports() ).done( function ( activitiesReportsData ) {
             apiObj.get( getOrgInfos() ).done( function ( orgInfosData ) {
                 apiObj.get( getOOCLevel() ).done( function( oocLevelsData ) {
                     var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
-                        manifest = [], reportEndYear, reportingEndDate, dateSlice,
-                        todayDate, insertInPlace, latestActivityReport, insertInPlaceOOC,
-                        oocLevels, ooc_manifest = [], oocLevel;
+                        manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
+                        latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear;
 
                     activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
                     orgInfos = parseModuleContent( orgInfosData.query.pages );
@@ -208,6 +207,7 @@
 
                         latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
 
+                        /**== OOC: Level 0 to Level 1 algorithm ==*/
                         if ( ( orgInfo.org_type === 'User Group' ||
                                 orgInfo.org_type === 'Chapter' ||
                                 orgInfo.org_type === 'Thematic Organization' )
@@ -215,23 +215,27 @@
                             && orgInfo.me_bypass_ooc_autochecks !== 'Yes'
                         ) {
                             currentYear = new Date().getFullYear();
-                            reportEndYear = latestActivityReport.end_date.split( "/" )[2];
-                            dateSlice = orgInfo.agreement_date.split( "/" );
-                            // generate reporting end date
-                            reportingEndDate = new Date( currentYear, dateSlice[1], dateSlice[0] )
+                            lastReportingYear = latestActivityReport.end_date.split( "/" )[2];
+                            if ( orgInfo.fiscal_year_end ) {
+                                fiscalYear = orgInfo.fiscal_year_end.split( "/" );
+                            } else if ( orgInfo.agreement_date ) {
+                                fiscalYear = orgInfo.agreement_date.split( "/" );
+                            }
+                            // generate due date for affiliate to submit report.
+                            reportingDueDate = new Date( currentYear, fiscalYear[1], fiscalYear[0] )
                                 .toJSON().slice( 0, 10 ).replace( /-/g, '/' );
-                            reportingEndDate = reportingEndDate.split( '/' ).reverse().join( '/' );
+                            reportingDueDate = reportingDueDate.split( '/' ).reverse().join( '/' );
                             // generate today's date as reportingEndDate above
                             todayDate = new Date().toJSON().slice( 0, 10 ).replace(/-/g,'/');
                             todayDate = todayDate.split( '/' ).reverse().join( '/' );
 
-                            // perform checks to see if activities report is not yet submitted : dateSlice[1] is reporting month
-                            if ( todayDate > reportingEndDate &&
-                                ( parseInt( dateSlice[1] ) < 12 ) &&
-                                reportEndYear < currentYear &&
+                            // check if activities report is not yet submitted : dateSlice[1] is reporting month
+                            if ( todayDate > reportingDueDate &&
+                                lastReportingYear < currentYear &&
                                 orgInfo.out_of_compliance_level < '1'
                             ) {
-                                orgInfo.out_of_compliance_level = '1';
+                                console.log( orgInfo.group_name );
+                                /*orgInfo.out_of_compliance_level = '1';
 
                                 oocLevel = {
                                     group_name: orgInfo.group_name,
@@ -240,31 +244,16 @@
                                     created_at: new Date().toISOString()
                                 };
 
-                                ooc_manifest.push( oocLevel );
-                            } else if ( todayDate > reportingEndDate &&
-                                ( parseInt( dateSlice[1] ) > 11 ) &&
-                                reportEndYear < ( currentYear - 1 ) &&
-                                orgInfo.out_of_compliance_level < '1'
-                            ) {
-                                orgInfo.out_of_compliance_level = '1';
-
-                                oocLevel = {
-                                    group_name: orgInfo.group_name,
-                                    out_of_compliance_level: '1',
-                                    financial_year: currentYear.toString(),
-                                    created_at: new Date().toISOString()
-                                };
-
-                                ooc_manifest.push( oocLevel );
+                                ooc_manifest.push( oocLevel );*/
                             }
+                            // manifest.push( orgInfo );
+                        } /*else {
                             manifest.push( orgInfo );
-                        } else {
-                            manifest.push( orgInfo );
-                        }
+                        }*/
                     }
 
                     // Re-generate the OOC Lua table based on `ooc_manifest`
-                    insertInPlaceOOC = 'return {\n';
+                    /**insertInPlaceOOC = 'return {\n';
                     for ( i = 0; i < ooc_manifest.length; i++ ) {
                         insertInPlaceOOC += '\t{\n';
                         if ( ooc_manifest[ i ].group_name ) {
@@ -504,7 +493,7 @@
                             text: insertInPlace,
                             contentmodel: 'Scribunto'
                         }
-                    );
+                    );*/
                 } );
             } );
         } );
