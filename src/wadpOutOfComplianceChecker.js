@@ -123,6 +123,8 @@
                 report = cleanRawEntry( reports[i].value.fields );
                 if ( report.group_name === affiliateName && report.dos_stamp > latestReport.dos_stamp ) {
                     latestReport = report;
+                } else {
+                    latestReport = '';
                 }
             }
 
@@ -189,7 +191,7 @@
             apiObj.get( getOrgInfos() ).done( function ( orgInfosData ) {
                 apiObj.get( getOOCLevel() ).done( function( oocLevelsData ) {
                     var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
-                        manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
+                        manifest = [], lastReportingYear = '', reportingDueDate, todayDate, insertInPlace,
                         latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear;
 
                     activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
@@ -215,7 +217,9 @@
                             && orgInfo.me_bypass_ooc_autochecks !== 'Yes'
                         ) {
                             currentYear = new Date().getFullYear();
-                            lastReportingYear = latestActivityReport.end_date.split( "/" )[2];
+                            if ( latestActivityReport !== '' ) {
+                                lastReportingYear = latestActivityReport.end_date.split( "/" )[2];
+                            }
                             if ( orgInfo.fiscal_year_end ) {
                                 fiscalYear = orgInfo.fiscal_year_end.split( "/" );
                             } else if ( orgInfo.agreement_date ) {
@@ -228,10 +232,11 @@
 
                             // check if activities report is not yet submitted : dateSlice[1] is reporting month
                             if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
+                                lastReportingYear !== '' &&
                                 lastReportingYear < currentYear &&
                                 orgInfo.out_of_compliance_level < '1'
                             ) {
-                                console.log( "OOC L1: " + orgInfo.group_name );
+                                console.log( "OOC L1: " + orgInfo.group_name);
                                 /*orgInfo.out_of_compliance_level = '1';
 
                                 oocLevel = {
@@ -244,6 +249,7 @@
                                 ooc_manifest.push( oocLevel );*/
                             } else if ( orgInfo.group_name === 'User Group' &&
                                 lastReportingYear < currentYear &&
+                                lastReportingYear !== '' &&
                                 // check if days difference is greater than 30 days
                                 ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 30 &&
                                 orgInfo.uptodate_reporting === "Tick" &&
