@@ -177,8 +177,8 @@
         /**
          * Add an interface to add days to a given date
          */
-        Date.prototype.addDays = function ( days ) {
-            var date = new Date( this.valueOf() );
+        Date.prototype.addDays = function ( reportingDueDate, days ) {
+            var date = new Date( reportingDueDate );
             date.setDate( date.getDate() + days );
 
             return date;
@@ -222,24 +222,40 @@
                                 fiscalYear = orgInfo.agreement_date.split( "/" );
                             }
                             // generate due date for affiliate to submit report.
-                            reportingDueDate = new Date( currentYear, fiscalYear[1], fiscalYear[0] )
-                                .toJSON().slice( 0, 10 ).replace( /-/g, '/' );
-                            reportingDueDate = reportingDueDate.split( '/' ).reverse().join( '/' );
+                            reportingDueDate = new Date( currentYear, parseInt( fiscalYear[1] ) - 1, parseInt( fiscalYear[0] ) + 1 );
                             // generate today's date as reportingEndDate above
-                            todayDate = new Date().toJSON().slice( 0, 10 ).replace(/-/g,'/');
-                            todayDate = todayDate.split( '/' ).reverse().join( '/' );
+                            todayDate = new Date();
 
                             // check if activities report is not yet submitted : dateSlice[1] is reporting month
-                            if ( todayDate > reportingDueDate &&
+                            if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
                                 lastReportingYear < currentYear &&
                                 orgInfo.out_of_compliance_level < '1'
                             ) {
-                                console.log( orgInfo.group_name );
+                                console.log( "OOC L1: " + orgInfo.group_name );
                                 /*orgInfo.out_of_compliance_level = '1';
 
                                 oocLevel = {
                                     group_name: orgInfo.group_name,
                                     out_of_compliance_level: '1',
+                                    financial_year: currentYear.toString(),
+                                    created_at: new Date().toISOString()
+                                };
+
+                                ooc_manifest.push( oocLevel );*/
+                            } else if ( orgInfo.group_name === 'User Group' &&
+                                lastReportingYear < currentYear &&
+                                // check if days difference is greater than 30 days
+                                ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 30 &&
+                                orgInfo.uptodate_reporting === "Tick" &&
+                                orgInfo.out_of_compliance_level === '1'
+                            ) {
+                                console.log( "OOC L2: " + orgInfo.group_name );
+                                /*orgInfo.out_of_compliance_level = '2';
+                                orgInfo.uptodate_reporting = "Cross";
+
+                                oocLevel = {
+                                    group_name: orgInfo.group_name,
+                                    out_of_compliance_level: '2',
                                     financial_year: currentYear.toString(),
                                     created_at: new Date().toISOString()
                                 };
