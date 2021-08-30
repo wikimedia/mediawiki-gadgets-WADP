@@ -118,14 +118,13 @@
          * @returns {Array}
          */
         getLatestReport = function ( affiliateName, reports ) {
-            var latestReport = cleanRawEntry( reports[0].value.fields ), report;
+            var latestReport = { end_date: '01/01/2000', dos_stamp: '2000-01-01T00:00:00.000Z' },
+                report;
 
             for ( var i = 0; i < reports.length; i++ ) {
                 report = cleanRawEntry( reports[i].value.fields );
                 if ( report.group_name === affiliateName && compareDates( report.dos_stamp, latestReport.dos_stamp ) === 1 ) {
                     latestReport = report;
-                } else {
-                    latestReport = '';
                 }
             }
 
@@ -223,7 +222,8 @@
                 apiObj.get( getOOCLevel() ).done( function( oocLevelsData ) {
                     var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
                         manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
-                        latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear;
+                        latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear,
+                        oocLevel;
 
                     activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
                     orgInfos = parseModuleContent( orgInfosData.query.pages );
@@ -240,7 +240,6 @@
 
                         latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
 
-                        /**== OOC: Level 0 to Level 1 algorithm ==*/
                         if ( ( orgInfo.org_type === 'User Group' ||
                                 orgInfo.org_type === 'Chapter' ||
                                 orgInfo.org_type === 'Thematic Organization' )
@@ -248,9 +247,9 @@
                             && orgInfo.me_bypass_ooc_autochecks === 'No'
                         ) {
                             currentYear = new Date().getFullYear();
-                            if ( latestActivityReport !== '' ) {
+                            if ( typeof latestActivityReport === 'object' && latestActivityReport !== null ) {
                                 lastReportingYear = latestActivityReport.end_date.split( "/" )[2];
-                            } else if ( latestActivityReport === '' ) {
+                            } else if ( latestActivityReport.end_date === '01/01/2000' ) {
                                 lastReportingYear = 'nlr';
                             }
                             if ( orgInfo.fiscal_year_end ) {
@@ -263,14 +262,14 @@
                             // generate today's date as reportingEndDate above
                             todayDate = new Date();
 
+                            /**== OOC: Level 0 to Level 1 algorithm ==*/
                             // check if activities report is not yet submitted : dateSlice[1] is reporting month
                             if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
                                 lastReportingYear !== 'nlr' &&
                                 lastReportingYear < currentYear &&
                                 orgInfo.out_of_compliance_level < '1'
                             ) {
-                                console.log( "OOC L1: " + orgInfo.group_name);
-                                /*orgInfo.out_of_compliance_level = '1';
+                                orgInfo.out_of_compliance_level = '1';
 
                                 oocLevel = {
                                     group_name: orgInfo.group_name,
@@ -279,7 +278,7 @@
                                     created_at: new Date().toISOString()
                                 };
 
-                                ooc_manifest.push( oocLevel );*/
+                                ooc_manifest.push( oocLevel );
                             } else if ( orgInfo.group_name === 'User Group' &&
                                 lastReportingYear < currentYear &&
                                 lastReportingYear !== 'nlr' &&
@@ -301,14 +300,14 @@
 
                                 ooc_manifest.push( oocLevel );*/
                             }
-                            // manifest.push( orgInfo );
-                        } /*else {
                             manifest.push( orgInfo );
-                        }*/
+                        } else {
+                            manifest.push( orgInfo );
+                        }
                     }
 
                     // Re-generate the OOC Lua table based on `ooc_manifest`
-                    /**insertInPlaceOOC = 'return {\n';
+                    insertInPlaceOOC = 'return {\n';
                     for ( i = 0; i < ooc_manifest.length; i++ ) {
                         insertInPlaceOOC += '\t{\n';
                         if ( ooc_manifest[ i ].group_name ) {
@@ -339,7 +338,7 @@
                     }
                     insertInPlaceOOC += '}';
 
-                    // Make changes to the Org Info table as required.
+                    // Make changes to the Org Info OOC table as required.
                     apiObj.postWithToken(
                         'csrf',
                         {
@@ -548,7 +547,7 @@
                             text: insertInPlace,
                             contentmodel: 'Scribunto'
                         }
-                    );*/
+                    );
                 } );
             } );
         } );
