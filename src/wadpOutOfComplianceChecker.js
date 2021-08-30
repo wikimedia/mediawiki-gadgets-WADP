@@ -18,7 +18,42 @@
             cleanRawEntry,
             getLatestReport,
             getOOCLevel,
-            compareDates;
+            compareDates,
+            getAffiliateTalkPageWikiText,
+            parseAndExtractAffiliateTalkPageContent;
+
+        /**
+         * @param {String} affiliate
+         * @return {Object}
+         */
+        getAffiliateTalkPageWikiText = function ( affiliate ) {
+            var titles;
+            if ( affiliate === 'test' ) {
+                // Test feature before deployment
+                titles = 'User:DAlangi (WMF)/Sandbox/OOC post notif messages';
+            } else {
+                titles = 'Talk:' + affiliate;
+            }
+            return {
+                action: 'query',
+                prop: 'revisions',
+                titles: titles,
+                rvprop: 'content',
+                rvlimit: 1
+            }
+        }
+
+        /**
+         * @param {Text} sourceblob The wikitext for the page
+         * @returns {Text} The wiki page content only from API request
+         */
+        parseAndExtractAffiliateTalkPageContent = function ( sourceblob ) {
+            var i, raw;
+            for ( i in sourceblob ) {  // should only be one result
+                raw = sourceblob[ i ].revisions[ 0 ][ '*' ];
+                return raw;
+            }
+        }
 
         /**
          * Provides API parameters for getting the content from [[Module:Activities_Reports]]
@@ -223,7 +258,7 @@
                     var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
                         manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
                         latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear,
-                        oocLevel;
+                        oocLevel, affiliateTalkPageContent;
 
                     activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
                     orgInfos = parseModuleContent( orgInfosData.query.pages );
@@ -279,14 +314,15 @@
                                 };
 
                                 ooc_manifest.push( oocLevel );
-                            } else if ( orgInfo.group_name === 'User Group' &&
+                            } /*else if ( orgInfo.group_name === 'User Group' &&
                                 lastReportingYear < currentYear &&
                                 lastReportingYear !== 'nlr' &&
                                 // check if days difference is greater than 30 days
                                 ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 30 &&
                                 orgInfo.uptodate_reporting === "Tick" &&
                                 orgInfo.out_of_compliance_level === '1'
-                            ) {
+                            ) {*/
+                            else if ( orgInfo.group_name === 'Wikimedians of Tamazight User Group' ) {
                                 console.log( "OOC L2: " + orgInfo.group_name );
                                 /*orgInfo.out_of_compliance_level = '2';
                                 orgInfo.uptodate_reporting = "Cross";
@@ -299,6 +335,32 @@
                                 };
 
                                 ooc_manifest.push( oocLevel );*/
+
+                                /** After writing to DB, post a talk page notification */
+                                apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).done( function ( wikiPageContent ) {
+                                    var notifMessage;
+                                    console.log(
+                                        parseAndExtractAffiliateTalkPageContent( wikiPageContent.query.pages )
+                                    );
+
+                                    notifMessage = "\n\n== This is a test section ==\n\nJust some test content.";
+                                    affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
+                                        wikiPageContent.query.pages
+                                    ) + notifMessage;
+
+                                    // Post notification to talk page of affiliate
+                                    apiObj.postWithToken(
+                                        'csrf',
+                                        {
+                                            action: 'edit',
+                                            nocreate: true,
+                                            summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
+                                            title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', // test page for now
+                                            text: affiliateTalkPageContent,
+                                            contentmodel: 'wikitext'
+                                        }
+                                    );
+                                } );
                             }
                             manifest.push( orgInfo );
                         } else {
