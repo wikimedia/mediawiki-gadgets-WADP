@@ -17,7 +17,8 @@
             parseModuleContent,
             cleanRawEntry,
             getLatestReport,
-            getOOCLevel;
+            getOOCLevel,
+            compareDates;
 
         /**
          * Provides API parameters for getting the content from [[Module:Activities_Reports]]
@@ -121,7 +122,7 @@
 
             for ( var i = 0; i < reports.length; i++ ) {
                 report = cleanRawEntry( reports[i].value.fields );
-                if ( report.group_name === affiliateName && report.dos_stamp > latestReport.dos_stamp ) {
+                if ( report.group_name === affiliateName && compareDates( report.dos_stamp, latestReport.dos_stamp ) === 1 ) {
                     latestReport = report;
                 } else {
                     latestReport = '';
@@ -129,6 +130,36 @@
             }
 
             return latestReport;
+        };
+
+        /**
+         * @param {String} date1
+         * @param {String} date2
+         * @return {Number} 0 if dates are equal, 1 if date1 > date2 and -1 if date1 < date2
+         */
+        compareDates = function ( date1, date2 ) {
+            var d1, d2, d1Obj, d2Obj;
+
+            // Date is in the format: 2020-03-02T21:27:26.877Z, so truncate
+            d1 = date1.substring( 0, 10 ).split( "-" );
+
+            if ( date2 ) {
+                d2 = date2.substring( 0, 10 ).split( "-" );
+            } else {
+                date2 = "2000-01-01T00:00:00.000Z";
+                d2 = date2.substring( 0, 10 ).split( "-" );
+            }
+
+            d1Obj = new Date( parseInt( d1[0] ), parseInt( d1[1] ) - 1, parseInt( d1[2] ) + 1 );
+            d2Obj = new Date( parseInt( d2[0] ), parseInt( d2[1] ) - 1, parseInt( d2[2] ) + 1 );
+
+            if ( d1Obj.valueOf() === d2Obj.valueOf() ) {
+                return 0;
+            } else if ( d1Obj.valueOf() > d2Obj.valueOf() ) {
+                return 1;
+            } else if ( d1Obj.valueOf() < d2Obj.valueOf() ) {
+                return -1;
+            }
         };
 
         /**
@@ -191,7 +222,7 @@
             apiObj.get( getOrgInfos() ).done( function ( orgInfosData ) {
                 apiObj.get( getOOCLevel() ).done( function( oocLevelsData ) {
                     var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
-                        manifest = [], lastReportingYear = '', reportingDueDate, todayDate, insertInPlace,
+                        manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
                         latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear;
 
                     activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
@@ -214,11 +245,13 @@
                                 orgInfo.org_type === 'Chapter' ||
                                 orgInfo.org_type === 'Thematic Organization' )
                             && orgInfo.recognition_status === 'recognised'
-                            && orgInfo.me_bypass_ooc_autochecks !== 'Yes'
+                            && orgInfo.me_bypass_ooc_autochecks === 'No'
                         ) {
                             currentYear = new Date().getFullYear();
                             if ( latestActivityReport !== '' ) {
                                 lastReportingYear = latestActivityReport.end_date.split( "/" )[2];
+                            } else if ( latestActivityReport === '' ) {
+                                lastReportingYear = 'nlr';
                             }
                             if ( orgInfo.fiscal_year_end ) {
                                 fiscalYear = orgInfo.fiscal_year_end.split( "/" );
@@ -232,7 +265,7 @@
 
                             // check if activities report is not yet submitted : dateSlice[1] is reporting month
                             if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
-                                lastReportingYear !== '' &&
+                                lastReportingYear !== 'nlr' &&
                                 lastReportingYear < currentYear &&
                                 orgInfo.out_of_compliance_level < '1'
                             ) {
@@ -249,7 +282,7 @@
                                 ooc_manifest.push( oocLevel );*/
                             } else if ( orgInfo.group_name === 'User Group' &&
                                 lastReportingYear < currentYear &&
-                                lastReportingYear !== '' &&
+                                lastReportingYear !== 'nlr' &&
                                 // check if days difference is greater than 30 days
                                 ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 30 &&
                                 orgInfo.uptodate_reporting === "Tick" &&
