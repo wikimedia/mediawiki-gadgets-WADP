@@ -948,7 +948,7 @@
                 }
             } );
         } ).fail( function () {
-            alert( gadgetMsg[ 'gadget-failed-to-load-translation-strings' ] || 'Unable to load translation strings' );
+            alert( 'Unable to load translation strings' );
         } );
     } );
 }() );

@@ -52,7 +52,7 @@
                 'MKaur (WMF)'
             ];
 
-            var i, res, key, val, gadgetMsg = {};
+            var i, res, key, val;
             res = data.query.messagecollection;
             for ( i = 0; i < res.length; i++ ) {
                 key = res[ i ].key.replace( 'Template:I18n/Reports/', '' );
@@ -822,8 +822,7 @@
                         { data: '3' },
                         { data: '4' },
                         { data: '5' },
-                        { data: '6' },
-                        { data: '7' }
+                        { data: '6' }
                     ]
                 } );
                 if ( this.out_of_compliance_level ) {
@@ -1576,7 +1575,7 @@
             } );
 
         } ).fail( function () {
-            alert( gadgetMsg[ 'gadget-failed-to-load-translation-strings' ] );
+            alert( 'Unable to load translation strings' );
         } );
     } );
 }() );

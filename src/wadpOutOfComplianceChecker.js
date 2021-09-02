@@ -314,15 +314,14 @@
                                 };
 
                                 ooc_manifest.push( oocLevel );
-                            } /*else if ( orgInfo.group_name === 'User Group' &&
+                            } else if ( orgInfo.group_name === 'User Group' &&
                                 lastReportingYear < currentYear &&
                                 lastReportingYear !== 'nlr' &&
                                 // check if days difference is greater than 30 days
                                 ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 30 &&
                                 orgInfo.uptodate_reporting === "Tick" &&
                                 orgInfo.out_of_compliance_level === '1'
-                            ) {*/
-                            else if ( orgInfo.group_name === 'Wikimedians of Tamazight User Group' ) {
+                            ) {
                                 console.log( "OOC L2: " + orgInfo.group_name );
                                 /*orgInfo.out_of_compliance_level = '2';
                                 orgInfo.uptodate_reporting = "Cross";
@@ -337,7 +336,7 @@
                                 ooc_manifest.push( oocLevel );*/
 
                                 /** After writing to DB, post a talk page notification */
-                                apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).done( function ( wikiPageContent ) {
+                                /* apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).done( function ( wikiPageContent ) {
                                     var notifMessage;
                                     console.log(
                                         parseAndExtractAffiliateTalkPageContent( wikiPageContent.query.pages )
@@ -360,7 +359,7 @@
                                             contentmodel: 'wikitext'
                                         }
                                     );
-                                } );
+                                } );*/
                             }
                             manifest.push( orgInfo );
                         } else {

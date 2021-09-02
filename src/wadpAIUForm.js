@@ -36,7 +36,8 @@
             queryAffiliatesPage,
             sanitizeInput,
             userLang,
-            windowManager;
+            windowManager,
+            gadgetMsg = {};
 
         userLang = mw.config.get( 'wgUserLanguage' );
         if ( userLang === 'en' ) {
@@ -50,7 +51,7 @@
             mclanguage: userLang
         } ).done( function ( data ) {
 
-            var i, res, key, val, gadgetMsg = {};
+            var i, res, key, val;
             res = data.query.messagecollection;
             for ( i = 0; i < res.length; i++ ) {
                 key = res[ i ].key.replace( 'Template:I18n/Reports/', '' );
@@ -3731,8 +3732,6 @@
                     'DAlangi (WMF)',
                     'DNdubane (WMF)',
                     'JAnstee (WMF)',
-                    'DMccurdy (WMF)',
-                    'RMaung (WMF)',
                     'MKaur (WMF)'
                 ];
 
@@ -3743,7 +3742,7 @@
                 }
             } );
         } ).fail( function() {
-            alert( gadgetMsg[ 'gadget-failed-to-load-translation-strings' ] );
+            alert( 'Unable to load translation strings' );
         } );
     } );
 }() );
