@@ -5,23 +5,20 @@
 ( function () {
     'use strict';
 
-    mw.loader.using( [
-        'mediawiki.api',
-        'ext.gadget.luaparse'
-    ] ).done( function () {
-        var apiObj,
-            getActivitiesReports,
-            generateKeyValuePair,
-            sanitizeInput,
-            getOrgInfos,
-            parseModuleContent,
-            cleanRawEntry,
-            getLatestReport,
-            getOOCLevel,
-            compareDates,
-            getAffiliateTalkPageWikiText,
-            parseAndExtractAffiliateTalkPageContent;
+    var apiObj,
+        getActivitiesReports,
+        generateKeyValuePair,
+        sanitizeInput,
+        getOrgInfos,
+        parseModuleContent,
+        cleanRawEntry,
+        getLatestReport,
+        getOOCLevel,
+        compareDates,
+        getAffiliateTalkPageWikiText,
+        parseAndExtractAffiliateTalkPageContent;
 
+    function init() {
         /**
          * @param {String} affiliate
          * @return {Object}
@@ -612,5 +609,11 @@
                 } );
             } );
         } );
-    } );
+    }
+
+    mw.loader.using( [
+        'mediawiki.api',
+        'ext.gadget.luaparse'
+    ] ).done( init );
+
 }() );

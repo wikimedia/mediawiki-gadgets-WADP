@@ -33,6 +33,7 @@
 
     userLang = mw.config.get( 'wgUserLanguage' );
 
+    // This is called after translation messages are ready
     function initAfterMessages() {
         /**
          * Provides API parameters for getting the content from [[Module:Activities_Reports]]
@@ -956,7 +957,7 @@
 
             initAfterMessages();
         } ).fail( function() {
-            alert( 'Unable to load translation strings' );
+            alert( 'Unable to load translation strings - __ARF__' );
         } );
     }
 
