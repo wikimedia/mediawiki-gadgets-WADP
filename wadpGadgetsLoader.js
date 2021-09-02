@@ -18,7 +18,8 @@
         mw.loader.load( 'ext.gadget.wadpAIUForm' );
 
         /* Load Grants Report Form (module) */
-        mw.loader.load( 'ext.gadget.wadpGrantReportForm' );
+        // Disabled till further notice, not used for now.
+        // mw.loader.load( 'ext.gadget.wadpGrantReportForm' );
 
         /* Load Financial Report Form (module) */
         mw.loader.load( 'ext.gadget.wadpFinancialReportForm' );

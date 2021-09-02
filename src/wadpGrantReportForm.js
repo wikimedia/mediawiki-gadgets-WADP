@@ -819,7 +819,6 @@
             mcgroup: 'page-Template:I18n/Reports',
             mclanguage: userLang
         } ).done( function ( data ) {
-
             var i, res, key, val;
             res = data.query.messagecollection;
             for ( i = 0; i < res.length; i++ ) {
