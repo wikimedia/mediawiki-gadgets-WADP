@@ -311,7 +311,9 @@
                                 };
 
                                 ooc_manifest.push( oocLevel );
-                            } else if ( orgInfo.group_name === 'User Group' &&
+                            }
+                            /**== OOC: Level 1 to Level 2 algorithm ==*/
+                            else if ( orgInfo.org_type === 'User Group' &&
                                 lastReportingYear < currentYear &&
                                 lastReportingYear !== 'nlr' &&
                                 // check if days difference is greater than 30 days
@@ -319,8 +321,7 @@
                                 orgInfo.uptodate_reporting === "Tick" &&
                                 orgInfo.out_of_compliance_level === '1'
                             ) {
-                                console.log( "OOC L2: " + orgInfo.group_name );
-                                /*orgInfo.out_of_compliance_level = '2';
+                                orgInfo.out_of_compliance_level = '2';
                                 orgInfo.uptodate_reporting = "Cross";
 
                                 oocLevel = {
@@ -330,10 +331,10 @@
                                     created_at: new Date().toISOString()
                                 };
 
-                                ooc_manifest.push( oocLevel );*/
+                                ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                /* apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).then( function ( wikiPageContent ) {
+                                /*apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).then( function ( wikiPageContent ) {
                                     var notifMessage;
                                     console.log(
                                         parseAndExtractAffiliateTalkPageContent( wikiPageContent.query.pages )
@@ -350,7 +351,7 @@
                                         {
                                             action: 'edit',
                                             nocreate: true,
-                                            summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
+                                            summary: '[Automated] Out of compliance check notification message: ',
                                             title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', // test page for now
                                             text: affiliateTalkPageContent,
                                             contentmodel: 'wikitext'
