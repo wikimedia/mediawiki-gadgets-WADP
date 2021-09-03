@@ -638,7 +638,7 @@
                 return new OO.ui.Process( function () {
                     new OO.ui.confirm(
                         gadgetMsg[ 'confirm-cancel-action' ]
-                    ).done( function ( confirmed ) {
+                    ).then( function ( confirmed ) {
                         if ( confirmed ) {
                             dialog.saveItem( 'delete' );
                         }
@@ -659,7 +659,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getAIUDataModuleQuery() ).done( function ( data ) {
+            new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, entries;
 
@@ -806,7 +806,7 @@
                  *
                  * Also, make sure to also delete PMC entries for matching persistent ID
                  */
-                new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
+                new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
                     var manifest = [];
 
                     entries = parseAIUDataModule( data.query.pages );
@@ -1180,7 +1180,7 @@
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
                     }
-                ).done( function () {
+                ).then( function () {
                     dialog.close();
 
                     /** After saving, show a message box */
@@ -1211,9 +1211,9 @@
                     new mw.Api().postWithToken(
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
-                    ).done( function () {
+                    ).then( function () {
                         if ( persistentId !== '' ) {
-                            new mw.Api().get( getAIUDataModuleQuery() ).done( function ( data ) {
+                            new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
                                 var entryData;
 
                                 entryData = cleanRawEntry(
@@ -1228,9 +1228,10 @@
                             openWindow2( {} );
                         }
                     } );
-                } ).fail( function () {
+                } ).catch( function ( error ) {
                     alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
                     dialog.close();
+                    console.error( error );
                 } );
             } );
         };
@@ -1533,7 +1534,7 @@
                 return new OO.ui.Process( function () {
                     new OO.ui.confirm(
                         gadgetMsg[ 'confirm-cancel-action' ]
-                    ).done( function ( confirmed ) {
+                    ).then( function ( confirmed ) {
                         if ( confirmed ) {
                             dialog.saveItem( 'delete' );
                         }
@@ -1542,7 +1543,7 @@
             } else if ( action === 'back' && persistentId !== '' ) {
                 dialog.close();
                 return new OO.ui.Process( function () {
-                    new mw.Api().get( getAIUDataModuleQuery() ).done( function ( data ) {
+                    new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
                         var entryData;
 
                         entryData = cleanRawEntry(
@@ -1569,7 +1570,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getAIUDataModuleQuery() ).done( function ( data ) {
+            new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, entries;
 
@@ -1690,7 +1691,7 @@
                  *
                  * Also, make sure to also delete PMC entries for matching persistent ID
                  */
-                new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
+                new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
                     var manifest = [];
 
                     entries = parseAIUDataModule( data.query.pages );
@@ -2060,7 +2061,7 @@
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
                     }
-                ).done( function () {
+                ).then( function () {
                     dialog.close();
 
                     /** After saving, show a message box */
@@ -2090,16 +2091,17 @@
                     new mw.Api().postWithToken(
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
-                    ).done( function () {
+                    ).then( function () {
                         if ( deleteFlag ) {
                             dialog.close();
                         } else {
                             openWindow3( {} );
                         }
                     } );
-                } ).fail( function () {
+                } ).catch( function ( error ) {
                     alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
                     dialog.close();
+                    console.error( error );
                 } );
             } );
         };
@@ -3069,10 +3071,10 @@
             } else if ( action === 'back' && persistentId !== '' ) {
                 dialog.close();
                 return new OO.ui.Process( function () {
-                    new mw.Api().get( getAIUDataModuleQuery() ).done( function ( data ) {
+                    new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
                         var entryData, entry;
 
-                        new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
+                        new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
                             pmcEntries = parseAIUDataModule( data.query.pages );
                             if ( pmcEntries ) {
                                 for ( i = 0; i < pmcEntries.length; i++ ) {
@@ -3100,7 +3102,7 @@
                 return new OO.ui.Process( function () {
                     new OO.ui.confirm(
                         gadgetMsg[ 'confirm-cancel-action' ]
-                    ).done( function ( confirmed ) {
+                    ).then( function ( confirmed ) {
                         if ( confirmed ) {
                             dialog.saveItem( 'delete' );
                         }
@@ -3121,7 +3123,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
+            new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, entries;
 
@@ -3250,7 +3252,7 @@
                  * entries for matching persistent ID.
                  */
                 if ( deleteFlag === 'delete' && persistentId !== '' ) {
-                    new mw.Api().get( getAIUDataModuleQuery() ).done( function ( data ) {
+                    new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
                         var manifest = [];
                         entries = parseAIUDataModule( data.query.pages );
 
@@ -3627,7 +3629,7 @@
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
                     }
-                ).done( function () {
+                ).then( function () {
                     dialog.close();
 
                     /** After saving, show a message box */
@@ -3657,15 +3659,15 @@
                     new mw.Api().postWithToken(
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
-                    ).done( function () {
+                    ).then( function () {
                         if ( deleteFlag === 'add' ) {
                             pmcTabs = true;
-                            new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
+                            new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
                                 pmcEntries = parseAIUDataModule( data.query.pages );
                                 openWindow3( {} );
                             } );
                         } else if ( deleteFlag === 'update' ) {
-                            new mw.Api().get( getAIUProgramsModuleQuery() ).done( function ( data ) {
+                            new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
                                 pmcEntries = parseAIUDataModule( data.query.pages );
                                 openWindow3( {} );
                             } );
@@ -3673,9 +3675,10 @@
                             location.reload();
                         }
                     } );
-                } ).fail( function () {
+                } ).catch( function ( error ) {
                     alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
                     dialog.close();
+                    console.error( error );
                 } );
             } );
         };
@@ -3723,7 +3726,7 @@
             /** TODO: Move to 'page-Template:I18n/WADP' */
             mcgroup: 'page-Template:I18n/Reports',
             mclanguage: userLang
-        } ).done( function ( data ) {
+        } ).then( function ( data ) {
 
             var i, res, key, val;
             res = data.query.messagecollection;
@@ -3738,8 +3741,8 @@
             }
 
             initAfterMessages();
-        } ).fail( function() {
-            alert( 'Unable to load translation strings - __AIUF__' );
+        } ).catch( function( error ) {
+            console.error( error, 'Unable to load translation strings - __AIUF__' );
         } );
     }
 
@@ -3750,6 +3753,6 @@
         'oojs-ui',
         'oojs-ui-core',
         'oojs-ui.styles.icons-editing-core',
-    ] ).done( initAfterModules );
+    ] ).then( initAfterModules );
 
 }() );

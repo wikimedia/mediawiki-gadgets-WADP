@@ -249,9 +249,9 @@
         };
 
         apiObj = new mw.Api();
-        apiObj.get( getActivitiesReports() ).done( function ( activitiesReportsData ) {
-            apiObj.get( getOrgInfos() ).done( function ( orgInfosData ) {
-                apiObj.get( getOOCLevel() ).done( function( oocLevelsData ) {
+        apiObj.get( getActivitiesReports() ).then( function ( activitiesReportsData ) {
+            apiObj.get( getOrgInfos() ).then( function ( orgInfosData ) {
+                apiObj.get( getOOCLevel() ).then( function( oocLevelsData ) {
                     var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
                         manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
                         latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear,
@@ -333,7 +333,7 @@
                                 ooc_manifest.push( oocLevel );*/
 
                                 /** After writing to DB, post a talk page notification */
-                                /* apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).done( function ( wikiPageContent ) {
+                                /* apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).then( function ( wikiPageContent ) {
                                     var notifMessage;
                                     console.log(
                                         parseAndExtractAffiliateTalkPageContent( wikiPageContent.query.pages )
@@ -614,6 +614,6 @@
     mw.loader.using( [
         'mediawiki.api',
         'ext.gadget.luaparse'
-    ] ).done( init );
+    ] ).then( init );
 
 }() );

@@ -1061,7 +1061,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getContentModuleQuery() ).done( function ( data ) {
+            new mw.Api().get( getContentModuleQuery() ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, entries;
 
@@ -1446,7 +1446,7 @@
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
                     }
-                ).done( function () {
+                ).then( function () {
                     dialog.close();
 
                     /** After saving, show a message box */
@@ -1474,12 +1474,13 @@
                     new mw.Api().postWithToken(
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
-                    ).done( function () {
+                    ).then( function () {
                         location.reload();
                     } );
-                } ).fail( function () {
+                } ).catch( function ( error ) {
                     alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
                     dialog.close();
+                    console.error( error );
                 } );
             } );
         };
@@ -1498,7 +1499,7 @@
                 if ( mw.config.get ( 'wgUserName' ) === null ) {
                     alert( gadgetMsg[ 'you-need-to-log-in' ] );
                 } else {
-                    new mw.Api().get( getContentModuleQuery() ).done( function ( data ) {
+                    new mw.Api().get( getContentModuleQuery() ).then( function ( data ) {
                         var entryData, record, content;
 
                         record = editButton.$element
@@ -1555,7 +1556,7 @@
             list: 'messagecollection',
             mcgroup: 'page-Template:I18n/Reports',
             mclanguage: userLang
-        } ).done( function ( data ) {
+        } ).then( function ( data ) {
 
             var i, res, key, val;
             res = data.query.messagecollection;
@@ -1570,8 +1571,8 @@
             }
 
             initAfterMessages();
-        } ).fail( function () {
-            alert( 'Unable to load translation strings - __OIF__' );
+        } ).catch( function ( error ) {
+            console.error( error, 'Unable to load translation strings - __OIF__' );
         } );
     }
 
@@ -1582,6 +1583,6 @@
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse',
         'mediawiki.widgets.DateInputWidget'
-    ] ).done( initAfterModules );
+    ] ).then( initAfterModules );
 
 }() );

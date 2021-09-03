@@ -74,7 +74,7 @@
          */
         convertDateToDdMmYyyyFormat = function ( date ) {
             // Put in a format our lua script will feed on, in DD/MM/YYYY format
-            date = date.split('-');
+            date = date.split( '-' );
             date = date[2] + "/" + date[1] + "/" + date[0];
 
             return date;
@@ -671,11 +671,11 @@
             dialog.pushPending();
             apiObj = new mw.Api();
 
-            apiObj.get( getSandboxContentModuleQuery() ).done( function ( data ) {
+            apiObj.get( getSandboxContentModuleQuery() ).then( function ( data ) {
                 sandbox_activities_reports = data;
             } );
 
-            apiObj.get( getContentModuleQuery() ).done( function ( data ) {
+            apiObj.get( getContentModuleQuery() ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry, editSummary,
                     manifest = [], workingEntry, entries;
 
@@ -870,7 +870,7 @@
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
                     }
-                ).done( function () {
+                ).then( function () {
 
                     dialog.close();
 
@@ -899,12 +899,13 @@
                     new mw.Api().postWithToken(
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
-                    ).done( function () {
+                    ).then( function () {
                         location.reload();
                     } );
-                } ).fail( function () {
+                } ).catch( function ( error ) {
                     alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
                     dialog.close();
+                    console.error( error );
                 } );
             } );
         };
@@ -942,7 +943,7 @@
             list: 'messagecollection',
             mcgroup: 'page-Template:I18n/Reports',
             mclanguage: userLang
-        } ).done( function ( data ) {
+        } ).then( function ( data ) {
             var i, res, key, val;
             res = data.query.messagecollection;
             for ( i = 0; i < res.length; i++ ) {
@@ -956,8 +957,8 @@
             }
 
             initAfterMessages();
-        } ).fail( function() {
-            alert( 'Unable to load translation strings - __ARF__' );
+        } ).catch( function ( error ) {
+            console.error( error, 'Unable to load translation strings - __ARF__' );
         } );
     }
 
@@ -968,6 +969,6 @@
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse',
         'mediawiki.widgets.DateInputWidget'
-    ] ).done( initAfterModules );
+    ] ).then( initAfterModules );
 
 }() );

@@ -636,11 +636,11 @@
 
             apiObj = new mw.Api();
 
-            apiObj.get( getSandboxContentModuleQuery() ).done( function ( data ) {
+            apiObj.get( getSandboxContentModuleQuery() ).then( function ( data ) {
                 sandbox_financial_reports = data;
             } );
 
-            apiObj.get( getContentModuleQuery() ).done( function ( data ) {
+            apiObj.get( getContentModuleQuery() ).then( function ( data ) {
                 var i,
                     insertInPlace,
                     processWorkingEntry,
@@ -859,7 +859,7 @@
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
                     }
-                ).done( function () {
+                ).then( function () {
                     dialog.close();
                     /** After saving, show a message box */
                     var messageDialog = new OO.ui.MessageDialog();
@@ -886,12 +886,13 @@
                     apiObj.postWithToken(
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
-                    ).done( function () {
+                    ).then( function () {
                         location.reload();
                     } );
-                } ).fail( function () {
+                } ).catch( function ( error ) {
                     alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
                     dialog.close();
+                    console.error( error );
                 } );
             } );
         };
@@ -929,7 +930,7 @@
             list: 'messagecollection',
             mcgroup: 'page-Template:I18n/Reports',
             mclanguage: userLang
-        } ).done( function ( data ) {
+        } ).then( function ( data ) {
 
             var i, res, key, val;
             res = data.query.messagecollection;
@@ -944,8 +945,8 @@
             }
 
             initAfterMessages();
-        } ).fail( function () {
-            alert( 'Unable to load translation strings - __FRF__' );
+        } ).catch( function ( error ) {
+            console.error( error, 'Unable to load translation strings - __FRF__' );
         } );
     }
 
@@ -956,6 +957,6 @@
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse',
         'mediawiki.widgets.DateInputWidget'
-    ] ).done( initAfterModules );
+    ] ).then( initAfterModules );
 
 }() );

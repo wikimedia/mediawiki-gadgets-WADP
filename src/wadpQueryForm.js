@@ -945,10 +945,10 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( data ) {
+            new mw.Api().get( getDataFromLuaTables( 'Activities_Reports' ) ).then( function ( data ) {
                 activities_reports = parseContentModule( data.query.pages );
 
-                new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                     var i, j, entries, entry, a_report, list, affiliate_structures;
                     var windowManager = new OO.ui.WindowManager();
 
@@ -2337,7 +2337,7 @@
                 var i, j;
                 if ( QUERY["queryObject"] === 'affiliates' ) {
                     if ( QUERY["querySubject"] === 'recognised-in-year' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -2378,7 +2378,7 @@
                             openLeafWindow( {} );
                         } );
                     } else if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -2418,7 +2418,7 @@
                             openLeafWindow( {} );
                         } );
                     } else if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -2456,7 +2456,7 @@
                             openLeafWindow( {} );
                         } );
                     } else if ( QUERY["querySubject"] === 'belongs-to' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -2502,9 +2502,9 @@
                             affiliateName,
                             activityReportYear,
                             financialReportYear;
-                        apiObject.get( getDataFromLuaTables( 'Financial_Reports' ) ).done( function ( fReports ) {
+                        apiObject.get( getDataFromLuaTables( 'Financial_Reports' ) ).then( function ( fReports ) {
                             financialReports = parseContentModule( fReports.query.pages );
-                            apiObject.get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( aReports ) {
+                            apiObject.get( getDataFromLuaTables( 'Activities_Reports' ) ).then( function ( aReports ) {
                                 activityReportsEntries = parseContentModule( aReports.query.pages );
 
                                 if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
@@ -2546,7 +2546,7 @@
                                     leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                     openLeafWindow( {} );
                                 } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2620,7 +2620,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'User Group' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2698,7 +2698,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'Chapter' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2776,7 +2776,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'Thematic Organization' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2862,7 +2862,7 @@
                         var api = new mw.Api(),
                             financialReports,
                             financialReport;
-                        api.get( getDataFromLuaTables( 'Financial_Reports' ) ).done( function ( reports ) {
+                        api.get( getDataFromLuaTables( 'Financial_Reports' ) ).then( function ( reports ) {
                             financialReports = parseContentModule( reports.query.pages );
 
                             if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
@@ -2893,7 +2893,7 @@
                                 leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                 openLeafWindow( {} );
                             } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
-                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                     var affiliatesEntries, affiliateEntry;
 
                                     affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -2953,7 +2953,7 @@
                                     openLeafWindow( {} );
                                 } );
                             } else if ( FILTERS["affiliateSearchType"] === 'User Group' ) {
-                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                     var affiliatesEntries, affiliateEntry;
 
                                     affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -3015,7 +3015,7 @@
                                     openLeafWindow( {} );
                                 } );
                             } else if ( FILTERS["affiliateSearchType"] === 'Chapter' ) {
-                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                     var affiliatesEntries, affiliateEntry;
 
                                     affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -3077,7 +3077,7 @@
                                     openLeafWindow( {} );
                                 } );
                             } else if ( FILTERS["affiliateSearchType"] === 'Thematic Organization' ) {
-                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                api.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                     var affiliatesEntries, affiliateEntry;
 
                                     affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -3151,7 +3151,7 @@
                 var counter = 0;
                 if ( QUERY["queryObject"] === 'affiliates' ) {
                     if ( QUERY["querySubject"] === 'recognised-in-year' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -3193,7 +3193,7 @@
                             openLeafWindow( {} );
                         } );
                     } else if ( QUERY["querySubject"] === 'derecognised-in-year' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -3234,7 +3234,7 @@
                             openLeafWindow( {} );
                         } );
                     } else if ( QUERY["querySubject"] === 'compliant-with-reporting' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -3273,7 +3273,7 @@
                             openLeafWindow( {} );
                         } );
                     } else if ( QUERY["querySubject"] === 'belongs-to' ) {
-                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                        new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                             var entries, entry;
                             entries = parseContentModule( data.query.pages );
 
@@ -3320,9 +3320,9 @@
                             affiliateName,
                             activityReportYear,
                             financialReportYear;
-                        apiObject.get( getDataFromLuaTables( 'Financial_Reports' ) ).done( function ( fReports ) {
+                        apiObject.get( getDataFromLuaTables( 'Financial_Reports' ) ).then( function ( fReports ) {
                             financialReports = parseContentModule( fReports.query.pages );
-                            apiObject.get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( aReports ) {
+                            apiObject.get( getDataFromLuaTables( 'Activities_Reports' ) ).then( function ( aReports ) {
                                 activityReportsEntries = parseContentModule( aReports.query.pages );
 
                                 if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
@@ -3365,7 +3365,7 @@
                                     leafWindowResults = new OO.ui.HtmlSnippet( QUERY_RES );
                                     openLeafWindow( {} );
                                 } else if ( FILTERS["affiliateSearchType"] === 'all-affiliates' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -3440,7 +3440,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'User Group' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -3517,7 +3517,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'Chapter' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -3596,7 +3596,7 @@
                                         openLeafWindow( {} );
                                     } );
                                 } else if ( FILTERS["affiliateSearchType"] === 'Thematic Organization' ) {
-                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( affiliates ) {
+                                    apiObject.get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( affiliates ) {
                                         var affiliatesEntries, affiliateEntry;
 
                                         affiliatesEntries = parseContentModule( affiliates.query.pages );
@@ -3686,7 +3686,7 @@
                             totalBudget = 0,
                             totalExpenses = 0,
                             currencyCode;
-                        api.get( getDataFromLuaTables( 'Financial_Reports' ) ).done( function ( reports ) {
+                        api.get( getDataFromLuaTables( 'Financial_Reports' ) ).then( function ( reports ) {
                             financialReports = parseContentModule( reports.query.pages );
 
                             if ( FILTERS["affiliateSearchType"] === 'specific-affiliate' ) {
@@ -3902,10 +3902,10 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getDataFromLuaTables( 'Activities_Reports' ) ).done( function ( data ) {
+            new mw.Api().get( getDataFromLuaTables( 'Activities_Reports' ) ).then( function ( data ) {
                 activities_reports = parseContentModule( data.query.pages );
 
-                new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).done( function ( data ) {
+                new mw.Api().get( getDataFromLuaTables( 'Organizational_Informations' ) ).then( function ( data ) {
                     var i, j, entries, entry, a_report;
                     var windowManager = new OO.ui.WindowManager();
 
@@ -4248,7 +4248,7 @@
             /** TODO: Move to 'page-Template:I18n/WADP' */
             mcgroup: 'page-Template:I18n/Reports',
             mclanguage: userLang
-        } ).done( function ( data ) {
+        } ).then( function ( data ) {
 
             var i, res, key, val;
             res = data.query.messagecollection;
@@ -4263,8 +4263,8 @@
             }
 
             initAfterMessages();
-        } ).fail( function() {
-            alert( 'Unable to load translation strings - __QF__' );
+        } ).catch( function( error) {
+            console.error( error, 'Unable to load translation strings - __QF__' );
         } );
     }
 
@@ -4275,6 +4275,6 @@
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse',
         'mediawiki.widgets.DateInputWidget'
-    ] ).done( initAfterModules );
+    ] ).then( initAfterModules );
 
 }() );

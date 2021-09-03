@@ -280,8 +280,7 @@
          * to initialize widgets, and to set up event handlers.
          */
         GrantsEditor.prototype.initialize = function () {
-            var dialog, i, fieldPartnershipInfoSelected;
-            dialog = this;
+            var i, fieldPartnershipInfoSelected;
 
             /* Get today's date and time in YYYY-MM-DDTHH:MM:SSZ */
             /* format. dos stands for "date of submission" */
@@ -529,7 +528,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getContentModuleQuery() ).done( function ( data ) {
+            new mw.Api().get( getContentModuleQuery() ).then( function ( data ) {
                 var i, insertInPlace, sanitizeInput, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, generateKeyValuePair,
                     entries;
@@ -752,7 +751,7 @@
                         text: insertInPlace,
                         contentmodel: 'Scribunto'
                     }
-                ).done( function () {
+                ).then( function () {
                     dialog.close();
 
                     /** After saving, show a message box */
@@ -780,12 +779,13 @@
                     new mw.Api().postWithToken(
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
-                    ).done( function () {
+                    ).then( function () {
                         location.reload();
                     } );
-                } ).fail( function () {
+                } ).catch( function ( error ) {
                     alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
                     dialog.close();
+                    console.error( error );
                 } );
             } );
         };
@@ -818,7 +818,7 @@
             list: 'messagecollection',
             mcgroup: 'page-Template:I18n/Reports',
             mclanguage: userLang
-        } ).done( function ( data ) {
+        } ).then( function ( data ) {
             var i, res, key, val;
             res = data.query.messagecollection;
             for ( i = 0; i < res.length; i++ ) {
@@ -832,8 +832,8 @@
             }
 
             initAfterMessages();
-        } ).fail( function () {
-            alert( 'Unable to load translation strings - __GRF__' );
+        } ).catch( function ( error ) {
+            console.error( error, 'Unable to load translation strings - __GRF__' );
         } );
     }
 
@@ -843,6 +843,6 @@
         'oojs-ui-core',
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse'
-    ] ).done( initAfterModules );
+    ] ).then( initAfterModules );
 
 }() );
