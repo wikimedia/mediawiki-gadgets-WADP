@@ -16,7 +16,8 @@
         getOOCLevel,
         compareDates,
         getAffiliateTalkPageWikiText,
-        parseAndExtractAffiliateTalkPageContent;
+        parseAndExtractAffiliateTalkPageContent,
+        getAffiliateRedirectPageIfExist;
 
     function init() {
         /**
@@ -37,8 +38,8 @@
                 titles: titles,
                 rvprop: 'content',
                 rvlimit: 1
-            }
-        }
+            };
+        };
 
         /**
          * @param {Text} sourceblob The wikitext for the page
@@ -50,7 +51,7 @@
                 raw = sourceblob[ i ].revisions[ 0 ][ '*' ];
                 return raw;
             }
-        }
+        };
 
         /**
          * Provides API parameters for getting the content from [[Module:Activities_Reports]]
@@ -194,6 +195,19 @@
         };
 
         /**
+         * @param {String} affiliatePage Group name
+         *
+         * @returns {Object}
+         */
+        getAffiliateRedirectPageIfExist = function ( affiliatePage ) {
+            return {
+                action: 'query',
+                titles: affiliatePage,
+                redirects: null
+            };
+        };
+
+        /**
          * Creates Lua-style key-value pairs, including converting the
          * audiences array into a proper sequential table.
          *
@@ -334,30 +348,47 @@
                                 ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                /*apiObj.get( getAffiliateTalkPageWikiText( 'test' ) ).then( function ( wikiPageContent ) {
-                                    var notifMessage;
-                                    console.log(
-                                        parseAndExtractAffiliateTalkPageContent( wikiPageContent.query.pages )
-                                    );
+                                ( function ( orgInfo, currentYear, reportingDueDate ) {
+                                    apiObj.get( getAffiliateRedirectPageIfExist( orgInfo.group_name ) ).then( function ( data ) {
+                                        var notificationMessage, redirectsTo;
 
-                                    notifMessage = "\n\n== This is a test section ==\n\nJust some test content.";
-                                    affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
-                                        wikiPageContent.query.pages
-                                    ) + notifMessage;
-
-                                    // Post notification to talk page of affiliate
-                                    apiObj.postWithToken(
-                                        'csrf',
-                                        {
-                                            action: 'edit',
-                                            nocreate: true,
-                                            summary: '[Automated] Out of compliance check notification message: ',
-                                            title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', // test page for now
-                                            text: affiliateTalkPageContent,
-                                            contentmodel: 'wikitext'
+                                        if ( data.query.hasOwnProperty( "redirects" ) ) {
+                                            redirectsTo = data.query.redirects[0].to;
+                                        } else {
+                                            redirectsTo = orgInfo.group_name;
                                         }
-                                    );
-                                } );*/
+                                        // NOTE: if the affiliate page is a redirect, use the correct target page
+                                        apiObj.get( getAffiliateTalkPageWikiText( redirectsTo ) ).then( function ( wikiPageContent ) {
+                                            notificationMessage = "\n\n== Notification of User Group Expiration - Renewal pending submission of reporting ==\n\n" +
+                                                "Greetings group contacts,\n\n" +
+                                                "This is a notification to bring to your attention that your organization is currently past due on its required annual reporting. Wikimedia Affiliates are required to submit an annual activity report covering the entirety of the 12-month agreement period in order to prompt review for a renewal.  Reports must be written in English, posted to meta via the  [[Wikimedia Affiliates Data Portal]].\n\n" +
+                                                "This page is used to track how organizations and groups are meeting reporting requirements described in their agreements with the Wikimedia Foundation (e.g. chapter agreements, thematic organization agreements, user group agreements).  It is the central place where affiliates can add reports about their activities, share their plans, and even news or social media channels with the wider movement. When new reports are available, organizations and groups should add them to this page to keep their columns up to date.\n\n" +
+                                                "As noted on the meta [[Wikimedia Affiliates Data Portal/Reports|Reports page]], your organization’s '''" + String( currentYear ) + "''' annual reporting became past due in '''" + reportingDueDate.toISOString().slice( 0, 10 ) + "'''. Please be sure to:\n\n" +
+                                                "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
+                                                "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
+                                                "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
+                                                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''', <br />''Wikimedia Affiliates Data Portal''\n\n";
+
+                                            affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
+                                                wikiPageContent.query.pages
+                                            ) + notificationMessage;
+
+                                            // Post notification to talk page of affiliate
+                                            apiObj.postWithToken(
+                                                'csrf',
+                                                {
+                                                    action: 'edit',
+                                                    nocreate: true,
+                                                    summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
+                                                    // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
+                                                    title: 'Talk:' + redirectsTo,
+                                                    text: affiliateTalkPageContent,
+                                                    contentmodel: 'wikitext'
+                                                }
+                                            );
+                                        } );
+                                    } );
+                                } )( orgInfo, currentYear, reportingDueDate );
                             }
                             manifest.push( orgInfo );
                         } else {
