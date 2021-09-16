@@ -326,7 +326,15 @@
 
                                 ooc_manifest.push( oocLevel );
                             }
-                            /**== OOC: Level 1 to Level 2 algorithm ==*/
+                            /**== OOC: Level 1 back to Level 0 algorithm ==*/
+                            else if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
+                                lastReportingYear !== 'nlr' &&
+                                lastReportingYear === currentYear &&
+                                orgInfo.out_of_compliance_level === '1'
+                            ) {
+                                orgInfo.out_of_compliance_level = '0';
+                            }
+                            /**== OOC: Level 1 to Level 2 algorithm for UG ==*/
                             else if ( orgInfo.org_type === 'User Group' &&
                                 lastReportingYear < currentYear &&
                                 lastReportingYear !== 'nlr' &&
@@ -389,6 +397,79 @@
                                         } );
                                     } );
                                 } )( orgInfo, currentYear, reportingDueDate );
+                            }
+                            /**== OOC: Level 1 to Level 2 algorithm for Chaps ==*/
+                            else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                lastReportingYear < currentYear &&
+                                lastReportingYear !== 'nlr' &&
+                                // check if days difference is greater than 30 days
+                                ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 120 &&
+                                orgInfo.uptodate_reporting === "Tick" &&
+                                orgInfo.out_of_compliance_level === '1'
+                            ) {
+                                orgInfo.out_of_compliance_level = '2';
+                                orgInfo.uptodate_reporting = "Cross";
+
+                                oocLevel = {
+                                    group_name: orgInfo.group_name,
+                                    out_of_compliance_level: '2',
+                                    financial_year: currentYear.toString(),
+                                    created_at: new Date().toISOString()
+                                };
+
+                                ooc_manifest.push( oocLevel );
+
+                                /** After writing to DB, post a talk page notification */
+                                ( function ( orgInfo, currentYear, reportingDueDate ) {
+                                    apiObj.get( getAffiliateRedirectPageIfExist( orgInfo.group_name ) ).then( function ( data ) {
+                                        var notificationMessage, redirectsTo;
+
+                                        if ( data.query.hasOwnProperty( "redirects" ) ) {
+                                            redirectsTo = data.query.redirects[0].to;
+                                        } else {
+                                            redirectsTo = orgInfo.group_name;
+                                        }
+                                        // NOTE: if the affiliate page is a redirect, use the correct target page
+                                        apiObj.get( getAffiliateTalkPageWikiText( redirectsTo ) ).then( function ( wikiPageContent ) {
+                                            notificationMessage = "\n\n== Notification of User Group Expiration - Renewal pending submission of reporting ==\n\n" +
+                                                "Greetings group contacts,\n\n" +
+                                                "This is a notification to bring to your attention that your organization is currently past due on its required annual reporting. Wikimedia Affiliates are required to submit an annual activity report covering the entirety of the 12-month agreement period in order to prompt review for a renewal.  Reports must be written in English, posted to meta via the  [[Wikimedia Affiliates Data Portal]].\n\n" +
+                                                "This page is used to track how organizations and groups are meeting reporting requirements described in their agreements with the Wikimedia Foundation (e.g. chapter agreements, thematic organization agreements, user group agreements).  It is the central place where affiliates can add reports about their activities, share their plans, and even news or social media channels with the wider movement. When new reports are available, organizations and groups should add them to this page to keep their columns up to date.\n\n" +
+                                                "As noted on the meta [[Wikimedia Affiliates Data Portal/Reports|Reports page]], your organization’s '''" + String( currentYear ) + "''' annual reporting became past due in '''" + reportingDueDate.toISOString().slice( 0, 10 ) + "'''. Please be sure to:\n\n" +
+                                                "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
+                                                "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
+                                                "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
+                                                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''', <br />''Wikimedia Affiliates Data Portal''\n\n";
+
+                                            affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
+                                                wikiPageContent.query.pages
+                                            ) + notificationMessage;
+
+                                            // Post notification to talk page of affiliate
+                                            apiObj.postWithToken(
+                                                'csrf',
+                                                {
+                                                    action: 'edit',
+                                                    nocreate: true,
+                                                    summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
+                                                    // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
+                                                    title: 'Talk:' + redirectsTo,
+                                                    text: affiliateTalkPageContent,
+                                                    contentmodel: 'wikitext'
+                                                }
+                                            );
+                                        } );
+                                    } );
+                                } )( orgInfo, currentYear, reportingDueDate );
+                            }
+                            /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
+                            else if ( lastReportingYear === currentYear &&
+                                lastReportingYear !== 'nlr' &&
+                                orgInfo.uptodate_reporting === "Cross" &&
+                                orgInfo.out_of_compliance_level === '2'
+                            ) {
+                                orgInfo.uptodate_reporting = "Tick";
+                                orgInfo.out_of_compliance_level = '0';
                             }
                             manifest.push( orgInfo );
                         } else {
