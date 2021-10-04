@@ -20,7 +20,8 @@
         getAffiliateRedirectPageIfExist,
         oocLevel2MessageGenerator,
         sendEmailToMEStaff,
-        oocLevelLogGenerator;
+        oocLevelLogGenerator,
+        postTalkPageNotification;
 
     function init() {
         /**
@@ -283,13 +284,14 @@
         /**
          * OOC level 2 talk page message generator
          *
+         * @param {String} noticeLevel
          * @param {Number} currentYear
          * @param {Date} reportingDueDate
          *
          * @return {String}
          */
-        oocLevel2MessageGenerator = function ( currentYear, reportingDueDate ) {
-            return "\n\n== Notification of Affiliate Expiration - Renewal pending submission of reporting ==\n\n" +
+        oocLevel2MessageGenerator = function ( noticeLevel, currentYear, reportingDueDate ) {
+            return "\n\n== " + noticeLevel + " Notification of Affiliate Expiration - Renewal pending submission of reporting ==\n\n" +
             "Greetings group contacts,\n\n" +
             "This is a notification to bring to your attention that your organization is currently past due on its required annual reporting. Wikimedia Affiliates are required to submit an annual activity report covering the entirety of the 12-month agreement period in order to prompt review for a renewal.  Reports must be written in English, posted to meta via the  [[Wikimedia Affiliates Data Portal]].\n\n" +
             "This page is used to track how organizations and groups are meeting reporting requirements described in their agreements with the Wikimedia Foundation (e.g. chapter agreements, thematic organization agreements, user group agreements).  It is the central place where affiliates can add reports about their activities, share their plans, and even news or social media channels with the wider movement. When new reports are available, organizations and groups should add them to this page to keep their columns up to date.\n\n" +
@@ -298,6 +300,45 @@
             "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
             "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
             "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''', <br />''Wikimedia Affiliates Data Portal''\n\n";
+        };
+
+        /**
+         * @param {String} orgInfo
+         * @param {Number} currentYear
+         * @param {String} reportingDueDate
+         * @param {String} noticeLevel
+         */
+        postTalkPageNotification = function ( orgInfo, currentYear, reportingDueDate, noticeLevel ) {
+            apiObj = new mw.Api();
+            apiObj.get( getAffiliateRedirectPageIfExist( orgInfo.group_name ) ).then( function ( data ) {
+                var redirectsTo, affiliateTalkPageContent;
+
+                if ( data.query.hasOwnProperty( "redirects" ) ) {
+                    redirectsTo = data.query.redirects[0].to;
+                } else {
+                    redirectsTo = orgInfo.group_name;
+                }
+                // NOTE: if the affiliate page is a redirect, use the correct target page
+                apiObj.get( getAffiliateTalkPageWikiText( redirectsTo ) ).then( function ( wikiPageContent ) {
+                    affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
+                        wikiPageContent.query.pages
+                    ) + oocLevel2MessageGenerator( noticeLevel, currentYear, reportingDueDate );
+
+                    // Post notification to talk page of affiliate
+                    apiObj.postWithToken(
+                        'csrf',
+                        {
+                            action: 'edit',
+                            nocreate: true,
+                            summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
+                            // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
+                            title: 'Talk:' + redirectsTo,
+                            text: affiliateTalkPageContent,
+                            contentmodel: 'wikitext'
+                        }
+                    );
+                } );
+            } );
         };
 
         /**
@@ -408,37 +449,7 @@
                                 ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                ( function ( orgInfo, currentYear, reportingDueDate ) {
-                                    apiObj.get( getAffiliateRedirectPageIfExist( orgInfo.group_name ) ).then( function ( data ) {
-                                        var redirectsTo;
-
-                                        if ( data.query.hasOwnProperty( "redirects" ) ) {
-                                            redirectsTo = data.query.redirects[0].to;
-                                        } else {
-                                            redirectsTo = orgInfo.group_name;
-                                        }
-                                        // NOTE: if the affiliate page is a redirect, use the correct target page
-                                        apiObj.get( getAffiliateTalkPageWikiText( redirectsTo ) ).then( function ( wikiPageContent ) {
-                                            affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
-                                                wikiPageContent.query.pages
-                                            ) + oocLevel2MessageGenerator( currentYear, reportingDueDate );
-
-                                            // Post notification to talk page of affiliate
-                                            apiObj.postWithToken(
-                                                'csrf',
-                                                {
-                                                    action: 'edit',
-                                                    nocreate: true,
-                                                    summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
-                                                    // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
-                                                    title: 'Talk:' + redirectsTo,
-                                                    text: affiliateTalkPageContent,
-                                                    contentmodel: 'wikitext'
-                                                }
-                                            );
-                                        } );
-                                    } );
-                                } )( orgInfo, currentYear, reportingDueDate );
+                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Notice]' );
                             }
                             /**== OOC: Level 1 to Level 2 algorithm for Chaps ==*/
                             else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -456,37 +467,7 @@
                                 ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                ( function ( orgInfo, currentYear, reportingDueDate ) {
-                                    apiObj.get( getAffiliateRedirectPageIfExist( orgInfo.group_name ) ).then( function ( data ) {
-                                        var notificationMessage, redirectsTo;
-
-                                        if ( data.query.hasOwnProperty( "redirects" ) ) {
-                                            redirectsTo = data.query.redirects[0].to;
-                                        } else {
-                                            redirectsTo = orgInfo.group_name;
-                                        }
-                                        // NOTE: if the affiliate page is a redirect, use the correct target page
-                                        apiObj.get( getAffiliateTalkPageWikiText( redirectsTo ) ).then( function ( wikiPageContent ) {
-                                            affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
-                                                wikiPageContent.query.pages
-                                            ) + oocLevel2MessageGenerator( currentYear, reportingDueDate );
-
-                                            // Post notification to talk page of affiliate
-                                            apiObj.postWithToken(
-                                                'csrf',
-                                                {
-                                                    action: 'edit',
-                                                    nocreate: true,
-                                                    summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
-                                                    // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
-                                                    title: 'Talk:' + redirectsTo,
-                                                    text: affiliateTalkPageContent,
-                                                    contentmodel: 'wikitext'
-                                                }
-                                            );
-                                        } );
-                                    } );
-                                } )( orgInfo, currentYear, reportingDueDate );
+                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Notice]' );
                             }
                             /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
                             else if ( lastReportingYear === currentYear &&
@@ -514,6 +495,9 @@
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
                                     ooc_manifest.push( oocLevel );
+
+                                    /** After writing to DB, post a talk page notification */
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Notice]' );
                                 }
                                 // forward logic: 2 - 3 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -527,6 +511,9 @@
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
                                     ooc_manifest.push( oocLevel );
+
+                                    /** After writing to DB, post a talk page notification */
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Notice]' );
                                 }
                             }
                             // backward logic: 3 - 0 (for UGs)
@@ -573,6 +560,9 @@
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
                                     ooc_manifest.push( oocLevel );
+
+                                    /** After writing to DB, post a talk page notification */
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Notice]' );
                                 }
                                 // forward logic: 3 - 4 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -586,6 +576,9 @@
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
                                     ooc_manifest.push( oocLevel );
+
+                                    /** After writing to DB, post a talk page notification */
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Notice]' );
                                 }
                             }
                             // backward logic: 4 - 0 (for UGs)
@@ -629,9 +622,13 @@
                                     orgInfo.uptodate_reporting === "Cross"
                                 ) {
                                     orgInfo.out_of_compliance_level = '5';
+                                    orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
                                     ooc_manifest.push( oocLevel );
+
+                                    /** After writing to DB, post a talk page notification */
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Final Notice]' );
                                 }
                                 // forward logic: 4 - 5 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -648,6 +645,9 @@
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
                                     ooc_manifest.push( oocLevel );
+
+                                    /** After writing to DB, post a talk page notification */
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Final Notice]' );
                                 }
                             }
                             // backward logic: 5 - 0 (for UGs)
