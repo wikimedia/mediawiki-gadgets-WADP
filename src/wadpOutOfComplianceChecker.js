@@ -449,7 +449,7 @@
                                 ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Notice]' );
+                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Initial Review]' );
                             }
                             /**== OOC: Level 1 to Level 2 algorithm for Chaps ==*/
                             else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -467,7 +467,7 @@
                                 ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Notice]' );
+                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Initial Review]' );
                             }
                             /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
                             else if ( lastReportingYear === currentYear &&
@@ -497,7 +497,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Notice]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Reminder]' );
                                 }
                                 // forward logic: 2 - 3 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -513,7 +513,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Notice]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Reminder]' );
                                 }
                             }
                             // backward logic: 3 - 0 (for UGs)
@@ -562,7 +562,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Notice]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Reminder]' );
                                 }
                                 // forward logic: 3 - 4 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -578,7 +578,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Notice]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Reminder]' );
                                 }
                             }
                             // backward logic: 4 - 0 (for UGs)
@@ -628,7 +628,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Final Notice]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Reminder]' );
                                 }
                                 // forward logic: 4 - 5 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -647,7 +647,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Final Notice]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Reminder]' );
                                 }
                             }
                             // backward logic: 5 - 0 (for UGs)
