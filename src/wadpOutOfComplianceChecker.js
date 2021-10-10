@@ -266,12 +266,17 @@
             return date;
         };
 
-        sendEmailToMEStaff = function ( subject, text ) {
+        /**
+         * @param {String} subject The email subject
+         * @param {String} body The email content/body.
+         * @param {String} to The M&E staff to send email to.
+         */
+        sendEmailToMEStaff = function ( subject, body, to ) {
             var params = {
                 action: 'emailuser',
-                target: 'DNdubane (WMF)',
+                target: to,
                 subject: '[WADP] ' + subject,
-                text: text,
+                text: body,
                 format: 'json'
             },
             api = new mw.Api();
@@ -366,7 +371,8 @@
                     var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
                         manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
                         latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear,
-                        oocLevel, affiliateTalkPageContent;
+                        oocLevel, specialAffiliatesToEmailL45 = "", specialAffiliatesToEmailL34 = "",
+                        emailDispatcherCount = { "l34": 0, "l45": 0 };
 
                     activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
                     orgInfos = parseModuleContent( orgInfosData.query.pages );
@@ -428,10 +434,11 @@
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
 
-                                // Send M&E staff a log of the activity
+                                // POC: Send M&E staff a log of the activity
                                 subject = "Level 1 back to level 0";
                                 text = orgInfo.group_name;
-                                sendEmailToMEStaff( subject, text );
+                                sendEmailToMEStaff( subject, text, 'DNdubane (WMF)' );
+                                sendEmailToMEStaff( subject, text, 'DAlangi (WMF)' ); // loop back address
                             }
                             /**== OOC: Level 1 to Level 2 algorithm for UG ==*/
                             else if ( orgInfo.org_type === 'User Group' &&
@@ -563,6 +570,10 @@
 
                                     /** After writing to DB, post a talk page notification */
                                     postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Reminder]' );
+
+                                    /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
+                                    emailDispatcherCount["l34"]++;
+                                    specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
                                 }
                                 // forward logic: 3 - 4 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -579,6 +590,10 @@
 
                                     /** After writing to DB, post a talk page notification */
                                     postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Reminder]' );
+
+                                    /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
+                                    emailDispatcherCount["l34"]++;
+                                    specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
                                 }
                             }
                             // backward logic: 4 - 0 (for UGs)
@@ -629,6 +644,10 @@
 
                                     /** After writing to DB, post a talk page notification */
                                     postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Reminder]' );
+
+                                    /** Email list of UG from level 4 - 5 to M&E staff. */
+                                    emailDispatcherCount["l45"]++;
+                                    specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
                                 }
                                 // forward logic: 4 - 5 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -641,13 +660,15 @@
                                     orgInfo.out_of_compliance_level = '5';
                                     orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                    // **TODO** (special): Send log activity to M&E staff.
-
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
                                     postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Reminder]' );
+
+                                    /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
+                                    emailDispatcherCount["l45"]++;
+                                    specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
                                 }
                             }
                             // backward logic: 5 - 0 (for UGs)
@@ -684,6 +705,22 @@
                         } else {
                             manifest.push( orgInfo );
                         }
+                    }
+
+                    if ( emailDispatcherCount["l34"] > 0 ) {
+                        // Send aggregate email to M&E staff (L3-4)
+                        subject = "New affiliates at level 4 of OOC Checks";
+                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DNdubane (WMF)' );
+                        // loop back address -- for backup purposes and monitoring
+                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DAlangi (WMF)' );
+                    }
+
+                    if ( emailDispatcherCount["l45"] > 0 ) {
+                        // Send aggregate email to M&E staff (L4-5)
+                        subject = "New affiliates at level 5 of OOC Checks";
+                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DNdubane (WMF)' );
+                        // loop back address -- for backup purposes and monitoring
+                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
                     }
 
                     // Re-generate the OOC Lua table based on `ooc_manifest`
