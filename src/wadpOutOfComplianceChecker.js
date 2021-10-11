@@ -315,6 +315,7 @@
          */
         postTalkPageNotification = function ( orgInfo, currentYear, reportingDueDate, noticeLevel ) {
             apiObj = new mw.Api();
+
             apiObj.get( getAffiliateRedirectPageIfExist( orgInfo.group_name ) ).then( function ( data ) {
                 var redirectsTo, affiliateTalkPageContent;
 
@@ -365,14 +366,31 @@
         };
 
         apiObj = new mw.Api();
+
         apiObj.get( getActivitiesReports() ).then( function ( activitiesReportsData ) {
             apiObj.get( getOrgInfos() ).then( function ( orgInfosData ) {
                 apiObj.get( getOOCLevel() ).then( function( oocLevelsData ) {
-                    var activityReport, activitiesReports, orgInfo, orgInfos, currentYear,
-                        manifest = [], lastReportingYear, reportingDueDate, todayDate, insertInPlace,
-                        latestActivityReport, insertInPlaceOOC, oocLevels, ooc_manifest = [], fiscalYear,
-                        oocLevel, specialAffiliatesToEmailL45 = "", specialAffiliatesToEmailL34 = "",
-                        emailDispatcherCount = { "l34": 0, "l45": 0 };
+                    var activityReport,
+                        activitiesReports,
+                        orgInfo,
+                        orgInfos,
+                        currentYear,
+                        manifest = [],
+                        lastReportingYear,
+                        reportingDueDate,
+                        todayDate,
+                        insertInPlace,
+                        latestActivityReport,
+                        insertInPlaceOOC,
+                        oocLevels,
+                        ooc_manifest = [],
+                        fiscalYear,
+                        oocLevel,
+                        subject,
+                        systemActivityLogsToEmail = "",
+                        specialAffiliatesToEmailL45 = "",
+                        specialAffiliatesToEmailL34 = "",
+                        emailDispatcherCount = { "l050": 0, "l34": 0, "l45": 0 };
 
                     activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
                     orgInfos = parseModuleContent( orgInfosData.query.pages );
@@ -398,7 +416,7 @@
                             currentYear = new Date().getFullYear();
                             if ( typeof latestActivityReport === 'object' && latestActivityReport !== null ) {
                                 lastReportingYear = parseInt( latestActivityReport.end_date.split( "/" )[2] );
-                            } else if ( latestActivityReport.end_date === '01/01/2000' ) {
+                            } else if ( latestActivityReport === null || latestActivityReport.end_date === '01/01/2000' ) {
                                 lastReportingYear = 'nlr';
                             }
                             if ( orgInfo.fiscal_year_end ) {
@@ -407,7 +425,9 @@
                                 fiscalYear = orgInfo.agreement_date.split( "/" );
                             }
                             // generate due date for affiliate to submit report.
-                            reportingDueDate = new Date( currentYear, parseInt( fiscalYear[1] ) - 1, parseInt( fiscalYear[0] ) + 1 );
+                            reportingDueDate = new Date(
+                                currentYear, parseInt( fiscalYear[1] ) - 1, parseInt( fiscalYear[0] ) + 1
+                            );
                             // generate today's date as reportingEndDate above
                             todayDate = new Date();
 
@@ -421,6 +441,9 @@
                                 orgInfo.out_of_compliance_level = '1';
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 0 -> 1.";
                             }
                             /**== OOC: Level 1 back to Level 0 algorithm ==*/
                             else if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
@@ -428,17 +451,12 @@
                                 lastReportingYear === currentYear &&
                                 orgInfo.out_of_compliance_level === '1'
                             ) {
-                                var subject, text;
-
                                 orgInfo.out_of_compliance_level = '0';
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
 
-                                // POC: Send M&E staff a log of the activity
-                                subject = "Level 1 back to level 0";
-                                text = orgInfo.group_name;
-                                sendEmailToMEStaff( subject, text, 'DNdubane (WMF)' );
-                                sendEmailToMEStaff( subject, text, 'DAlangi (WMF)' ); // loop back address
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 0.";
                             }
                             /**== OOC: Level 1 to Level 2 algorithm for UG ==*/
                             else if ( orgInfo.org_type === 'User Group' &&
@@ -457,6 +475,9 @@
 
                                 /** After writing to DB, post a talk page notification */
                                 postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Initial Review]' );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
                             }
                             /**== OOC: Level 1 to Level 2 algorithm for Chaps ==*/
                             else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -475,6 +496,9 @@
 
                                 /** After writing to DB, post a talk page notification */
                                 postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Initial Review]' );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
                             }
                             /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
                             else if ( lastReportingYear === currentYear &&
@@ -487,6 +511,9 @@
 
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
                             }
                             /**== Level 2 to 3 OOC algorithm (use case) ==*/
                             else if ( orgInfo.out_of_compliance_level === '2' ) {
@@ -505,6 +532,9 @@
 
                                     /** After writing to DB, post a talk page notification */
                                     postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Reminder]' );
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
                                 }
                                 // forward logic: 2 - 3 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -521,6 +551,9 @@
 
                                     /** After writing to DB, post a talk page notification */
                                     postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Reminder]' );
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
                                 }
                             }
                             // backward logic: 3 - 0 (for UGs)
@@ -537,6 +570,9 @@
 
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                             }
                             // backward logic: 3 - 0 for chaps & thorgs
                             else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -552,6 +588,9 @@
 
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                             }
                             /**== Level 3 to 4 OOC algorithm (use case) ==*/
                             else if ( orgInfo.out_of_compliance_level === '3' ) {
@@ -574,6 +613,9 @@
                                     /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                     emailDispatcherCount["l34"]++;
                                     specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
                                 }
                                 // forward logic: 3 - 4 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -594,6 +636,9 @@
                                     /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                     emailDispatcherCount["l34"]++;
                                     specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
                                 }
                             }
                             // backward logic: 4 - 0 (for UGs)
@@ -610,6 +655,9 @@
 
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
                             }
                             // backward logic: 4 - 0 for chaps & thorgs
                             else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -625,6 +673,9 @@
 
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
                             }
                             /**== Level 4 to 5 OOC algorithm (use case) ==*/
                             else if ( orgInfo.out_of_compliance_level === '4' ) {
@@ -648,6 +699,9 @@
                                     /** Email list of UG from level 4 - 5 to M&E staff. */
                                     emailDispatcherCount["l45"]++;
                                     specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
                                 }
                                 // forward logic: 4 - 5 for chaps & thorgs
                                 else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -669,6 +723,9 @@
                                     /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
                                     emailDispatcherCount["l45"]++;
                                     specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
                                 }
                             }
                             // backward logic: 5 - 0 (for UGs)
@@ -685,6 +742,9 @@
 
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 5 -> 0.";
                             }
                             // backward logic: 5 - 0 for chaps & thorgs
                             else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
@@ -700,6 +760,9 @@
 
                                 oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                 ooc_manifest.push( oocLevel );
+
+                                emailDispatcherCount["l050"]++;
+                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 5 -> 0.";
                             }
                             manifest.push( orgInfo );
                         } else {
@@ -718,6 +781,14 @@
                     if ( emailDispatcherCount["l45"] > 0 ) {
                         // Send aggregate email to M&E staff (L4-5)
                         subject = "New affiliates at level 5 of OOC Checks";
+                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DNdubane (WMF)' );
+                        // loop back address -- for backup purposes and monitoring
+                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
+                    }
+
+                    if ( emailDispatcherCount["l050"] > 0 ) {
+                        // Send aggregate email to M&E staff (L0-5 and back)
+                        subject = "[General] Compliance sweep of all Wikimedia Affiliates";
                         sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DNdubane (WMF)' );
                         // loop back address -- for backup purposes and monitoring
                         sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
