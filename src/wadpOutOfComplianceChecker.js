@@ -474,7 +474,7 @@
                                 ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Initial Review]' );
+                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
 
                                 emailDispatcherCount["l050"]++;
                                 systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
@@ -495,7 +495,7 @@
                                 ooc_manifest.push( oocLevel );
 
                                 /** After writing to DB, post a talk page notification */
-                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Initial Review]' );
+                                postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
 
                                 emailDispatcherCount["l050"]++;
                                 systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
@@ -531,7 +531,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Reminder]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
 
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -550,7 +550,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[First Reminder]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
 
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -608,7 +608,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Reminder]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
 
                                     /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                     emailDispatcherCount["l34"]++;
@@ -631,7 +631,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Second Reminder]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
 
                                     /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                     emailDispatcherCount["l34"]++;
@@ -694,7 +694,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Reminder]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
 
                                     /** Email list of UG from level 4 - 5 to M&E staff. */
                                     emailDispatcherCount["l45"]++;
@@ -718,7 +718,7 @@
                                     ooc_manifest.push( oocLevel );
 
                                     /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '[Third Reminder]' );
+                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
 
                                     /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
                                     emailDispatcherCount["l45"]++;
