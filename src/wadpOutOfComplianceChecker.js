@@ -789,9 +789,9 @@
                     if ( emailDispatcherCount["l050"] > 0 ) {
                         // Send aggregate email to M&E staff (L0-5 and back)
                         subject = "[General] Compliance sweep of all Wikimedia Affiliates";
-                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DNdubane (WMF)' );
+                        sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DNdubane (WMF)' );
                         // loop back address -- for backup purposes and monitoring
-                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
+                        sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DAlangi (WMF)' );
                     }
 
                     // Re-generate the OOC Lua table based on `ooc_manifest`
