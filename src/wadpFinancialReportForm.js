@@ -853,6 +853,7 @@
                     'csrf',
                     {
                         action: 'edit',
+                        bot: true,
                         nocreate: true,
                         summary: editSummary,
                         pageid: PAGEID,  // Live page or Sandbox based on edit mode

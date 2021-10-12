@@ -745,6 +745,7 @@
                     'csrf',
                     {
                         action: 'edit',
+                        bot: true,
                         nocreate: true,
                         summary: editSummary,
                         pageid: 10623919,  // [[Module:Grant_Reports]]

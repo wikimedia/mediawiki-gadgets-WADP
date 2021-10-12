@@ -939,6 +939,7 @@
                         'csrf',
                         {
                             action: 'edit',
+                            bot: true,
                             nocreate: true,
                             summary: editSummary,
                             pageid: 11119914,  // [[Module:Affiliate_Indicators/Programs]]
@@ -1174,6 +1175,7 @@
                     'csrf',
                     {
                         action: 'edit',
+                        bot: true,
                         nocreate: true,
                         summary: editSummary,
                         pageid: 11082119,  // [[Module:Affiliate_Indicators]]
@@ -1824,6 +1826,7 @@
                         'csrf',
                         {
                             action: 'edit',
+                            bot: true,
                             nocreate: true,
                             summary: editSummary,
                             pageid: 11119914,  // [[Module:Affiliate_Indicators/Programs]]
@@ -2055,6 +2058,7 @@
                     'csrf',
                     {
                         action: 'edit',
+                        bot: true,
                         nocreate: true,
                         summary: editSummary,
                         pageid: 11082119,  // [[Module:Affiliate_Indicators]]
@@ -3623,6 +3627,7 @@
                     'csrf',
                     {
                         action: 'edit',
+                        bot: true,
                         nocreate: true,
                         summary: editSummary,
                         pageid: 11119914,  // [[Module:Affiliate_Indicators/Programs]]

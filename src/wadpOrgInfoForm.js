@@ -1440,6 +1440,7 @@
                     'csrf',
                     {
                         action: 'edit',
+                        bot: true,
                         nocreate: true,
                         summary: editSummary,
                         pageid: 10603224,  // [[Module:Organizational_Informations]]

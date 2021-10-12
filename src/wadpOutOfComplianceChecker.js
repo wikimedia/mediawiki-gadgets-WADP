@@ -831,6 +831,7 @@
                         'csrf',
                         {
                             action: 'edit',
+                            bot: true,
                             nocreate: true,
                             summary: '[Automated] M&E compliance automated checks by WAD Portal.',
                             pageid: 11441702,  // [[Module:Organizational_Informations/Out Of Compliance Level]]
@@ -1039,6 +1040,7 @@
                         'csrf',
                         {
                             action: 'edit',
+                            bot: true,
                             nocreate: true,
                             summary: '[Automated] M&E compliance automated checks by WAD Portal.',
                             pageid: 10603224,  // [[Module:Organizational_Informations]]

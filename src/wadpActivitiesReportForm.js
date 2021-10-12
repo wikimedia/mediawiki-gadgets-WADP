@@ -864,6 +864,7 @@
                     'csrf',
                     {
                         action: 'edit',
+                        bot: true,
                         nocreate: true,
                         summary: editSummary,
                         pageid: PAGEID,
