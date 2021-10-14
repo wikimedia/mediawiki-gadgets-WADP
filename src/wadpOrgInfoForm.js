@@ -1371,11 +1371,21 @@
                             'fiscal_year_start',
                             manifest[ i ].fiscal_year_start
                         );
+                    } else {
+                        insertInPlace += generateKeyValuePair(
+                            'fiscal_year_start',
+                            ''
+                        );
                     }
                     if ( manifest[ i ].fiscal_year_end ){
                         insertInPlace += generateKeyValuePair(
                             'fiscal_year_end',
                             manifest[ i ].fiscal_year_end
+                        );
+                    } else {
+                        insertInPlace += generateKeyValuePair(
+                            'fiscal_year_end',
+                            ''
                         );
                     }
                     if ( manifest[ i ].uptodate_reporting ){
