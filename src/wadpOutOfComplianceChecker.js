@@ -591,7 +591,7 @@
                                     orgInfo.out_of_compliance_level = '0';
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
-                                    ooc_manifest.push(oocLevel);
+                                    ooc_manifest.push( oocLevel );
 
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
