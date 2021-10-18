@@ -472,6 +472,9 @@
             if ( config.uptodate_reporting ) {
                 this.uptodate_reporting = config.uptodate_reporting;
             }
+            if ( config.notes_on_reporting ) {
+                this.notes_on_reporting = config.notes_on_reporting;
+            }
             if ( config.recognition_status ) {
                 this.recognition_status = config.recognition_status;
             }

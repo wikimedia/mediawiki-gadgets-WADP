@@ -6,7 +6,7 @@
     'use strict';
 
     var apiObj,
-        getActivitiesReports,
+        getReports,
         generateKeyValuePair,
         sanitizeInput,
         getOrgInfos,
@@ -58,15 +58,16 @@
         };
 
         /**
-         * Provides API parameters for getting the content from [[Module:Activities_Reports]]
+         * Get reports saved in a Lua module
          *
+         * @param {string} report_type Report type.
          * @return {Object}
          */
-        getActivitiesReports = function () {
+        getReports = function ( report_type ) {
             return {
                 action: 'query',
                 prop: 'revisions',
-                titles: 'Module:Activities_Reports',
+                titles: 'Module:' + report_type,
                 rvprop: 'content',
                 rvlimit: 1
             };
@@ -367,78 +368,88 @@
 
         apiObj = new mw.Api();
 
-        apiObj.get( getActivitiesReports() ).then( function ( activitiesReportsData ) {
-            apiObj.get( getOrgInfos() ).then( function ( orgInfosData ) {
-                apiObj.get( getOOCLevel() ).then( function( oocLevelsData ) {
-                    var activityReport,
-                        activitiesReports,
-                        orgInfo,
-                        orgInfos,
-                        currentYear,
-                        manifest = [],
-                        lastReportingYear,
-                        reportingDueDate,
-                        todayDate,
-                        insertInPlace,
-                        latestActivityReport,
-                        insertInPlaceOOC,
-                        oocLevels,
-                        ooc_manifest = [],
-                        fiscalYear,
-                        oocLevel,
-                        subject,
-                        systemActivityLogsToEmail = "",
-                        specialAffiliatesToEmailL45 = "",
-                        specialAffiliatesToEmailL34 = "",
-                        emailDispatcherCount = { "l050": 0, "l34": 0, "l45": 0 };
+        apiObj.get( getOrgInfos() ).then( function ( orgInfosData ) {
+            apiObj.get( getReports( 'Activities_Reports' ) ).then( function ( activitiesReportsData ) {
+                apiObj.get( getReports( 'Financial_Reports' ) ).then( function ( financialReportsData ) {
+                    apiObj.get( getOOCLevel() ).then( function ( oocLevelsData ) {
+                        var activityReport,
+                            activitiesReports,
+                            financialReports,
+                            orgInfo,
+                            orgInfos,
+                            currentYear,
+                            manifest = [],
+                            latestActivityReportYear,
+                            latestFinancialReportYear,
+                            reportingDueDate,
+                            todayDate,
+                            insertInPlace,
+                            latestActivityReport,
+                            latestFinancialReport,
+                            insertInPlaceOOC,
+                            oocLevels,
+                            ooc_manifest = [],
+                            fiscalYear,
+                            oocLevel,
+                            subject,
+                            systemActivityLogsToEmail = "",
+                            specialAffiliatesToEmailL45 = "",
+                            specialAffiliatesToEmailL34 = "",
+                            emailDispatcherCount = { "l050": 0, "l34": 0, "l45": 0 };
 
-                    activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
-                    orgInfos = parseModuleContent( orgInfosData.query.pages );
-                    oocLevels = parseModuleContent( oocLevelsData.query.pages );
+                        activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
+                        financialReports = parseModuleContent( financialReportsData.query.pages );
+                        orgInfos = parseModuleContent( orgInfosData.query.pages );
+                        oocLevels = parseModuleContent( oocLevelsData.query.pages );
 
-                    // First of all populate the ooc_manifest with existing entries
-                    for (i = 0; i < oocLevels.length; i++ ) {
-                        ooc_manifest.push( cleanRawEntry( oocLevels[i].value.fields ) );
-                    }
+                        // First of all populate the ooc_manifest with existing entries
+                        for ( i = 0; i < oocLevels.length; i++ ) {
+                            ooc_manifest.push( cleanRawEntry( oocLevels[i].value.fields ) );
+                        }
 
-                    for ( var i = 0; i < orgInfos.length; i++ ) {
-                        orgInfo = cleanRawEntry( orgInfos[i].value.fields );
-                        activityReport = cleanRawEntry( activitiesReports[i].value.fields );
+                        for ( var i = 0; i < orgInfos.length; i++ ) {
+                            orgInfo = cleanRawEntry( orgInfos[i].value.fields );
+                            activityReport = cleanRawEntry( activitiesReports[i].value.fields );
 
-                        latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
+                            latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
+                            latestFinancialReport = getLatestReport( orgInfos.group_name, financialReports );
 
-                        if ( ( orgInfo.org_type === 'User Group' ||
-                                orgInfo.org_type === 'Chapter' ||
-                                orgInfo.org_type === 'Thematic Organization' )
-                            && orgInfo.recognition_status === 'recognised'
-                            && orgInfo.me_bypass_ooc_autochecks === 'No'
-                        ) {
-                            currentYear = new Date().getFullYear();
-                            if ( typeof latestActivityReport === 'object' && latestActivityReport !== null ) {
-                                lastReportingYear = parseInt( latestActivityReport.end_date.split( "/" )[2] );
-                            } else if ( latestActivityReport === null || latestActivityReport.end_date === '01/01/2000' ) {
-                                lastReportingYear = 'nlr';
-                            }
-
-                            if ( orgInfo.fiscal_year_end || orgInfos.fiscal_year_end !== '' ) {
-                                fiscalYear = orgInfo.fiscal_year_end.split( "/" );
-                            } else if ( orgInfo.agreement_date ) {
-                                fiscalYear = orgInfo.agreement_date.split( "/" );
-                            }
-
-                            // generate due date for affiliate to submit report.
-                            reportingDueDate = new Date(
-                                currentYear,
-                                parseInt( fiscalYear[1] ) - 1,
-                                parseInt( fiscalYear[0] ) + 1
-                            );
-                            todayDate = new Date();
-
-                            /**== OOC: Level 0 to Level 1 and back algorithm ==*/
-                            if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
-                                lastReportingYear !== 'nlr'
+                            if ( ( orgInfo.org_type === 'User Group' ||
+                                    orgInfo.org_type === 'Chapter' ||
+                                    orgInfo.org_type === 'Thematic Organization' )
+                                && orgInfo.recognition_status === 'recognised'
+                                && orgInfo.me_bypass_ooc_autochecks === 'No'
                             ) {
-                                if ( lastReportingYear < currentYear &&
+                                currentYear = new Date().getFullYear();
+                                if ( typeof latestActivityReport === 'object' && latestActivityReport !== null ) {
+                                    latestActivityReportYear = parseInt( latestActivityReport.end_date.split( "/" )[2] );
+                                } else if ( latestActivityReport === null || latestActivityReport.end_date === '01/01/2000' ) {
+                                    latestActivityReportYear = 'nlr';
+                                }
+
+                                if ( typeof latestFinancialReport === 'object' && latestFinancialReport !== null ) {
+                                    latestFinancialReportYear = parseInt( latestFinancialReport.end_date.split( "/" )[2] );
+                                } else if ( latestFinancialReport === null || latestFinancialReport.end_date === '01/01/2000' ) {
+                                    latestFinancialReportYear = 'nlr';
+                                }
+
+                                if ( orgInfo.fiscal_year_end || orgInfos.fiscal_year_end !== '' ) {
+                                    fiscalYear = orgInfo.fiscal_year_end.split( "/" );
+                                } else if ( orgInfo.agreement_date ) {
+                                    fiscalYear = orgInfo.agreement_date.split( "/" );
+                                }
+
+                                // generate due date for affiliate to submit report.
+                                reportingDueDate = new Date(
+                                    currentYear,
+                                    parseInt( fiscalYear[1] ) - 1,
+                                    parseInt( fiscalYear[0] ) + 1
+                                );
+                                todayDate = new Date();
+
+                                /**== Level 0 - 1: For new affiliates, handle them differently ==*/
+                                if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
+                                    orgInfo.uptodate_reporting === 'Tick-N' &&
                                     orgInfo.out_of_compliance_level === '0'
                                 ) {
                                     orgInfo.out_of_compliance_level = '1';
@@ -446,688 +457,799 @@
                                     ooc_manifest.push( oocLevel );
 
                                     emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 0 -> 1.";
-                                } else if ( lastReportingYear === currentYear &&
+                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 0 -> 1.";
+                                }
+                                /**== OOC: Level 0 to Level 1 and back algorithm for all affiliates ==*/
+                                else if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
+                                    latestActivityReportYear !== 'nlr'
+                                ) {
+                                    if ( latestActivityReportYear < currentYear &&
+                                        orgInfo.out_of_compliance_level === '0'
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '1';
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 0 -> 1.";
+                                    } else if ( latestActivityReportYear === currentYear &&
+                                        orgInfo.out_of_compliance_level === '1'
+                                    ) {
+                                        // NOTE: If it's a new affiliate, just mark it directly as compliant.
+                                        // And also, it's no longer a new affiliate as it now has at least 1 report.
+                                        if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
+                                            orgInfo.uptodate_reporting = 'Tick';
+                                        }
+                                        orgInfo.out_of_compliance_level = '0';
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 0.";
+                                    }
+                                }
+                                /**== Level 1 - 2: For UG, Chaps & ThOrgs ==*/
+                                else if ( latestActivityReportYear < currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    orgInfo.uptodate_reporting === "Tick" &&
                                     orgInfo.out_of_compliance_level === '1'
                                 ) {
-                                    // NOTE: If it's a new affiliate, just mark it directly as compliant.
-                                    // And also, it's no longer a new affiliate as it now has at least 1 report.
-                                    if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
-                                        orgInfo.uptodate_reporting = 'Tick';
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'Yes' &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
+                                        // check if days difference is greater than 30 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 30
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '2';
+                                        orgInfo.uptodate_reporting = "Cross";
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
+                                    } else if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'No' &&
+                                        // check if days difference is greater than 30 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 30
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '2';
+                                        orgInfo.uptodate_reporting = "Cross";
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
+                                    } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        // check if days difference is greater than 120 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24) ) > 120
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '2';
+                                        orgInfo.uptodate_reporting = "Cross";
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
                                     }
+                                }
+                                /**== Level 1 - 2: For new UGs, Chaps & ThOrgs, handle them differently ==*/
+                                else if ( orgInfo.uptodate_reporting === "Tick-N" &&
+                                    orgInfo.out_of_compliance_level === '1'
+                                ) {
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        // check if days difference is greater than 30 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 30
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '2';
+                                        orgInfo.uptodate_reporting = "Cross-N";
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 1 -> 2.";
+                                    } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // check if days difference is greater than 120 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 120
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '2';
+                                        orgInfo.uptodate_reporting = "Cross-N";
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 1 -> 2.";
+                                    }
+                                }
+                                /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
+                                else if ( latestActivityReportYear === currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    // Also check for new chaps or thorgs and catch them too - 'Cross-N'.
+                                    ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
+                                    orgInfo.out_of_compliance_level === '2'
+                                ) {
+                                    orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
+
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
+                                    ooc_manifest.push(oocLevel);
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
+                                }
+                                /**== Level 2 to 3 OOC algorithm for UGs, Chaps & ThOrgs ==*/
+                                else if ( orgInfo.out_of_compliance_level === '2' &&
+                                    latestActivityReportYear < currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    orgInfo.uptodate_reporting === "Cross"
+                                ) {
+                                    // forward logic: 2 - 3 for UGs
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'Yes' &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
+                                        // check if days difference is greater than 60 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 60
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '3';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                    } else if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'No' &&
+                                        // check if days difference is greater than 60 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 60
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '3';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                    }
+                                    // forward logic: 2 - 3 for chaps & thorgs
+                                    else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        // check if days difference is greater than 150 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 150
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '3';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                    }
+                                }
+                                /**== Level 2 - 3 for new affiliates (UGs, Chaps & ThOrgs) ==*/
+                                else if ( orgInfo.out_of_compliance_level === '2' &&
+                                    orgInfo.uptodate_reporting === "Cross-N"
+                                ) {
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'Yes' &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        // check if days difference is greater than 60 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 60
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '3';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                    } else if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'No' &&
+                                        // check if days difference is greater than 60 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 60
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '3';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                    } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // check if days difference is greater than 150 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 150
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '3';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                    }
+                                }
+                                /**== Level 3 - 0: Backward logic for all affiliates: UGs, Chaps & ThOrgs ==*/
+                                else if ( latestActivityReportYear === currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
+                                    orgInfo.out_of_compliance_level === '3'
+                                ) {
+                                    orgInfo.uptodate_reporting = "Tick";
+                                    orgInfo.out_of_compliance_level = '0';
+
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                     ooc_manifest.push( oocLevel );
 
                                     emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 0.";
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                                 }
-                            }
-                            /**== Level 0 - 1: For new affiliates, handle them differently ==*/
-                            if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
-                                orgInfo.uptodate_reporting === 'Tick-N' &&
-                                orgInfo.out_of_compliance_level === '0'
-                            ) {
-                                orgInfo.out_of_compliance_level = '1';
-                                oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', currentYear );
-                                ooc_manifest.push( oocLevel );
-
-                                emailDispatcherCount["l050"]++;
-                                systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 0 -> 1.";
-                            }
-                            /**== Level 1 - 2: For UG, Chaps & ThOrgs ==*/
-                            else if ( lastReportingYear < currentYear &&
-                                lastReportingYear !== 'nlr' &&
-                                orgInfo.uptodate_reporting === "Tick" &&
-                                orgInfo.out_of_compliance_level === '1'
-                            ) {
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 30 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 30
+                                /**== Level 3 to 4 OOC algorithm for all affiliates (UGs, Chaps, ThOrgs) ==*/
+                                else if ( orgInfo.out_of_compliance_level === '3' &&
+                                    latestActivityReportYear < currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    orgInfo.uptodate_reporting === "Cross"
                                 ) {
-                                    orgInfo.out_of_compliance_level = '2';
-                                    orgInfo.uptodate_reporting = "Cross";
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'Yes' &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
+                                        // check if days difference is greater than 90 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 90
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '4';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
-                                    ooc_manifest.push( oocLevel );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        ooc_manifest.push( oocLevel );
 
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
-                                } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 120 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 120
-                                ) {
-                                    orgInfo.out_of_compliance_level = '2';
-                                    orgInfo.uptodate_reporting = "Cross";
+                                        /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
+                                        emailDispatcherCount["l34"]++;
+                                        specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
-                                    ooc_manifest.push( oocLevel );
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
+                                    } else if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'No' &&
+                                        // check if days difference is greater than 90 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 90
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '4';
 
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        ooc_manifest.push( oocLevel );
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+
+                                        /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
+                                        emailDispatcherCount["l34"]++;
+                                        specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
+                                    } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        // check if days difference is greater than 180 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 180
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '4';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+
+                                        /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
+                                        emailDispatcherCount["l34"]++;
+                                        specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
+                                    }
                                 }
-                            }
-                            /**== Level 1 - 2: For new UGs, Chaps & ThOrgs, handle them differently ==*/
-                            if ( orgInfo.uptodate_reporting === "Tick-N" &&
-                                orgInfo.out_of_compliance_level === '1'
-                            ) {
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 30 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 30
+                                /**== Level 3 - 4 for all **new** affiliates (UGs, Chaps & ThOrgs) */
+                                else if ( orgInfo.out_of_compliance_level === '3' &&
+                                    orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
-                                    orgInfo.out_of_compliance_level = '2';
-                                    orgInfo.uptodate_reporting = "Cross-N";
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        // check if days difference is greater than 90 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 90
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '4';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
-                                    ooc_manifest.push( oocLevel );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        ooc_manifest.push( oocLevel );
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 1 -> 2.";
-                                } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 120 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 120
-                                ) {
-                                    orgInfo.out_of_compliance_level = '2';
-                                    orgInfo.uptodate_reporting = "Cross-N";
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
-                                    ooc_manifest.push( oocLevel );
+                                        /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
+                                        emailDispatcherCount["l34"]++;
+                                        specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
 
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 3 -> 4.";
+                                    } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // check if days difference is greater than 180 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 180
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '4';
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 1 -> 2.";
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+
+                                        /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
+                                        emailDispatcherCount["l34"]++;
+                                        specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 3 -> 4.";
+                                    }
                                 }
-                            }
-                            /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
-                            else if ( lastReportingYear === currentYear &&
-                                lastReportingYear !== 'nlr' &&
-                                // Also check for new chaps or thorgs and catch them too - 'Cross-N'.
-                                ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
-                                orgInfo.out_of_compliance_level === '2'
-                            ) {
-                                orgInfo.uptodate_reporting = "Tick";
-                                orgInfo.out_of_compliance_level = '0';
-
-                                oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
-                                ooc_manifest.push( oocLevel );
-
-                                emailDispatcherCount["l050"]++;
-                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
-                            }
-                            /**== Level 2 to 3 OOC algorithm for UGs, Chaps & ThOrgs ==*/
-                            else if ( orgInfo.out_of_compliance_level === '2' &&
-                                lastReportingYear < currentYear &&
-                                lastReportingYear !== 'nlr' &&
-                                orgInfo.uptodate_reporting === "Cross"
-                            ) {
-                                // forward logic: 2 - 3 for UGs
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 60 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 60
+                                /**== Level 4 - 0: backward logic for all affiliates ==*/
+                                else if ( latestActivityReportYear === currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
+                                    orgInfo.out_of_compliance_level === '4'
                                 ) {
-                                    orgInfo.out_of_compliance_level = '3';
+                                    orgInfo.uptodate_reporting = "Tick";
+                                    orgInfo.out_of_compliance_level = '0';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
                                     ooc_manifest.push( oocLevel );
 
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
-
                                     emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
                                 }
-                                // forward logic: 2 - 3 for chaps & thorgs
-                                else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 150 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 150
+                                /**== Level 4 to 5 OOC algorithm for UGs, Chaps & ThOrgs ==*/
+                                else if ( orgInfo.out_of_compliance_level === '4' &&
+                                    latestActivityReportYear < currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    orgInfo.uptodate_reporting === "Cross"
                                 ) {
-                                    orgInfo.out_of_compliance_level = '3';
+                                    // forward logic: 4 - 5
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'Yes' &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
+                                        // check if days difference is greater than 120 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 120
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '5';
+                                        orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
-                                    ooc_manifest.push( oocLevel );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        ooc_manifest.push( oocLevel );
 
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                        /** Email list of UG from level 4 - 5 to M&E staff. */
+                                        emailDispatcherCount["l45"]++;
+                                        specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
+                                    } else if ( orgInfo.org_type === 'User Group' &&
+                                        orgInfos.legal_entity === 'No' &&
+                                        // check if days difference is greater than 120 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 120
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '5';
+                                        orgInfo.me_bypass_ooc_autochecks = 'Yes';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+
+                                        /** Email list of UG from level 4 - 5 to M&E staff. */
+                                        emailDispatcherCount["l45"]++;
+                                        specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
+                                    }
+                                    // forward logic: 4 - 5 for chaps & thorgs
+                                    else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // Financial report year can be 1 year off from activity report year.
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        // check if days difference is greater than 210 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 210
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '5';
+                                        orgInfo.me_bypass_ooc_autochecks = 'Yes';
+
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        ooc_manifest.push(oocLevel);
+
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+
+                                        /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
+                                        emailDispatcherCount["l45"]++;
+                                        specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
+                                    }
                                 }
-                            }
-                            /**== Level 2 - 3 for new affiliates (UGs, Chaps & ThOrgs) ==*/
-                            else if ( orgInfo.out_of_compliance_level === '2' &&
-                                orgInfo.uptodate_reporting === "Cross-N"
-                            ) {
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 60 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 60
+                                /**== Level 4 - 5: For all new affiliates ==*/
+                                else if ( orgInfo.out_of_compliance_level === '4' &&
+                                    orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
-                                    orgInfo.out_of_compliance_level = '3';
+                                    if ( orgInfo.org_type === 'User Group' &&
+                                        // check if days difference is greater than 120 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 120
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '5';
+                                        orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
-                                    ooc_manifest.push( oocLevel );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        ooc_manifest.push( oocLevel );
 
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
-                                } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 150 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 150
-                                ) {
-                                    orgInfo.out_of_compliance_level = '3';
+                                        /** Email list of UG from level 4 - 5 to M&E staff. */
+                                        emailDispatcherCount["l45"]++;
+                                        specialAffiliatesToEmailL45 += "\n✦ [New Affiliate] " + orgInfo.group_name;
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
-                                    ooc_manifest.push( oocLevel );
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
+                                    } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
+                                        // check if days difference is greater than 210 days
+                                        ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 210
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '5';
+                                        orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        ooc_manifest.push( oocLevel );
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
+                                        /** After writing to DB, post a talk page notification */
+                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+
+                                        /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
+                                        emailDispatcherCount["l45"]++;
+                                        specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 4 -> 5.";
+                                    }
                                 }
+                                manifest.push( orgInfo );
+                            } else {
+                                manifest.push( orgInfo );
                             }
-                            /**== Level 3 - 0: Backward logic for all affiliates: UGs, Chaps & ThOrgs ==*/
-                            else if ( lastReportingYear === currentYear &&
-                                lastReportingYear !== 'nlr' &&
-                                ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
-                                orgInfo.out_of_compliance_level === '3'
-                            ) {
-                                orgInfo.uptodate_reporting = "Tick";
-                                orgInfo.out_of_compliance_level = '0';
+                        }
 
-                                oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
-                                ooc_manifest.push( oocLevel );
+                        if ( emailDispatcherCount["l34"] > 0) {
+                            // Send aggregate email to M&E staff (L3-4)
+                            subject = "New affiliates at level 4 of OOC Checks";
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DNdubane (WMF)' );
+                            // loop back address -- for backup purposes and monitoring
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DAlangi (WMF)' );
+                        }
 
-                                emailDispatcherCount["l050"]++;
-                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
+                        if ( emailDispatcherCount["l45"] > 0 ) {
+                            // Send aggregate email to M&E staff (L4-5)
+                            subject = "New affiliates at level 5 of OOC Checks";
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DNdubane (WMF)' );
+                            // loop back address -- for backup purposes and monitoring
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
+                        }
+
+                        if ( emailDispatcherCount["l050"] > 0 ) {
+                            // Send aggregate email to M&E staff (L0-5 and back)
+                            subject = "[General] Compliance sweep of all Wikimedia Affiliates";
+                            sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DNdubane (WMF)' );
+                            // loop back address -- for backup purposes and monitoring
+                            sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DAlangi (WMF)' );
+                        }
+
+                        // Re-generate the OOC Lua table based on `ooc_manifest`
+                        insertInPlaceOOC = 'return {\n';
+                        for ( i = 0; i < ooc_manifest.length; i++ ) {
+                            insertInPlaceOOC += '\t{\n';
+                            if ( ooc_manifest[i].group_name ) {
+                                insertInPlaceOOC += generateKeyValuePair(
+                                    'group_name',
+                                    ooc_manifest[i].group_name
+                                );
                             }
-                            /**== Level 3 to 4 OOC algorithm for all affiliates (UGs, Chaps, ThOrgs) ==*/
-                            else if ( orgInfo.out_of_compliance_level === '3' &&
-                                lastReportingYear < currentYear &&
-                                lastReportingYear !== 'nlr' &&
-                                orgInfo.uptodate_reporting === "Cross"
-                            ) {
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 90 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 90
-                                ) {
-                                    orgInfo.out_of_compliance_level = '4';
-
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
-
-                                    /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
-                                    emailDispatcherCount["l34"]++;
-                                    specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
-                                } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 180 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 180
-                                ) {
-                                    orgInfo.out_of_compliance_level = '4';
-
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
-
-                                    /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
-                                    emailDispatcherCount["l34"]++;
-                                    specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
-                                }
+                            if ( ooc_manifest[i].out_of_compliance_level ) {
+                                insertInPlaceOOC += generateKeyValuePair(
+                                    'out_of_compliance_level',
+                                    ooc_manifest[i].out_of_compliance_level
+                                );
                             }
-                            /**== Level 3 - 4 for all **new** affiliates (UGs, Chaps & ThOrgs) */
-                            else if ( orgInfo.out_of_compliance_level === '3' &&
-                                orgInfo.uptodate_reporting === "Cross-N"
-                            ) {
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 90 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 90
-                                ) {
-                                    orgInfo.out_of_compliance_level = '4';
-
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
-
-                                    /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
-                                    emailDispatcherCount["l34"]++;
-                                    specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 3 -> 4.";
-                                } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 180 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 180
-                                ) {
-                                    orgInfo.out_of_compliance_level = '4';
-
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
-
-                                    /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
-                                    emailDispatcherCount["l34"]++;
-                                    specialAffiliatesToEmailL34 += "\n✦ " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 3 -> 4.";
-                                }
+                            if ( ooc_manifest[i].financial_year ) {
+                                insertInPlaceOOC += generateKeyValuePair(
+                                    'financial_year',
+                                    ooc_manifest[i].financial_year
+                                );
                             }
-                            /**== Level 4 - 0: backward logic for all affiliates ==*/
-                            else if ( lastReportingYear === currentYear &&
-                                lastReportingYear !== 'nlr' &&
-                                ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
-                                orgInfo.out_of_compliance_level === '4'
-                            ) {
-                                orgInfo.uptodate_reporting = "Tick";
-                                orgInfo.out_of_compliance_level = '0';
-
-                                oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
-                                ooc_manifest.push( oocLevel );
-
-                                emailDispatcherCount["l050"]++;
-                                systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
+                            if ( ooc_manifest[i].created_at ) {
+                                insertInPlaceOOC += generateKeyValuePair(
+                                    'created_at',
+                                    ooc_manifest[i].created_at
+                                );
                             }
-                            /**== Level 4 to 5 OOC algorithm for UGs, Chaps & ThOrgs ==*/
-                            else if ( orgInfo.out_of_compliance_level === '4' &&
-                                lastReportingYear < currentYear &&
-                                lastReportingYear !== 'nlr' &&
-                                orgInfo.uptodate_reporting === "Cross"
-                            ) {
-                                // forward logic: 4 - 5
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 120 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 120
-                                ) {
-                                    orgInfo.out_of_compliance_level = '5';
-                                    orgInfo.me_bypass_ooc_autochecks = 'Yes';
+                            insertInPlaceOOC += '\t},\n';
+                        }
+                        insertInPlaceOOC += '}';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
-
-                                    /** Email list of UG from level 4 - 5 to M&E staff. */
-                                    emailDispatcherCount["l45"]++;
-                                    specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
-                                }
-                                // forward logic: 4 - 5 for chaps & thorgs
-                                else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 210 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 210
-                                ) {
-                                    orgInfo.out_of_compliance_level = '5';
-                                    orgInfo.me_bypass_ooc_autochecks = 'Yes';
-
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
-
-                                    /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
-                                    emailDispatcherCount["l45"]++;
-                                    specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
-                                }
+                        // Make changes to the Org Info OOC table as required.
+                        apiObj.postWithToken(
+                            'csrf',
+                            {
+                                action: 'edit',
+                                bot: true,
+                                nocreate: true,
+                                summary: '[Automated] M&E compliance automated checks by WAD Portal.',
+                                pageid: 11441702,  // [[Module:Organizational_Informations/Out Of Compliance Level]]
+                                text: insertInPlaceOOC,
+                                contentmodel: 'Scribunto'
                             }
-                            /**== Level 4 - 5: For all new affiliates ==*/
-                            else if ( orgInfo.out_of_compliance_level === '4' &&
-                                orgInfo.uptodate_reporting === "Cross-N"
-                            ) {
-                                if ( orgInfo.org_type === 'User Group' &&
-                                    // check if days difference is greater than 120 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 120
-                                ) {
-                                    orgInfo.out_of_compliance_level = '5';
-                                    orgInfo.me_bypass_ooc_autochecks = 'Yes';
+                        );
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
-
-                                    /** Email list of UG from level 4 - 5 to M&E staff. */
-                                    emailDispatcherCount["l45"]++;
-                                    specialAffiliatesToEmailL45 += "\n✦ [New Affiliate] " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
-                                } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                    // check if days difference is greater than 210 days
-                                    ( ( todayDate.getTime() - reportingDueDate.getTime() ) / (1000 * 60 * 60 * 24) ) > 210
-                                ) {
-                                    orgInfo.out_of_compliance_level = '5';
-                                    orgInfo.me_bypass_ooc_autochecks = 'Yes';
-
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
-                                    ooc_manifest.push( oocLevel );
-
-                                    /** After writing to DB, post a talk page notification */
-                                    postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
-
-                                    /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
-                                    emailDispatcherCount["l45"]++;
-                                    specialAffiliatesToEmailL45 += "\n✦ " + orgInfo.group_name;
-
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 4 -> 5.";
-                                }
+                        // Re-generate the Lua table based on `manifest`
+                        insertInPlace = 'return {\n';
+                        for ( i = 0; i < manifest.length; i++ ) {
+                            insertInPlace += '\t{\n';
+                            if ( manifest[i].unique_id ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'unique_id',
+                                    manifest[i].unique_id
+                                );
                             }
-                            manifest.push( orgInfo );
-                        } else {
-                            manifest.push( orgInfo );
+                            if ( manifest[i].affiliate_code ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'affiliate_code',
+                                    manifest[i].affiliate_code
+                                );
+                            }
+                            if ( manifest[i].group_name ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'group_name',
+                                    manifest[i].group_name
+                                );
+                            }
+                            if ( manifest[i].org_type ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'org_type',
+                                    manifest[i].org_type
+                                );
+                            }
+                            if ( manifest[i].region ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'region',
+                                    manifest[i].region
+                                );
+                            }
+                            if ( manifest[i].group_country ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'group_country',
+                                    manifest[i].group_country
+                                );
+                            }
+                            if ( !manifest[i].legal_entity && manifest[i].org_type === 'User Group' ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'legal_entity',
+                                    'No'
+                                );
+                            } else if ( manifest[i].legal_entity && manifest[i].org_type === 'User Group' ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'legal_entity',
+                                    manifest[i].legal_entity
+                                );
+                            } else {
+                                insertInPlace += generateKeyValuePair(
+                                    'legal_entity',
+                                    'Yes'
+                                );
+                            }
+                            if ( manifest[i].mission_changed ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'mission_changed',
+                                    manifest[i].mission_changed
+                                );
+                            }
+                            if ( manifest[i].explanation ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'explanation',
+                                    manifest[i].explanation
+                                );
+                            }
+                            if ( manifest[i].group_page ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'group_page',
+                                    manifest[i].group_page.trim()
+                                );
+                            }
+                            if ( manifest[i].member_count ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'member_count',
+                                    manifest[i].member_count
+                                );
+                            }
+                            if ( manifest[i].facebook ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'facebook',
+                                    manifest[i].facebook.trim()
+                                );
+                            }
+                            if ( manifest[i].twitter ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'twitter',
+                                    manifest[i].twitter.trim()
+                                );
+                            }
+                            if ( manifest[i].other ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'other',
+                                    manifest[i].other.trim()
+                                );
+                            }
+                            if ( manifest[i].dm_structure ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'dm_structure',
+                                    manifest[i].dm_structure
+                                );
+                            }
+                            if ( manifest[i].board_contacts ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'board_contacts',
+                                    manifest[i].board_contacts
+                                );
+                            }
+                            if ( manifest[i].agreement_date ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'agreement_date',
+                                    manifest[i].agreement_date
+                                );
+                            }
+                            if ( manifest[i].fiscal_year_start ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'fiscal_year_start',
+                                    manifest[i].fiscal_year_start
+                                );
+                            } else {
+                                insertInPlace += generateKeyValuePair(
+                                    'fiscal_year_start',
+                                    ''
+                                );
+                            }
+                            if ( manifest[i].fiscal_year_end ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'fiscal_year_end',
+                                    manifest[i].fiscal_year_end
+                                );
+                            } else {
+                                insertInPlace += generateKeyValuePair(
+                                    'fiscal_year_end',
+                                    ''
+                                );
+                            }
+                            if ( manifest[i].uptodate_reporting ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'uptodate_reporting',
+                                    manifest[i].uptodate_reporting
+                                );
+                            }
+                            if ( manifest[i].notes_on_reporting ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'notes_on_reporting',
+                                    manifest[i].notes_on_reporting
+                                );
+                            } else {
+                                insertInPlace += generateKeyValuePair(
+                                    'notes_on_reporting',
+                                    ''
+                                );
+                            }
+                            if ( manifest[i].recognition_status ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'recognition_status',
+                                    manifest[i].recognition_status
+                                );
+                            }
+                            if ( manifest[i].me_bypass_ooc_autochecks ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'me_bypass_ooc_autochecks',
+                                    manifest[i].me_bypass_ooc_autochecks
+                                );
+                            }
+                            if ( manifest[i].out_of_compliance_level ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'out_of_compliance_level',
+                                    manifest[i].out_of_compliance_level
+                                );
+                            }
+                            if ( manifest[i].derecognition_date ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'derecognition_date',
+                                    manifest[i].derecognition_date
+                                );
+                            }
+                            if ( manifest[i].derecognition_note ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'derecognition_note',
+                                    manifest[i].derecognition_note
+                                );
+                            }
+                            if ( manifest[i].dos_stamp ) {
+                                insertInPlace += generateKeyValuePair(
+                                    'dos_stamp',
+                                    manifest[i].dos_stamp
+                                );
+                            }
+                            insertInPlace += '\t},\n';
                         }
-                    }
+                        insertInPlace += '}';
 
-                    if ( emailDispatcherCount["l34"] > 0 ) {
-                        // Send aggregate email to M&E staff (L3-4)
-                        subject = "New affiliates at level 4 of OOC Checks";
-                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DNdubane (WMF)' );
-                        // loop back address -- for backup purposes and monitoring
-                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DAlangi (WMF)' );
-                    }
-
-                    if ( emailDispatcherCount["l45"] > 0 ) {
-                        // Send aggregate email to M&E staff (L4-5)
-                        subject = "New affiliates at level 5 of OOC Checks";
-                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DNdubane (WMF)' );
-                        // loop back address -- for backup purposes and monitoring
-                        sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
-                    }
-
-                    if ( emailDispatcherCount["l050"] > 0 ) {
-                        // Send aggregate email to M&E staff (L0-5 and back)
-                        subject = "[General] Compliance sweep of all Wikimedia Affiliates";
-                        sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DNdubane (WMF)' );
-                        // loop back address -- for backup purposes and monitoring
-                        sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DAlangi (WMF)' );
-                    }
-
-                    // Re-generate the OOC Lua table based on `ooc_manifest`
-                    insertInPlaceOOC = 'return {\n';
-                    for ( i = 0; i < ooc_manifest.length; i++ ) {
-                        insertInPlaceOOC += '\t{\n';
-                        if ( ooc_manifest[ i ].group_name ) {
-                            insertInPlaceOOC += generateKeyValuePair(
-                                'group_name',
-                                ooc_manifest[ i ].group_name
-                            );
-                        }
-                        if ( ooc_manifest[ i ].out_of_compliance_level ) {
-                            insertInPlaceOOC += generateKeyValuePair(
-                                'out_of_compliance_level',
-                                ooc_manifest[ i ].out_of_compliance_level
-                            );
-                        }
-                        if ( ooc_manifest[ i ].financial_year ) {
-                            insertInPlaceOOC += generateKeyValuePair(
-                                'financial_year',
-                                ooc_manifest[ i ].financial_year
-                            );
-                        }
-                        if ( ooc_manifest[ i ].created_at ) {
-                            insertInPlaceOOC += generateKeyValuePair(
-                                'created_at',
-                                ooc_manifest[ i ].created_at
-                            );
-                        }
-                        insertInPlaceOOC += '\t},\n';
-                    }
-                    insertInPlaceOOC += '}';
-
-                    // Make changes to the Org Info OOC table as required.
-                    apiObj.postWithToken(
-                        'csrf',
-                        {
-                            action: 'edit',
-                            bot: true,
-                            nocreate: true,
-                            summary: '[Automated] M&E compliance automated checks by WAD Portal.',
-                            pageid: 11441702,  // [[Module:Organizational_Informations/Out Of Compliance Level]]
-                            text: insertInPlaceOOC,
-                            contentmodel: 'Scribunto'
-                        }
-                    );
-
-                    // Re-generate the Lua table based on `manifest`
-                    insertInPlace = 'return {\n';
-                    for ( i = 0; i < manifest.length; i++ ) {
-                        insertInPlace += '\t{\n';
-                        if ( manifest[ i ].unique_id ) {
-                            insertInPlace += generateKeyValuePair(
-                                'unique_id',
-                                manifest[ i ].unique_id
-                            );
-                        }
-                        if ( manifest[ i ].affiliate_code ){
-                            insertInPlace += generateKeyValuePair(
-                                'affiliate_code',
-                                manifest[ i ].affiliate_code
-                            );
-                        }
-                        if ( manifest[ i ].group_name ) {
-                            insertInPlace += generateKeyValuePair(
-                                'group_name',
-                                manifest[ i ].group_name
-                            );
-                        }
-                        if ( manifest[ i ].org_type ) {
-                            insertInPlace += generateKeyValuePair(
-                                'org_type',
-                                manifest[ i ].org_type
-                            );
-                        }
-                        if ( manifest[ i ].region ) {
-                            insertInPlace += generateKeyValuePair(
-                                'region',
-                                manifest[ i ].region
-                            );
-                        }
-                        if ( manifest[ i ].group_country ) {
-                            insertInPlace += generateKeyValuePair(
-                                'group_country',
-                                manifest[ i ].group_country
-                            );
-                        }
-                        if ( !manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
-                            insertInPlace += generateKeyValuePair(
-                                'legal_entity',
-                                'No'
-                            );
-                        } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
-                            insertInPlace += generateKeyValuePair(
-                                'legal_entity',
-                                manifest[ i ].legal_entity
-                            );
-                        } else {
-                            insertInPlace += generateKeyValuePair(
-                                'legal_entity',
-                                'Yes'
-                            );
-                        }
-                        if ( manifest[ i ].mission_changed ) {
-                            insertInPlace += generateKeyValuePair(
-                                'mission_changed',
-                                manifest[ i ].mission_changed
-                            );
-                        }
-                        if ( manifest[ i ].explanation ) {
-                            insertInPlace += generateKeyValuePair(
-                                'explanation',
-                                manifest[ i ].explanation
-                            );
-                        }
-                        if ( manifest[ i ].group_page ) {
-                            insertInPlace += generateKeyValuePair(
-                                'group_page',
-                                manifest[ i ].group_page.trim()
-                            );
-                        }
-                        if ( manifest[ i ].member_count ) {
-                            insertInPlace += generateKeyValuePair(
-                                'member_count',
-                                manifest[ i ].member_count
-                            );
-                        }
-                        if ( manifest[ i ].facebook ) {
-                            insertInPlace += generateKeyValuePair(
-                                'facebook',
-                                manifest[ i ].facebook.trim()
-                            );
-                        }
-                        if ( manifest[ i ].twitter ) {
-                            insertInPlace += generateKeyValuePair(
-                                'twitter',
-                                manifest[ i ].twitter.trim()
-                            );
-                        }
-                        if ( manifest[ i ].other ) {
-                            insertInPlace += generateKeyValuePair(
-                                'other',
-                                manifest[ i ].other.trim()
-                            );
-                        }
-                        if ( manifest[ i ].dm_structure ) {
-                            insertInPlace += generateKeyValuePair(
-                                'dm_structure',
-                                manifest[ i ].dm_structure
-                            );
-                        }
-                        if ( manifest[ i ].board_contacts ) {
-                            insertInPlace += generateKeyValuePair(
-                                'board_contacts',
-                                manifest[ i ].board_contacts
-                            );
-                        }
-                        if ( manifest[ i ].agreement_date ){
-                            insertInPlace += generateKeyValuePair(
-                                'agreement_date',
-                                manifest[ i ].agreement_date
-                            );
-                        }
-                        if ( manifest[ i ].fiscal_year_start ){
-                            insertInPlace += generateKeyValuePair(
-                                'fiscal_year_start',
-                                manifest[ i ].fiscal_year_start
-                            );
-                        } else {
-                            insertInPlace += generateKeyValuePair(
-                                'fiscal_year_start',
-                                ''
-                            );
-                        }
-                        if ( manifest[ i ].fiscal_year_end ){
-                            insertInPlace += generateKeyValuePair(
-                                'fiscal_year_end',
-                                manifest[ i ].fiscal_year_end
-                            );
-                        } else {
-                            insertInPlace += generateKeyValuePair(
-                                'fiscal_year_end',
-                                ''
-                            );
-                        }
-                        if ( manifest[ i ].uptodate_reporting ){
-                            insertInPlace += generateKeyValuePair(
-                                'uptodate_reporting',
-                                manifest[ i ].uptodate_reporting
-                            );
-                        }
-                        if ( manifest[ i ].notes_on_reporting ){
-                            insertInPlace += generateKeyValuePair(
-                                'notes_on_reporting',
-                                manifest[ i ].notes_on_reporting
-                            );
-                        } else {
-                            insertInPlace += generateKeyValuePair(
-                                'notes_on_reporting',
-                                ''
-                            );
-                        }
-                        if ( manifest[ i ].recognition_status ){
-                            insertInPlace += generateKeyValuePair(
-                                'recognition_status',
-                                manifest[ i ].recognition_status
-                            );
-                        }
-                        if ( manifest[ i ].me_bypass_ooc_autochecks ){
-                            insertInPlace += generateKeyValuePair(
-                                'me_bypass_ooc_autochecks',
-                                manifest[ i ].me_bypass_ooc_autochecks
-                            );
-                        }
-                        if ( manifest[ i ].out_of_compliance_level ){
-                            insertInPlace += generateKeyValuePair(
-                                'out_of_compliance_level',
-                                manifest[ i ].out_of_compliance_level
-                            );
-                        }
-                        if ( manifest[ i ].derecognition_date ){
-                            insertInPlace += generateKeyValuePair(
-                                'derecognition_date',
-                                manifest[ i ].derecognition_date
-                            );
-                        }
-                        if ( manifest[ i ].derecognition_note ){
-                            insertInPlace += generateKeyValuePair(
-                                'derecognition_note',
-                                manifest[ i ].derecognition_note
-                            );
-                        }
-                        if ( manifest[ i ].dos_stamp ) {
-                            insertInPlace += generateKeyValuePair(
-                                'dos_stamp',
-                                manifest[ i ].dos_stamp
-                            );
-                        }
-                        insertInPlace += '\t},\n';
-                    }
-                    insertInPlace += '}';
-
-                    // Make changes to the Org Info table as required.
-                    apiObj.postWithToken(
-                        'csrf',
-                        {
-                            action: 'edit',
-                            bot: true,
-                            nocreate: true,
-                            summary: '[Automated] M&E compliance automated checks by WAD Portal.',
-                            pageid: 10603224,  // [[Module:Organizational_Informations]]
-                            text: insertInPlace,
-                            contentmodel: 'Scribunto'
-                        }
-                    );
+                        // Make changes to the Org Info table as required.
+                        apiObj.postWithToken(
+                            'csrf',
+                            {
+                                action: 'edit',
+                                bot: true,
+                                nocreate: true,
+                                summary: '[Automated] M&E compliance automated checks by WAD Portal.',
+                                pageid: 10603224,  // [[Module:Organizational_Informations]]
+                                text: insertInPlace,
+                                contentmodel: 'Scribunto'
+                            }
+                        );
+                    } );
                 } );
             } );
         } );
