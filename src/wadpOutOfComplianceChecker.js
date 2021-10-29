@@ -409,10 +409,11 @@
 
                         for ( var i = 0; i < orgInfos.length; i++ ) {
                             orgInfo = cleanRawEntry( orgInfos[i].value.fields );
+                            // TODO: Check if this is used, else remove.
                             activityReport = cleanRawEntry( activitiesReports[i].value.fields );
 
                             latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
-                            latestFinancialReport = getLatestReport( orgInfos.group_name, financialReports );
+                            latestFinancialReport = getLatestReport( orgInfo.group_name, financialReports );
 
                             if ( ( orgInfo.org_type === 'User Group' ||
                                     orgInfo.org_type === 'Chapter' ||
@@ -433,7 +434,7 @@
                                     latestFinancialReportYear = 'nlr';
                                 }
 
-                                if ( orgInfo.fiscal_year_end || orgInfos.fiscal_year_end !== '' ) {
+                                if ( orgInfo.fiscal_year_end || orgInfo.fiscal_year_end !== '' ) {
                                     fiscalYear = orgInfo.fiscal_year_end.split( "/" );
                                 } else if ( orgInfo.agreement_date ) {
                                     fiscalYear = orgInfo.agreement_date.split( "/" );
@@ -443,7 +444,7 @@
                                 reportingDueDate = new Date(
                                     currentYear,
                                     parseInt( fiscalYear[1] ) - 1,
-                                    parseInt( fiscalYear[0] ) + 1
+                                    parseInt( fiscalYear[0] )
                                 );
                                 todayDate = new Date();
 
@@ -460,7 +461,7 @@
                                     systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 0 -> 1.";
                                 }
                                 /**== OOC: Level 0 to Level 1 and back algorithm for all affiliates ==*/
-                                else if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
+                                if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
                                     latestActivityReportYear !== 'nlr'
                                 ) {
                                     if ( latestActivityReportYear < currentYear &&
@@ -489,13 +490,13 @@
                                     }
                                 }
                                 /**== Level 1 - 2: For UG, Chaps & ThOrgs ==*/
-                                else if ( latestActivityReportYear < currentYear &&
+                                if ( latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Tick" &&
                                     orgInfo.out_of_compliance_level === '1'
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'Yes' &&
+                                        orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
                                         // check if days difference is greater than 30 days
@@ -513,7 +514,7 @@
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
                                     } else if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'No' &&
+                                        orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 30 days
                                         ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 30
                                     ) {
@@ -548,7 +549,7 @@
                                     }
                                 }
                                 /**== Level 1 - 2: For new UGs, Chaps & ThOrgs, handle them differently ==*/
-                                else if ( orgInfo.uptodate_reporting === "Tick-N" &&
+                                if ( orgInfo.uptodate_reporting === "Tick-N" &&
                                     orgInfo.out_of_compliance_level === '1'
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
@@ -581,7 +582,7 @@
                                     }
                                 }
                                 /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
-                                else if ( latestActivityReportYear === currentYear &&
+                                if ( latestActivityReportYear === currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     // Also check for new chaps or thorgs and catch them too - 'Cross-N'.
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
@@ -597,14 +598,14 @@
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
                                 }
                                 /**== Level 2 to 3 OOC algorithm for UGs, Chaps & ThOrgs ==*/
-                                else if ( orgInfo.out_of_compliance_level === '2' &&
+                                if ( orgInfo.out_of_compliance_level === '2' &&
                                     latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Cross"
                                 ) {
                                     // forward logic: 2 - 3 for UGs
                                     if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'Yes' &&
+                                        orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
                                         // check if days difference is greater than 60 days
@@ -621,7 +622,7 @@
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
                                     } else if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'No' &&
+                                        orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 60 days
                                         ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 60
                                     ) {
@@ -656,11 +657,11 @@
                                     }
                                 }
                                 /**== Level 2 - 3 for new affiliates (UGs, Chaps & ThOrgs) ==*/
-                                else if ( orgInfo.out_of_compliance_level === '2' &&
+                                if ( orgInfo.out_of_compliance_level === '2' &&
                                     orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'Yes' &&
+                                        orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
                                         // check if days difference is greater than 60 days
@@ -677,7 +678,7 @@
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
                                     } else if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'No' &&
+                                        orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 60 days
                                         ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 60
                                     ) {
@@ -708,7 +709,7 @@
                                     }
                                 }
                                 /**== Level 3 - 0: Backward logic for all affiliates: UGs, Chaps & ThOrgs ==*/
-                                else if ( latestActivityReportYear === currentYear &&
+                                if ( latestActivityReportYear === currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
                                     orgInfo.out_of_compliance_level === '3'
@@ -723,13 +724,13 @@
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                                 }
                                 /**== Level 3 to 4 OOC algorithm for all affiliates (UGs, Chaps, ThOrgs) ==*/
-                                else if ( orgInfo.out_of_compliance_level === '3' &&
+                                if ( orgInfo.out_of_compliance_level === '3' &&
                                     latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Cross"
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'Yes' &&
+                                        orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
                                         // check if days difference is greater than 90 days
@@ -750,7 +751,7 @@
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
                                     } else if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'No' &&
+                                        orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 90 days
                                         ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 90
                                     ) {
@@ -791,7 +792,7 @@
                                     }
                                 }
                                 /**== Level 3 - 4 for all **new** affiliates (UGs, Chaps & ThOrgs) */
-                                else if ( orgInfo.out_of_compliance_level === '3' &&
+                                if ( orgInfo.out_of_compliance_level === '3' &&
                                     orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
@@ -833,7 +834,7 @@
                                     }
                                 }
                                 /**== Level 4 - 0: backward logic for all affiliates ==*/
-                                else if ( latestActivityReportYear === currentYear &&
+                                if ( latestActivityReportYear === currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
                                     orgInfo.out_of_compliance_level === '4'
@@ -848,14 +849,14 @@
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
                                 }
                                 /**== Level 4 to 5 OOC algorithm for UGs, Chaps & ThOrgs ==*/
-                                else if ( orgInfo.out_of_compliance_level === '4' &&
+                                if ( orgInfo.out_of_compliance_level === '4' &&
                                     latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Cross"
                                 ) {
                                     // forward logic: 4 - 5
                                     if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'Yes' &&
+                                        orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
                                         // check if days difference is greater than 120 days
@@ -877,7 +878,7 @@
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 5.";
                                     } else if ( orgInfo.org_type === 'User Group' &&
-                                        orgInfos.legal_entity === 'No' &&
+                                        orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 120 days
                                         ( ( todayDate.getTime() - reportingDueDate.getTime() ) / ( 1000 * 60 * 60 * 24 ) ) > 120
                                     ) {
@@ -922,7 +923,7 @@
                                     }
                                 }
                                 /**== Level 4 - 5: For all new affiliates ==*/
-                                else if ( orgInfo.out_of_compliance_level === '4' &&
+                                if ( orgInfo.out_of_compliance_level === '4' &&
                                     orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
