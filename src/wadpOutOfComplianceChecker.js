@@ -438,6 +438,11 @@
                                     fiscalYear = orgInfo.fiscal_year_end.split( "/" );
                                 } else if ( orgInfo.agreement_date ) {
                                     fiscalYear = orgInfo.agreement_date.split( "/" );
+                                    if ( parseInt( fiscalYear[2] ) === currentYear ) {
+                                        // Ignore this affiliate and not check it at all because
+                                        // it was just recognized and should be check only the following year.
+                                        continue;
+                                    }
                                 }
 
                                 // generate due date for affiliate to submit report.
