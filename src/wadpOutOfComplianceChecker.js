@@ -372,8 +372,7 @@
             apiObj.get( getReports( 'Activities_Reports' ) ).then( function ( activitiesReportsData ) {
                 apiObj.get( getReports( 'Financial_Reports' ) ).then( function ( financialReportsData ) {
                     apiObj.get( getOOCLevel() ).then( function ( oocLevelsData ) {
-                        var activityReport,
-                            activitiesReports,
+                        var activitiesReports,
                             financialReports,
                             orgInfo,
                             orgInfos,
@@ -409,8 +408,6 @@
 
                         for ( var i = 0; i < orgInfos.length; i++ ) {
                             orgInfo = cleanRawEntry( orgInfos[i].value.fields );
-                            // TODO: Check if this is used, else remove.
-                            activityReport = cleanRawEntry( activitiesReports[i].value.fields );
 
                             latestActivityReport = getLatestReport( orgInfo.group_name, activitiesReports );
                             latestFinancialReport = getLatestReport( orgInfo.group_name, financialReports );
