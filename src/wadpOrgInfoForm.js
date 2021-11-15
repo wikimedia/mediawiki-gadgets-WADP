@@ -59,9 +59,10 @@
          * @return {string} date
          */
         convertDateToDdMmYyyyFormat = function ( date ) {
+            var splitted_date;
             // Put in a format our lua script will feed on, in DD/MM/YYYY format
-            date = date.split('-');
-            date = date[2] + "/" + date[1] + "/" + date[0];
+            splitted_date = date.split('-');
+            date = splitted_date[2] + "/" + splitted_date[1] + "/" + splitted_date[0];
 
             return date;
         };
@@ -73,9 +74,10 @@
          * @return {string} date
          */
         convertDateToYyyyMmDdFormat = function ( date ) {
+            var splitted_date;
             // Put in a format our calendar OOUI will feed on, in YYYY-MM-DD format
-            date = date.split('/');
-            date = date[2] + "-" + date[1] + "-" + date[0];
+            splitted_date = date.split('/');
+            date = splitted_date[2] + "-" + splitted_date[1] + "-" + splitted_date[0];
 
             return date;
         };
