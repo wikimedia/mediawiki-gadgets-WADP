@@ -163,7 +163,7 @@
          * it's a cache variable.
          *
          * @param {Object} entries AST tree (Lua Table)
-         * @param {String} type The affiliate type e.g. Chapter, User Group etc.
+         * @param {string} type The affiliate type e.g. Chapter, User Group etc.
          * @return {Object} Count
          */
         luaTableCounterForAffiliateType = function ( entries, type ) {
@@ -188,7 +188,7 @@
          * it's a cache variable.
          *
          * @param {Object} entries AST tree (Lua Table)
-         * @param {String} region The affiliate region e.g. Asia/Pacific, Sub-Saharan Africa etc.
+         * @param {string} region The affiliate region e.g. Asia/Pacific, Sub-Saharan Africa etc.
          * @return {Object} Count
          */
         luaTableCounterByAffiliateRegion = function ( entries, region ) {

@@ -25,7 +25,7 @@
 
     function init() {
         /**
-         * @param {String} affiliate
+         * @param {string} affiliate
          * @return {Object}
          */
         getAffiliateTalkPageWikiText = function ( affiliate ) {
@@ -46,8 +46,8 @@
         };
 
         /**
-         * @param {Text} sourceblob The wikitext for the page
-         * @returns {Text} The wiki page content only from API request
+         * @param {string} sourceblob The wikitext for the page
+         * @returns {string} The wiki page content only from API request
          */
         parseAndExtractAffiliateTalkPageContent = function ( sourceblob ) {
             var i, raw;
@@ -151,9 +151,9 @@
 
         /**
          *
-         * @param {String} affiliateName
-         * @param {Array[]} reports
-         * @returns {Array}
+         * @param {string} affiliateName
+         * @param {array[]} reports
+         * @returns {array}
          */
         getLatestReport = function ( affiliateName, reports ) {
             var latestReport = { end_date: '01/01/2000', dos_stamp: '2000-01-01T00:00:00.000Z' },
@@ -170,9 +170,9 @@
         };
 
         /**
-         * @param {String} date1
-         * @param {String} date2
-         * @return {Number} 0 if dates are equal, 1 if date1 > date2 and -1 if date1 < date2
+         * @param {string} date1
+         * @param {string} date2
+         * @return {number} 0 if dates are equal, 1 if date1 > date2 and -1 if date1 < date2
          */
         compareDates = function ( date1, date2 ) {
             var d1, d2, d1Obj, d2Obj;
@@ -200,7 +200,7 @@
         };
 
         /**
-         * @param {String} affiliatePage Group name
+         * @param {string} affiliatePage Group name
          *
          * @returns {Object}
          */
@@ -268,9 +268,9 @@
         };
 
         /**
-         * @param {String} subject The email subject
-         * @param {String} body The email content/body.
-         * @param {String} to The M&E staff to send email to.
+         * @param {string} subject The email subject
+         * @param {string} body The email content/body.
+         * @param {string} to The M&E staff to send email to.
          */
         sendEmailToMEStaff = function ( subject, body, to ) {
             var params = {
@@ -290,11 +290,11 @@
         /**
          * OOC level 2 talk page message generator
          *
-         * @param {String} noticeLevel
-         * @param {Number} currentYear
+         * @param {string} noticeLevel
+         * @param {number} currentYear
          * @param {Date} reportingDueDate
          *
-         * @return {String}
+         * @return {string}
          */
         oocLevel2MessageGenerator = function ( noticeLevel, currentYear, reportingDueDate ) {
             return "\n\n== " + noticeLevel + " Notification of Affiliate Expiration - Renewal pending submission of reporting ==\n\n" +
@@ -309,10 +309,10 @@
         };
 
         /**
-         * @param {String} orgInfo
-         * @param {Number} currentYear
-         * @param {String} reportingDueDate
-         * @param {String} noticeLevel
+         * @param {Object} orgInfo
+         * @param {number} currentYear
+         * @param {string} reportingDueDate
+         * @param {string} noticeLevel
          */
         postTalkPageNotification = function ( orgInfo, currentYear, reportingDueDate, noticeLevel ) {
             apiObj = new mw.Api();
@@ -351,9 +351,9 @@
         /**
          * OOC level log generator.
          *
-         * @param {String} group_name
-         * @param {String} ooc_level
-         * @param {Number} financial_year
+         * @param {string} group_name
+         * @param {string} ooc_level
+         * @param {number} financial_year
          *
          * @return {Object}
          */
