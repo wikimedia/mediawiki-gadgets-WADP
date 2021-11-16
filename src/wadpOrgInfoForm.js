@@ -529,12 +529,16 @@
                 expanded: false
             } );
 
+            this.fieldGroupCode = new OO.ui.TextInputWidget( {
+                icon: 'code',
+                value: this.affiliate_code,
+                type: 'text',
+                indicator: 'required',
+                required: true,
+                placeholder: gadgetMsg[ 'group-code-placeholder' ]
+            } );
+
             // On edit, pass in the group name as config to be rendered.
-            if ( this.group_name ) {
-                this.group_name = this.group_name + ' ~ ' + this.affiliate_code;
-            } else {
-                this.group_name = '';
-            }
             this.fieldGroupName = new AffiliateLookupTextInputWidget( this.group_name );
 
             this.fieldOrgType = new OO.ui.DropdownInputWidget( {
@@ -852,16 +856,31 @@
                             align: 'top',
                             help: gadgetMsg[ 'group-name-tip' ]
                         }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.fieldOrgType,
-                        {
-                            label: gadgetMsg[ 'identify-your-organization' ],
-                            align: 'top'
-                        }
                     )
                 ]
             } );
+
+            if ( users.indexOf( mw.config.values.wgUserName ) > -1 ) {
+                this.fieldSet.addItems( [
+                    new OO.ui.FieldLayout(
+                        this.fieldGroupCode,
+                        {
+                            label: gadgetMsg['group-code-label'],
+                            align: 'top'
+                        }
+                    )
+                ] );
+            }
+
+            this.fieldSet.addItems( [
+                new OO.ui.FieldLayout(
+                    this.fieldOrgType,
+                    {
+                        label: gadgetMsg[ 'identify-your-organization' ],
+                        align: 'top'
+                    }
+                )
+            ] );
 
             if ( users.indexOf( mw.config.values.wgUserName ) > -1 ) {
                 this.fieldSet.addItems( [
@@ -1068,7 +1087,8 @@
 
             new mw.Api().get( getContentModuleQuery() ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
-                    editSummary, manifest = [], workingEntry, entries;
+                    editSummary, manifest = [], workingEntry, entries,
+                    mrl_affiliates = '';
 
                 /**
                  * Compares a given [[Module:Organizational_Informations]] entry against the edit fields
@@ -1078,12 +1098,12 @@
                  * @return {Object} The same entry but with modifications
                  */
                 processWorkingEntry = function ( workingEntry ) {
-                    if ( dialog.fieldGroupName.getValue() ) {
-                        workingEntry.affiliate_code = dialog.fieldGroupName.getValue().split(' ~ ')[1];
+                    if ( dialog.fieldGroupCode.getValue() ) {
+                        workingEntry.affiliate_code = dialog.fieldGroupCode.getValue();
                     }
 
                     if ( dialog.fieldGroupName.getValue() ) {
-                        workingEntry.group_name = dialog.fieldGroupName.getValue().split(' ~ ')[0];
+                        workingEntry.group_name = dialog.fieldGroupName.getValue();
                     } else if ( !dialog.fieldGroupName.getValue() && workingEntry.group_name ) {
                         delete workingEntry.group_name;
                     }
@@ -1236,7 +1256,7 @@
 
                 for ( i = 0; i < entries.length; i++ ) {
                     workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                    if ( workingEntry.group_name === dialog.group_name.split(' ~ ')[0] ) {
+                    if ( workingEntry.group_name === dialog.group_name ) {
                         workingEntry = processWorkingEntry( workingEntry );
                         editSummary = gadgetMsg[ 'updated-org-info' ] + ' ' + workingEntry.group_name;
                     }
@@ -1258,6 +1278,8 @@
                 // Re-generate the Lua table based on `manifest`
                 insertInPlace = 'return {\n';
                 for ( i = 0; i < manifest.length; i++ ) {
+                    // Keep a list copy of the affiliate name
+                    mrl_affiliates += manifest[ i ].group_name + ',\n';
                     insertInPlace += '\t{\n';
                     if ( manifest[ i ].unique_id ) {
                         insertInPlace += generateKeyValuePair(
@@ -1491,6 +1513,20 @@
                         'csrf',
                         { action: 'purge', titles: mw.config.values.wgPageName }
                     ).then( function () {
+                        // Defer reconstruction MRL of affiliates to background.
+                        new mw.Api().postWithToken(
+                            'csrf',
+                            {
+                                action: 'edit',
+                                bot: true,
+                                nocreate: true,
+                                summary: 'Reconstructed MRL of affiliates for all affiliates in the system.',
+                                pageid: 11142159, // [[WADP/MRL/List Of All Wikimedia Affiliates]]
+                                text: mrl_affiliates,
+                                contentmodel: 'wikitext'
+                            }
+                        );
+
                         location.reload();
                     } );
                 } ).catch( function ( error ) {
