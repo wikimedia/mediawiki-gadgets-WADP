@@ -382,7 +382,7 @@
                             latestFinancialReportYear,
                             reportingDueDate,
                             todayDate,
-                            insertInPlace,
+                            insertInPlaceOocData,
                             latestActivityReport,
                             latestFinancialReport,
                             insertInPlaceOOC,
@@ -438,6 +438,13 @@
                                     if ( parseInt( fiscalYear[2] ) === currentYear ) {
                                         // Ignore this affiliate and not check it at all because
                                         // it was just recognized and should be check only the following year.
+                                        //
+                                        // NOTE: Just push the affiliate into the manifest before ignoring.
+                                        // Silently ignoring without pushing to manifest caused a regression
+                                        // that "manually reverted" all affiliates with fiscal year equal to
+                                        // current year making M&E staff to not be able to add new affiliates
+                                        // into the system (due to the revert each time it's added).
+                                        manifest.push( orgInfo );
                                         continue;
                                     }
                                 }
@@ -1045,199 +1052,199 @@
                         );
 
                         // Re-generate the Lua table based on `manifest`
-                        insertInPlace = 'return {\n';
+                        insertInPlaceOocData = 'return {\n';
                         for ( i = 0; i < manifest.length; i++ ) {
-                            insertInPlace += '\t{\n';
+                            insertInPlaceOocData += '\t{\n';
                             if ( manifest[i].unique_id ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'unique_id',
                                     manifest[i].unique_id
                                 );
                             }
                             if ( manifest[i].affiliate_code ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'affiliate_code',
                                     manifest[i].affiliate_code
                                 );
                             }
                             if ( manifest[i].group_name ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'group_name',
                                     manifest[i].group_name
                                 );
                             }
                             if ( manifest[i].org_type ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'org_type',
                                     manifest[i].org_type
                                 );
                             }
                             if ( manifest[i].region ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'region',
                                     manifest[i].region
                                 );
                             }
                             if ( manifest[i].group_country ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'group_country',
                                     manifest[i].group_country
                                 );
                             }
                             if ( !manifest[i].legal_entity && manifest[i].org_type === 'User Group' ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'legal_entity',
                                     'No'
                                 );
                             } else if ( manifest[i].legal_entity && manifest[i].org_type === 'User Group' ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'legal_entity',
                                     manifest[i].legal_entity
                                 );
                             } else {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'legal_entity',
                                     'Yes'
                                 );
                             }
                             if ( manifest[i].mission_changed ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'mission_changed',
                                     manifest[i].mission_changed
                                 );
                             }
                             if ( manifest[i].explanation ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'explanation',
                                     manifest[i].explanation
                                 );
                             }
                             if ( manifest[i].group_page ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'group_page',
                                     manifest[i].group_page.trim()
                                 );
                             }
                             if ( manifest[i].member_count ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'member_count',
                                     manifest[i].member_count
                                 );
                             }
                             if ( manifest[i].facebook ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'facebook',
                                     manifest[i].facebook.trim()
                                 );
                             }
                             if ( manifest[i].twitter ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'twitter',
                                     manifest[i].twitter.trim()
                                 );
                             }
                             if ( manifest[i].other ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'other',
                                     manifest[i].other.trim()
                                 );
                             }
                             if ( manifest[i].dm_structure ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'dm_structure',
                                     manifest[i].dm_structure
                                 );
                             }
                             if ( manifest[i].board_contacts ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'board_contacts',
                                     manifest[i].board_contacts
                                 );
                             }
                             if ( manifest[i].agreement_date ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'agreement_date',
                                     manifest[i].agreement_date
                                 );
                             }
                             if ( manifest[i].fiscal_year_start ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'fiscal_year_start',
                                     manifest[i].fiscal_year_start
                                 );
                             } else {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'fiscal_year_start',
                                     ''
                                 );
                             }
                             if ( manifest[i].fiscal_year_end ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'fiscal_year_end',
                                     manifest[i].fiscal_year_end
                                 );
                             } else {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'fiscal_year_end',
                                     ''
                                 );
                             }
                             if ( manifest[i].uptodate_reporting ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'uptodate_reporting',
                                     manifest[i].uptodate_reporting
                                 );
                             }
                             if ( manifest[i].notes_on_reporting ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'notes_on_reporting',
                                     manifest[i].notes_on_reporting
                                 );
                             } else {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'notes_on_reporting',
                                     ''
                                 );
                             }
                             if ( manifest[i].recognition_status ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'recognition_status',
                                     manifest[i].recognition_status
                                 );
                             }
                             if ( manifest[i].me_bypass_ooc_autochecks ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'me_bypass_ooc_autochecks',
                                     manifest[i].me_bypass_ooc_autochecks
                                 );
                             }
                             if ( manifest[i].out_of_compliance_level ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'out_of_compliance_level',
                                     manifest[i].out_of_compliance_level
                                 );
                             }
                             if ( manifest[i].derecognition_date ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'derecognition_date',
                                     manifest[i].derecognition_date
                                 );
                             }
                             if ( manifest[i].derecognition_note ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'derecognition_note',
                                     manifest[i].derecognition_note
                                 );
                             }
                             if ( manifest[i].dos_stamp ) {
-                                insertInPlace += generateKeyValuePair(
+                                insertInPlaceOocData += generateKeyValuePair(
                                     'dos_stamp',
                                     manifest[i].dos_stamp
                                 );
                             }
-                            insertInPlace += '\t},\n';
+                            insertInPlaceOocData += '\t},\n';
                         }
-                        insertInPlace += '}';
+                        insertInPlaceOocData += '}';
 
                         // Make changes to the Org Info table as required.
                         apiObj.postWithToken(
@@ -1248,7 +1255,7 @@
                                 nocreate: true,
                                 summary: '[Automated] M&E compliance automated checks by WAD Portal.',
                                 pageid: 10603224,  // [[Module:Organizational_Informations]]
-                                text: insertInPlace,
+                                text: insertInPlaceOocData,
                                 contentmodel: 'Scribunto'
                             }
                         );

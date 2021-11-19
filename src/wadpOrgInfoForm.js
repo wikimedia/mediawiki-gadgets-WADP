@@ -9,7 +9,6 @@
     var users = [
         'DAlangi (WMF)',
         'DNdubane (WMF)',
-        'JAnstee (WMF)',
         'MKaur (WMF)'
     ];
 
@@ -1521,12 +1520,11 @@
                                 bot: true,
                                 nocreate: true,
                                 summary: 'Reconstructed MRL of affiliates for all affiliates in the system.',
-                                pageid: 11142159, // [[WADP/MRL/List Of All Wikimedia Affiliates]]
+                                pageid: 11608672, // [[WADP/MRL/List Of All Wikimedia Affiliates]]
                                 text: mrl_affiliates,
                                 contentmodel: 'wikitext'
                             }
                         );
-
                         location.reload();
                     } );
                 } ).catch( function ( error ) {

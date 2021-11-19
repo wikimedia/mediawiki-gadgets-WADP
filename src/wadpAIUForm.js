@@ -3712,7 +3712,6 @@
             var users = [
                 'DAlangi (WMF)',
                 'DNdubane (WMF)',
-                'JAnstee (WMF)',
                 'MKaur (WMF)'
             ];
 
