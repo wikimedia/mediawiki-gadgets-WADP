@@ -372,6 +372,15 @@
                 padded: true,
                 expanded: false
             } );
+            // Popup to be used after form validation
+            this.fieldPopup = new OO.ui.PopupWidget( {
+                $content: $( '<p style="color: red; text-align: center;">Error! Some required fields are not filled yet. Check and try submitting again.</p>' ),
+                padded: true,
+                width: 400,
+                height: 90,
+                head: true,
+                classes: [ 'wadp-popup-widget-position' ]
+            } );
             this.fieldGroupName = new AffiliateLookupTextInputWidget();
             tmpReportType = this.fieldReportType = new OO.ui.DropdownInputWidget( {
                 options: [
@@ -524,14 +533,12 @@
                 fieldImportedReportDate.toggle( isSelected );
             } );
 
-            this.fieldDateOfSubmission = new OO.ui.TextInputWidget( {
-                value: this.dos_stamp,
-                type: 'hidden'
-            } );
-
             // Append things to fieldSet
             this.fieldSet = new OO.ui.FieldsetLayout( {
                 items: [
+                    new OO.ui.FieldLayout(
+                        this.fieldPopup, {}
+                    ),
                     new OO.ui.FieldLayout(
                         this.fieldGroupName,
                         {
@@ -650,10 +657,24 @@
          *
          */
         ActivitiesEditor.prototype.getActionProcess = function ( action ) {
-            var dialog = this;
-            if ( action === 'continue' && dialog.fieldGroupName.getValue() ) {
+            var dialog = this, allRequiredFieldsAvailable = false;
+
+            if (
+                dialog.fieldGroupName.getValue() &&
+                dialog.fieldStartDate.getValue() &&
+                dialog.fieldEndDate.getValue() &&
+                dialog.fieldReportLink.getValue()
+            ) {
+                allRequiredFieldsAvailable = true;
+            }
+
+            if ( allRequiredFieldsAvailable && action === 'continue' ) {
                 return new OO.ui.Process( function () {
                     dialog.saveItem();
+                } );
+            } else if ( !allRequiredFieldsAvailable && action === 'continue' ) {
+                return new OO.ui.Process( function () {
+                    dialog.fieldPopup.toggle( true );
                 } );
             } else {
                 return new OO.ui.Process( function () {

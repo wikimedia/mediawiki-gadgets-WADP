@@ -250,8 +250,8 @@
             // Parent constructor
             OO.ui.TextInputWidget.call( this, $.extend(
                 {
-                    indicator: 'required',
                     id: 'group_name',
+                    indicator: 'required',
                     required: true,
                     validate: 'text',
                     value: config,
@@ -319,8 +319,8 @@
             // Parent constructor
             OO.ui.TextInputWidget.call( this, $.extend(
                 {
-                    indicator: 'required',
                     id: 'country',
+                    indicator: 'required',
                     required: true,
                     validate: 'text',
                     value: config,
@@ -528,6 +528,16 @@
                 expanded: false
             } );
 
+            // Popup to be used after form validation
+            this.fieldPopup = new OO.ui.PopupWidget( {
+                $content: $( '<p style="color: red; text-align: center;">Error! Some required fields are not filled yet. Check and try submitting again.</p>' ),
+                padded: true,
+                width: 400,
+                height: 90,
+                head: true,
+                classes: [ 'wadp-popup-widget-position' ]
+            } );
+
             this.fieldGroupCode = new OO.ui.TextInputWidget( {
                 icon: 'code',
                 value: this.affiliate_code,
@@ -726,6 +736,7 @@
                 value: this.agreement_date ? convertDateToYyyyMmDdFormat( this.agreement_date ) : this.agreement_date,
                 classes: [ 'full-width' ],
                 placeholderLabel: gadgetMsg[ 'agreement-date' ],
+                indicator: 'required',
                 required: true
             } );
 
@@ -816,6 +827,7 @@
                 value: this.derecognition_date ? convertDateToYyyyMmDdFormat( this.derecognition_date ) : this.derecognition_date,
                 classes: [ 'full-width' ],
                 placeholderLabel: gadgetMsg[ 'derecognition-date' ],
+                indicator: 'required',
                 required: true
             } );
 
@@ -848,6 +860,9 @@
             // Append things to fieldSet
             this.fieldSet = new OO.ui.FieldsetLayout( {
                 items: [
+                    new OO.ui.FieldLayout(
+                        this.fieldPopup, {}
+                    ),
                     new OO.ui.FieldLayout(
                         this.fieldGroupName,
                         {
@@ -1064,10 +1079,30 @@
          *
          */
         OrgInfoEditor.prototype.getActionProcess = function ( action ) {
-            var dialog = this;
-            if ( action === 'continue' && dialog.fieldGroupName.getValue() ) {
+            var dialog = this, allRequiredFieldsAvailable = false;
+
+            // Before submitting the form, check that all required fields indeed
+            // have values before we call saveItem(). Otherwise, don't close the
+            // form but instead reveal which input fields are not yet filled.
+            if( dialog.fieldGroupName.getValue() &&
+                dialog.fieldGroupCode.getValue() &&
+                dialog.fieldMembershipCount.getValue() &&
+                dialog.fieldGroupCountry.getValue() &&
+                dialog.fieldLegalEntity.findSelectedItem().getData() &&
+                dialog.fieldMissionChanged.findSelectedItem().getData() &&
+                dialog.fieldBoardContacts.getValue() &&
+                dialog.fieldAgreementDate.getValue()
+            ) {
+                allRequiredFieldsAvailable = true;
+            }
+
+            if ( action === 'continue' && allRequiredFieldsAvailable ) {
                 return new OO.ui.Process( function () {
                     dialog.saveItem();
+                } );
+            } else if ( action === 'continue' && allRequiredFieldsAvailable === false ) {
+                return new OO.ui.Process( function () {
+                    dialog.fieldPopup.toggle( true );
                 } );
             } else {
                 return new OO.ui.Process( function () {
