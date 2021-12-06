@@ -1155,6 +1155,18 @@
                                     manifest[i].dm_structure
                                 );
                             }
+                            if ( manifest[ i ].group_contact1 ) {
+                                insertInPlaceOocData += generateKeyValuePair(
+                                    'group_contact1',
+                                    manifest[ i ].group_contact1
+                                );
+                            }
+                            if ( manifest[ i ].group_contact2 ) {
+                                insertInPlaceOocData += generateKeyValuePair(
+                                    'group_contact2',
+                                    manifest[ i ].group_contact2
+                                );
+                            }
                             if ( manifest[i].board_contacts ) {
                                 insertInPlaceOocData += generateKeyValuePair(
                                     'board_contacts',

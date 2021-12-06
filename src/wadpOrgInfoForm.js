@@ -403,6 +403,8 @@
             this.twitter = '';
             this.other = '';
             this.dm_structure = []; // dm = decision making
+            this.group_contact1 = '';
+            this.group_contact2 = '';
             this.board_contacts = '';
             this.agreement_date = '';
             this.fiscal_year_start = '';
@@ -457,6 +459,12 @@
             }
             if ( config.dm_structure ) {
                 this.dm_structure = config.dm_structure;
+            }
+            if ( config.group_contact1 ) {
+                this.group_contact1 = config.group_contact1;
+            }
+            if ( config.group_contact2 ) {
+                this.group_contact2 = config.group_contact2;
             }
             if ( config.board_contacts ) {
                 this.board_contacts = config.board_contacts;
@@ -728,12 +736,28 @@
                 this.fieldDecisionMakingStructure.selectItemsByData( this.dm_structure );
             }
 
+            this.fieldGroupContact1 = new OO.ui.TextInputWidget( {
+                labelPosition: 'before',
+                label: 'User:',
+                value: this.group_contact1,
+                classes: [ 'full-width' ],
+                indicator: 'required',
+                required: true
+            } );
+
+            this.fieldGroupContact2 = new OO.ui.TextInputWidget( {
+                labelPosition: 'before',
+                label: 'User:',
+                value: this.group_contact2,
+                classes: [ 'full-width' ],
+                indicator: 'required',
+                required: true
+            } );
+
             this.fieldBoardContacts = new OO.ui.MultilineTextInputWidget( {
                 icon: 'userContributions',
                 value: this.board_contacts,
                 rows: 3,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'board-contacts' ]
             } );
 
@@ -980,11 +1004,25 @@
                     }
                 ),
                 new OO.ui.FieldLayout(
+                    this.fieldGroupContact1,
+                    {
+                        label: gadgetMsg[ 'group-contact-one-label' ],
+                        align: 'top'
+                    }
+                ),
+                new OO.ui.FieldLayout(
+                    this.fieldGroupContact2,
+                    {
+                        label: gadgetMsg[ 'group-contact-two-label' ],
+                        align: 'top'
+                    }
+                ),
+                new OO.ui.FieldLayout(
                     this.fieldBoardContacts,
                     {
-                        label: gadgetMsg[ 'board-shared-structure' ],
+                        label: gadgetMsg[ 'board-members' ],
                         align: 'top',
-                        help: gadgetMsg[ 'board-shared-structure-tip' ]
+                        help: gadgetMsg[ 'board-members-tip' ]
                     }
                 ),
             ] );
@@ -1087,7 +1125,8 @@
                 dialog.fieldGroupCountry.getValue() &&
                 dialog.fieldLegalEntity.findSelectedItem().getData() &&
                 dialog.fieldMissionChanged.findSelectedItem().getData() &&
-                dialog.fieldBoardContacts.getValue() &&
+                dialog.fieldGroupContact1.getValue() &&
+                dialog.fieldGroupContact2.getValue() &&
                 dialog.fieldAgreementDate.getValue()
             ) {
                 allRequiredFieldsAvailable = true;
@@ -1210,6 +1249,18 @@
                         workingEntry.dm_structure = dialog.fieldDecisionMakingStructure.findSelectedItemsData();
                     } else if ( !dialog.fieldDecisionMakingStructure.findSelectedItemsData() && workingEntry.dm_structure ) {
                         delete workingEntry.dm_structure;
+                    }
+
+                    if ( dialog.fieldGroupContact1.getValue() ) {
+                        workingEntry.group_contact1 = dialog.fieldGroupContact1.getValue();
+                    } else if ( !dialog.fieldGroupContact1.getValue() && workingEntry.group_contact1 ) {
+                        delete workingEntry.group_contact1;
+                    }
+
+                    if ( dialog.fieldGroupContact2.getValue() ) {
+                        workingEntry.group_contact2 = dialog.fieldGroupContact2.getValue();
+                    } else if ( !dialog.fieldGroupContact2.getValue() && workingEntry.group_contact2 ) {
+                        delete workingEntry.group_contact2;
                     }
 
                     if ( dialog.fieldBoardContacts.getValue() ) {
@@ -1410,6 +1461,18 @@
                         insertInPlace += generateKeyValuePair(
                             'dm_structure',
                             manifest[ i ].dm_structure
+                        );
+                    }
+                    if ( manifest[ i ].group_contact1 ) {
+                        insertInPlace += generateKeyValuePair(
+                            'group_contact1',
+                            'User:' + manifest[ i ].group_contact1
+                        );
+                    }
+                    if ( manifest[ i ].group_contact2 ) {
+                        insertInPlace += generateKeyValuePair(
+                            'group_contact2',
+                            'User:' + manifest[ i ].group_contact2
                         );
                     }
                     if ( manifest[ i ].board_contacts ) {
