@@ -671,22 +671,27 @@
                 placeholder: gadgetMsg[ 'membership-count-placeholder' ]
             } );
             this.fieldFacebook = new OO.ui.TextInputWidget( {
+                labelPosition: 'before',
                 icon: 'link',
                 type: 'url',
                 value: this.facebook,
-                placeholder: gadgetMsg[ 'facebook-placeholder' ]
+                label: 'Facebook: '
             } );
             this.fieldTwitter = new OO.ui.TextInputWidget( {
+                labelPosition: 'before',
+                classes: [ 'full-width' ],
                 icon: 'link',
                 type: 'url',
                 value: this.twitter,
-                placeholder: gadgetMsg[ 'twitter-placeholder' ]
+                label: 'Twitter: '
             } );
             this.fieldOther = new OO.ui.TextInputWidget( {
+                labelPosition: 'before',
+                classes: [ 'full-width' ],
                 icon: 'link',
                 type: 'url',
                 value: this.other,
-                placeholder: gadgetMsg[ 'other-placeholder' ]
+                label: 'Blog/news: '
             } );
 
             fieldDMStructureSelected = [];
@@ -961,19 +966,11 @@
                 ),
                 new OO.ui.FieldLayout(
                     this.fieldTwitter,
-                    {
-                        label: '',
-                        align: 'inline',
-                        help: gadgetMsg[ 'twitter-link-help' ]
-                    }
+                    { align: 'right' }
                 ),
                 new OO.ui.FieldLayout(
                     this.fieldOther,
-                    {
-                        label: '',
-                        align: 'inline',
-                        help: gadgetMsg[ 'blog-news-help' ]
-                    }
+                    { align: 'right' }
                 ),
                 new OO.ui.FieldLayout(
                     this.fieldDecisionMakingStructure,
