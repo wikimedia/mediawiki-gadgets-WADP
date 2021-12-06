@@ -966,11 +966,11 @@
                 ),
                 new OO.ui.FieldLayout(
                     this.fieldTwitter,
-                    { align: 'right' }
+                    { align: 'inline' }
                 ),
                 new OO.ui.FieldLayout(
                     this.fieldOther,
-                    { align: 'right' }
+                    { align: 'inline' }
                 ),
                 new OO.ui.FieldLayout(
                     this.fieldDecisionMakingStructure,
