@@ -30,7 +30,8 @@
         convertDateToDdMmYyyyFormat,
         convertDateToYyyyMmDdFormat,
         fieldDerecognitionDate,
-        fieldDerecognitionNote;
+        fieldDerecognitionNote,
+        getGroupContactsModule;
 
     userLang = mw.config.get( 'wgUserLanguage' );
 
@@ -46,6 +47,22 @@
                 action: 'query',
                 prop: 'revisions',
                 titles: 'Module:Organizational_Informations',
+                rvprop: 'content',
+                rvlimit: 1
+            };
+        };
+
+        /**
+         * Provides API parameters for getting the content from the
+         * [[Module:Organizational_Informations/Group_Contacts]] module.
+         *
+         * @return {Object}
+         */
+        getGroupContactsModule = function () {
+            return {
+                action: 'query',
+                prop: 'revisions',
+                titles: 'Module:Organizational_Informations/Group_Contacts',
                 rvprop: 'content',
                 rvlimit: 1
             };
@@ -739,7 +756,7 @@
             this.fieldGroupContact1 = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 label: 'User:',
-                value: this.group_contact1,
+                value: this.group_contact1.substring(5), // Ignore "User:" part.
                 classes: [ 'full-width' ],
                 indicator: 'required',
                 required: true
@@ -748,7 +765,7 @@
             this.fieldGroupContact2 = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 label: 'User:',
-                value: this.group_contact2,
+                value: this.group_contact2.substring(5), // Ignore "User:" part.
                 classes: [ 'full-width' ],
                 indicator: 'required',
                 required: true
@@ -1156,476 +1173,578 @@
             dialog.pushPending();
 
             new mw.Api().get( getContentModuleQuery() ).then( function ( data ) {
-                var i, insertInPlace, processWorkingEntry,
-                    editSummary, manifest = [], workingEntry, entries,
-                    mrl_affiliates = '';
+                new mw.Api().get( getGroupContactsModule() ).then( function ( existingGroupContacts ) {
+                    var i, j,
+                        insertInPlace,
+                        processWorkingEntry,
+                        editSummary,
+                        manifest = [],
+                        workingEntry,
+                        entries,
+                        mrl_affiliates = '',
+                        groupContactEntries,
+                        groupContactEntry,
+                        groupContactsManifest = [],
+                        insertInPlaceGC;
 
-                /**
-                 * Compares a given [[Module:Organizational_Informations]] entry against the edit fields
-                 * and applies changes where relevant.
-                 *
-                 * @param {Object} workingEntry the entry being worked on
-                 * @return {Object} The same entry but with modifications
-                 */
-                processWorkingEntry = function ( workingEntry ) {
-                    if ( dialog.fieldGroupCode.getValue() ) {
-                        workingEntry.affiliate_code = dialog.fieldGroupCode.getValue();
+                    /**
+                     * Compares a given [[Module:Organizational_Informations]] entry against the edit fields
+                     * and applies changes where relevant.
+                     *
+                     * @param {Object} workingEntry the entry being worked on
+                     * @return {Object} The same entry but with modifications
+                     */
+                    processWorkingEntry = function ( workingEntry ) {
+                        if ( dialog.fieldGroupCode.getValue() ) {
+                            workingEntry.affiliate_code = dialog.fieldGroupCode.getValue();
+                        }
+
+                        if ( dialog.fieldGroupName.getValue() ) {
+                            workingEntry.group_name = dialog.fieldGroupName.getValue();
+                        } else if ( !dialog.fieldGroupName.getValue() && workingEntry.group_name ) {
+                            delete workingEntry.group_name;
+                        }
+
+                        if ( dialog.fieldOrgType.getValue() ) {
+                            workingEntry.org_type = dialog.fieldOrgType.getValue();
+                        } else if ( !dialog.fieldOrgType.getValue() && workingEntry.org_type ) {
+                            delete workingEntry.org_type;
+                        }
+
+                        if ( dialog.fieldRegion.getValue() ) {
+                            workingEntry.region = dialog.fieldRegion.getValue();
+                        } else if ( !dialog.fieldRegion.getValue() && workingEntry.region ) {
+                            delete workingEntry.region;
+                        }
+
+                        if ( dialog.fieldGroupCountry.getValue() ) {
+                            workingEntry.group_country = dialog.fieldGroupCountry.getValue();
+                        } else if ( !dialog.fieldGroupCountry.getValue() && workingEntry.group_country ) {
+                            delete workingEntry.group_country;
+                        }
+
+                        if ( dialog.fieldLegalEntity.findSelectedItem().getData() ) {
+                            workingEntry.legal_entity = dialog.fieldLegalEntity.findSelectedItem().getData();
+                        } else if ( !dialog.findSelectedItem().getData() && workingEntry.legal_entity ) {
+                            delete workingEntry.legal_entity;
+                        }
+
+                        if ( dialog.fieldMissionChanged.findSelectedItem().getData() ) {
+                            workingEntry.mission_changed = dialog.fieldMissionChanged.findSelectedItem().getData();
+                        } else if ( !dialog.fieldMissionChanged.findSelectedItem().getData() &&
+                            workingEntry.mission_changed ) {
+                            delete workingEntry.mission_changed;
+                        }
+
+                        if ( dialog.fieldExplanation.getValue() ) {
+                            workingEntry.explanation = dialog.fieldExplanation.getValue();
+                        } else if ( !dialog.fieldExplanation.getValue() && workingEntry.explanation ) {
+                            delete workingEntry.explanation;
+                        }
+
+                        if ( dialog.fieldGroupMembershipPage.getValue() ) {
+                            workingEntry.group_page = dialog.fieldGroupMembershipPage.getValue();
+                        } else if ( !dialog.fieldGroupMembershipPage.getValue() && workingEntry.group_page ) {
+                            delete workingEntry.group_page;
+                        }
+
+                        if ( dialog.fieldMembershipCount.getValue() ) {
+                            workingEntry.member_count = dialog.fieldMembershipCount.getValue();
+                        } else if ( !dialog.fieldMembershipCount.getValue() && workingEntry.member_count ) {
+                            delete workingEntry.member_count;
+                        }
+
+                        if ( dialog.fieldFacebook.getValue() ) {
+                            workingEntry.facebook = dialog.fieldFacebook.getValue();
+                        } else if ( !dialog.fieldFacebook.getValue() && workingEntry.facebook ) {
+                            delete workingEntry.facebook;
+                        }
+
+                        if ( dialog.fieldTwitter.getValue() ) {
+                            workingEntry.twitter = dialog.fieldTwitter.getValue();
+                        } else if ( !dialog.fieldTwitter.getValue() && workingEntry.twitter ) {
+                            delete workingEntry.twitter;
+                        }
+
+                        if ( dialog.fieldOther.getValue() ) {
+                            workingEntry.other = dialog.fieldOther.getValue();
+                        } else if ( !dialog.fieldOther.getValue() && workingEntry.other ) {
+                            delete workingEntry.other;
+                        }
+
+                        if ( dialog.fieldDecisionMakingStructure.findSelectedItemsData() ) {
+                            workingEntry.dm_structure = dialog.fieldDecisionMakingStructure.findSelectedItemsData();
+                        } else if ( !dialog.fieldDecisionMakingStructure.findSelectedItemsData() && workingEntry.dm_structure ) {
+                            delete workingEntry.dm_structure;
+                        }
+
+                        if ( dialog.fieldGroupContact1.getValue() ) {
+                            workingEntry.group_contact1 = dialog.fieldGroupContact1.getValue();
+                        } else if ( !dialog.fieldGroupContact1.getValue() && workingEntry.group_contact1 ) {
+                            delete workingEntry.group_contact1;
+                        }
+
+                        if ( dialog.fieldGroupContact2.getValue() ) {
+                            workingEntry.group_contact2 = dialog.fieldGroupContact2.getValue();
+                        } else if ( !dialog.fieldGroupContact2.getValue() && workingEntry.group_contact2 ) {
+                            delete workingEntry.group_contact2;
+                        }
+
+                        if ( dialog.fieldBoardContacts.getValue() ) {
+                            workingEntry.board_contacts = dialog.fieldBoardContacts.getValue();
+                        } else if ( !dialog.fieldBoardContacts.getValue() && workingEntry.board_contacts ) {
+                            delete workingEntry.board_contacts;
+                        }
+
+                        if ( dialog.fieldAgreementDate.getValue() ) {
+                            workingEntry.agreement_date = convertDateToDdMmYyyyFormat( dialog.fieldAgreementDate.getValue() );
+                        } else if ( !dialog.fieldAgreementDate.getValue() && workingEntry.agreement_date ) {
+                            delete workingEntry.agreement_date;
+                        }
+
+                        if ( dialog.fieldFiscalYearStart.getValue() ) {
+                            workingEntry.fiscal_year_start = dialog.fieldFiscalYearStart.getValue();
+                        } else if ( !dialog.fieldFiscalYearStart.getValue() && workingEntry.fiscal_year_start ) {
+                            delete workingEntry.fiscal_year_start;
+                        }
+
+                        if ( dialog.fieldFiscalYearEnd.getValue() ) {
+                            workingEntry.fiscal_year_end = dialog.fieldFiscalYearEnd.getValue();
+                        } else if ( !dialog.fieldFiscalYearEnd.getValue() && workingEntry.fiscal_year_end ) {
+                            delete workingEntry.fiscal_year_end;
+                        }
+
+                        if ( dialog.fieldUpToDateReporting.getValue() ) {
+                            workingEntry.uptodate_reporting = dialog.fieldUpToDateReporting.getValue();
+                        } else if ( !dialog.fieldUpToDateReporting.getValue() && workingEntry.uptodate_reporting ) {
+                            delete workingEntry.uptodate_reporting;
+                        }
+
+                        if ( dialog.fieldRecognitionStatus.getValue() ) {
+                            workingEntry.recognition_status = dialog.fieldRecognitionStatus.getValue();
+                        } else if ( !dialog.fieldRecognitionStatus.getValue() && workingEntry.recognition_status ) {
+                            delete workingEntry.recognition_status;
+                        }
+
+                        if ( dialog.fieldMEByPassOOCAutoChecks.getValue() ) {
+                            workingEntry.me_bypass_ooc_autochecks = dialog.fieldMEByPassOOCAutoChecks.getValue();
+                        } else if ( !dialog.fieldMEByPassOOCAutoChecks.getValue() && workingEntry.me_bypass_ooc_autochecks ) {
+                            delete workingEntry.me_bypass_ooc_autochecks;
+                        }
+
+                        if ( dialog.fieldOutOfComplianceLevel.getValue() ) {
+                            workingEntry.out_of_compliance_level = dialog.fieldOutOfComplianceLevel.getValue();
+                        } else if ( !dialog.fieldOutOfComplianceLevel.getValue() && workingEntry.out_of_compliance_level ) {
+                            delete workingEntry.out_of_compliance_level;
+                        }
+
+                        if ( dialog.fieldDerecognitionDate.getValue() ) {
+                            workingEntry.derecognition_date = convertDateToDdMmYyyyFormat( dialog.fieldDerecognitionDate.getValue() );
+                        } else if ( !dialog.fieldDerecognitionDate.getValue() && workingEntry.derecognition_date ) {
+                            delete workingEntry.derecognition_date;
+                        }
+
+                        if ( dialog.fieldDerecognitionNote.getValue() ) {
+                            workingEntry.derecognition_note = dialog.fieldDerecognitionNote.getValue();
+                        } else if ( !dialog.fieldDerecognitionNote.getValue() && workingEntry.derecognition_note ) {
+                            delete workingEntry.derecognition_note;
+                        }
+
+                        if ( dialog.fieldDateOfSubmission.getValue() ) {
+                            workingEntry.dos_stamp = dialog.fieldDateOfSubmission.getValue();
+                        } else if ( !dialog.fieldDateOfSubmission.getValue() && workingEntry.dos_stamp ) {
+                            delete workingEntry.dos_stamp;
+                        }
+
+                        return workingEntry;
+                    };
+
+                    // Cycle through existing entries. If we are editing an existing
+                    // entry, that entry will be modified in place.
+                    entries = parseContentModule( data.query.pages );
+
+                    groupContactEntries = parseContentModule( existingGroupContacts.query.pages );
+                    for ( i = 0; i < groupContactEntries.length; i++ ) {
+                        groupContactsManifest.push( cleanRawEntry( groupContactEntries[i].value.fields ) );
                     }
 
-                    if ( dialog.fieldGroupName.getValue() ) {
-                        workingEntry.group_name = dialog.fieldGroupName.getValue();
-                    } else if ( !dialog.fieldGroupName.getValue() && workingEntry.group_name ) {
-                        delete workingEntry.group_name;
+                    for ( i = 0; i < entries.length; i++ ) {
+                        workingEntry = cleanRawEntry( entries[ i ].value.fields );
+                        if ( workingEntry.group_name === dialog.group_name ) {
+                            var newGroupContact1, newGroupContact2, oldGroupContact1, oldGroupContact2;
+
+                            newGroupContact1 = dialog.fieldGroupContact1.getValue().normalize();
+                            newGroupContact2 = dialog.fieldGroupContact2.getValue().normalize()
+                            oldGroupContact1 = workingEntry.group_contact1.normalize().substring( 5 );
+                            oldGroupContact2 = workingEntry.group_contact2.normalize().substring( 5 );
+
+                            /** Quickly check if group contacts have changed and log those first. */
+                            if ( oldGroupContact1 !== newGroupContact1 && oldGroupContact2 !== newGroupContact2 ) {
+                                var groupOldContacts = {
+                                    unique_id: Math.random().toString( 36 ).substring( 2 ),
+                                    group_name: workingEntry.group_name,
+                                    group_contact1: oldGroupContact1,
+                                    group_contact2: oldGroupContact2,
+                                    dos_stamp: new Date().toISOString()
+                                };
+                                groupContactsManifest.push( groupOldContacts );
+                            } else if ( oldGroupContact1 !== newGroupContact1 && oldGroupContact2 === newGroupContact2 ) {
+                                var groupOldContacts = {
+                                    unique_id: Math.random().toString( 36 ).substring( 2 ),
+                                    group_name: workingEntry.group_name,
+                                    group_contact1: oldGroupContact1,
+                                    dos_stamp: new Date().toISOString()
+                                };
+                                groupContactsManifest.push( groupOldContacts );
+                            } else if ( oldGroupContact1 === newGroupContact1 && oldGroupContact2 !== newGroupContact2 ) {
+                                var groupOldContacts = {
+                                    unique_id: Math.random().toString( 36 ).substring( 2 ),
+                                    group_name: workingEntry.group_name,
+                                    group_contact2: oldGroupContact2,
+                                    dos_stamp: new Date().toISOString()
+                                };
+                                groupContactsManifest.push( groupOldContacts );
+                            }
+
+                            // Re-generate the group contacts Lua table based on `groupContactsManifest`
+                            insertInPlaceGC = 'return {\n';
+                            for ( j = 0; j < groupContactsManifest.length; j++ ) {
+                                insertInPlaceGC += '\t{\n';
+                                if ( groupContactsManifest[ j ].unique_id ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'unique_id',
+                                        groupContactsManifest[ j ].unique_id
+                                    );
+                                }
+                                if ( groupContactsManifest[ j ].group_name ){
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'group_name',
+                                        groupContactsManifest[ j ].group_name
+                                    );
+                                }
+                                if ( groupContactsManifest[ j ].group_contact1 ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'group_contact1',
+                                        groupContactsManifest[ j ].group_contact1
+                                    );
+                                }
+                                if ( groupContactsManifest[ j ].group_contact2 ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'group_contact2',
+                                        groupContactsManifest[ j ].group_contact2
+                                    );
+                                }
+                                if ( groupContactsManifest[ j ].dos_stamp ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'dos_stamp',
+                                        groupContactsManifest[ j ].dos_stamp
+                                    );
+                                }
+                                insertInPlaceGC += '\t},\n';
+                            }
+                            insertInPlaceGC += '}';
+
+                            workingEntry = processWorkingEntry( workingEntry );
+                            editSummary = gadgetMsg[ 'updated-org-info' ] + ' ' + workingEntry.group_name;
+                        }
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
+                            manifest.push( workingEntry );
+                        }
                     }
 
-                    if ( dialog.fieldOrgType.getValue() ) {
-                        workingEntry.org_type = dialog.fieldOrgType.getValue();
-                    } else if ( !dialog.fieldOrgType.getValue() && workingEntry.org_type ) {
-                        delete workingEntry.org_type;
-                    }
-
-                    if ( dialog.fieldRegion.getValue() ) {
-                        workingEntry.region = dialog.fieldRegion.getValue();
-                    } else if ( !dialog.fieldRegion.getValue() && workingEntry.region ) {
-                        delete workingEntry.region;
-                    }
-
-                    if ( dialog.fieldGroupCountry.getValue() ) {
-                        workingEntry.group_country = dialog.fieldGroupCountry.getValue();
-                    } else if ( !dialog.fieldGroupCountry.getValue() && workingEntry.group_country ) {
-                        delete workingEntry.group_country;
-                    }
-
-                    if ( dialog.fieldLegalEntity.findSelectedItem().getData() ) {
-                        workingEntry.legal_entity = dialog.fieldLegalEntity.findSelectedItem().getData();
-                    } else if ( !dialog.findSelectedItem().getData() && workingEntry.legal_entity ) {
-                        delete workingEntry.legal_entity;
-                    }
-
-                    if ( dialog.fieldMissionChanged.findSelectedItem().getData() ) {
-                        workingEntry.mission_changed = dialog.fieldMissionChanged.findSelectedItem().getData();
-                    } else if ( !dialog.fieldMissionChanged.findSelectedItem().getData() &&
-                        workingEntry.mission_changed ) {
-                        delete workingEntry.mission_changed;
-                    }
-
-                    if ( dialog.fieldExplanation.getValue() ) {
-                        workingEntry.explanation = dialog.fieldExplanation.getValue();
-                    } else if ( !dialog.fieldExplanation.getValue() && workingEntry.explanation ) {
-                        delete workingEntry.explanation;
-                    }
-
-                    if ( dialog.fieldGroupMembershipPage.getValue() ) {
-                        workingEntry.group_page = dialog.fieldGroupMembershipPage.getValue();
-                    } else if ( !dialog.fieldGroupMembershipPage.getValue() && workingEntry.group_page ) {
-                        delete workingEntry.group_page;
-                    }
-
-                    if ( dialog.fieldMembershipCount.getValue() ) {
-                        workingEntry.member_count = dialog.fieldMembershipCount.getValue();
-                    } else if ( !dialog.fieldMembershipCount.getValue() && workingEntry.member_count ) {
-                        delete workingEntry.member_count;
-                    }
-
-                    if ( dialog.fieldFacebook.getValue() ) {
-                        workingEntry.facebook = dialog.fieldFacebook.getValue();
-                    } else if ( !dialog.fieldFacebook.getValue() && workingEntry.facebook ) {
-                        delete workingEntry.facebook;
-                    }
-
-                    if ( dialog.fieldTwitter.getValue() ) {
-                        workingEntry.twitter = dialog.fieldTwitter.getValue();
-                    } else if ( !dialog.fieldTwitter.getValue() && workingEntry.twitter ) {
-                        delete workingEntry.twitter;
-                    }
-
-                    if ( dialog.fieldOther.getValue() ) {
-                        workingEntry.other = dialog.fieldOther.getValue();
-                    } else if ( !dialog.fieldOther.getValue() && workingEntry.other ) {
-                        delete workingEntry.other;
-                    }
-
-                    if ( dialog.fieldDecisionMakingStructure.findSelectedItemsData() ) {
-                        workingEntry.dm_structure = dialog.fieldDecisionMakingStructure.findSelectedItemsData();
-                    } else if ( !dialog.fieldDecisionMakingStructure.findSelectedItemsData() && workingEntry.dm_structure ) {
-                        delete workingEntry.dm_structure;
-                    }
-
-                    if ( dialog.fieldGroupContact1.getValue() ) {
-                        workingEntry.group_contact1 = dialog.fieldGroupContact1.getValue();
-                    } else if ( !dialog.fieldGroupContact1.getValue() && workingEntry.group_contact1 ) {
-                        delete workingEntry.group_contact1;
-                    }
-
-                    if ( dialog.fieldGroupContact2.getValue() ) {
-                        workingEntry.group_contact2 = dialog.fieldGroupContact2.getValue();
-                    } else if ( !dialog.fieldGroupContact2.getValue() && workingEntry.group_contact2 ) {
-                        delete workingEntry.group_contact2;
-                    }
-
-                    if ( dialog.fieldBoardContacts.getValue() ) {
-                        workingEntry.board_contacts = dialog.fieldBoardContacts.getValue();
-                    } else if ( !dialog.fieldBoardContacts.getValue() && workingEntry.board_contacts ) {
-                        delete workingEntry.board_contacts;
-                    }
-
-                    if ( dialog.fieldAgreementDate.getValue() ) {
-                        workingEntry.agreement_date = convertDateToDdMmYyyyFormat( dialog.fieldAgreementDate.getValue() );
-                    } else if ( !dialog.fieldAgreementDate.getValue() && workingEntry.agreement_date ) {
-                        delete workingEntry.agreement_date;
-                    }
-
-                    if ( dialog.fieldFiscalYearStart.getValue() ) {
-                        workingEntry.fiscal_year_start = dialog.fieldFiscalYearStart.getValue();
-                    } else if ( !dialog.fieldFiscalYearStart.getValue() && workingEntry.fiscal_year_start ) {
-                        delete workingEntry.fiscal_year_start;
-                    }
-
-                    if ( dialog.fieldFiscalYearEnd.getValue() ) {
-                        workingEntry.fiscal_year_end = dialog.fieldFiscalYearEnd.getValue();
-                    } else if ( !dialog.fieldFiscalYearEnd.getValue() && workingEntry.fiscal_year_end ) {
-                        delete workingEntry.fiscal_year_end;
-                    }
-
-                    if ( dialog.fieldUpToDateReporting.getValue() ) {
-                        workingEntry.uptodate_reporting = dialog.fieldUpToDateReporting.getValue();
-                    } else if ( !dialog.fieldUpToDateReporting.getValue() && workingEntry.uptodate_reporting ) {
-                        delete workingEntry.uptodate_reporting;
-                    }
-
-                    if ( dialog.fieldRecognitionStatus.getValue() ) {
-                        workingEntry.recognition_status = dialog.fieldRecognitionStatus.getValue();
-                    } else if ( !dialog.fieldRecognitionStatus.getValue() && workingEntry.recognition_status ) {
-                        delete workingEntry.recognition_status;
-                    }
-
-                    if ( dialog.fieldMEByPassOOCAutoChecks.getValue() ) {
-                        workingEntry.me_bypass_ooc_autochecks = dialog.fieldMEByPassOOCAutoChecks.getValue();
-                    } else if ( !dialog.fieldMEByPassOOCAutoChecks.getValue() && workingEntry.me_bypass_ooc_autochecks ) {
-                        delete workingEntry.me_bypass_ooc_autochecks;
-                    }
-
-                    if ( dialog.fieldOutOfComplianceLevel.getValue() ) {
-                        workingEntry.out_of_compliance_level = dialog.fieldOutOfComplianceLevel.getValue();
-                    } else if ( !dialog.fieldOutOfComplianceLevel.getValue() && workingEntry.out_of_compliance_level ) {
-                        delete workingEntry.out_of_compliance_level;
-                    }
-
-                    if ( dialog.fieldDerecognitionDate.getValue() ) {
-                        workingEntry.derecognition_date = convertDateToDdMmYyyyFormat( dialog.fieldDerecognitionDate.getValue() );
-                    } else if ( !dialog.fieldDerecognitionDate.getValue() && workingEntry.derecognition_date ) {
-                        delete workingEntry.derecognition_date;
-                    }
-
-                    if ( dialog.fieldDerecognitionNote.getValue() ) {
-                        workingEntry.derecognition_note = dialog.fieldDerecognitionNote.getValue();
-                    } else if ( !dialog.fieldDerecognitionNote.getValue() && workingEntry.derecognition_note ) {
-                        delete workingEntry.derecognition_note;
-                    }
-
-                    if ( dialog.fieldDateOfSubmission.getValue() ) {
-                        workingEntry.dos_stamp = dialog.fieldDateOfSubmission.getValue();
-                    } else if ( !dialog.fieldDateOfSubmission.getValue() && workingEntry.dos_stamp ) {
-                        delete workingEntry.dos_stamp;
-                    }
-
-                    return workingEntry;
-                };
-
-                // Cycle through existing entries. If we are editing an existing
-                // entry, that entry will be modified in place.
-                entries = parseContentModule( data.query.pages );
-
-                for ( i = 0; i < entries.length; i++ ) {
-                    workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                    if ( workingEntry.group_name === dialog.group_name ) {
+                    // No unique ID means this is a new entry
+                    if ( !dialog.uniqueId ) {
+                        workingEntry = {
+                            unique_id: Math.random().toString( 36 ).substring( 2 )
+                        };
                         workingEntry = processWorkingEntry( workingEntry );
-                        editSummary = gadgetMsg[ 'updated-org-info' ] + ' ' + workingEntry.group_name;
-                    }
-                    if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
+                        editSummary = gadgetMsg[ 'added-new-org-info' ] + ' ' + workingEntry.group_name;
                         manifest.push( workingEntry );
                     }
-                }
 
-                // No unique ID means this is a new entry
-                if ( !dialog.uniqueId ) {
-                    workingEntry = {
-                        unique_id: Math.random().toString( 36 ).substring( 2 )
-                    };
-                    workingEntry = processWorkingEntry( workingEntry );
-                    editSummary = gadgetMsg[ 'added-new-org-info' ] + ' ' + workingEntry.group_name;
-                    manifest.push( workingEntry );
-                }
+                    // Re-generate the Lua table based on `manifest`
+                    insertInPlace = 'return {\n';
+                    for ( i = 0; i < manifest.length; i++ ) {
+                        // Keep a list copy of the affiliate name
+                        mrl_affiliates += manifest[ i ].group_name + ',\n';
+                        insertInPlace += '\t{\n';
+                        if ( manifest[ i ].unique_id ) {
+                            insertInPlace += generateKeyValuePair(
+                                'unique_id',
+                                manifest[ i ].unique_id
+                            );
+                        }
+                        if ( manifest[ i ].affiliate_code ){
+                            insertInPlace += generateKeyValuePair(
+                                'affiliate_code',
+                                manifest[ i ].affiliate_code
+                            );
+                        }
+                        if ( manifest[ i ].group_name ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_name',
+                                manifest[ i ].group_name
+                            );
+                        }
+                        if ( manifest[ i ].org_type ) {
+                            insertInPlace += generateKeyValuePair(
+                                'org_type',
+                                manifest[ i ].org_type
+                            );
+                        }
+                        if ( manifest[ i ].region ) {
+                            insertInPlace += generateKeyValuePair(
+                                'region',
+                                manifest[ i ].region
+                            );
+                        }
+                        if ( manifest[ i ].group_country ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_country',
+                                manifest[ i ].group_country
+                            );
+                        }
+                        if ( !manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
+                            insertInPlace += generateKeyValuePair(
+                                'legal_entity',
+                                'No'
+                            );
+                        } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
+                            insertInPlace += generateKeyValuePair(
+                                'legal_entity',
+                                manifest[ i ].legal_entity
+                            );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'legal_entity',
+                                'Yes'
+                            );
+                        }
+                        if ( manifest[ i ].mission_changed ) {
+                            insertInPlace += generateKeyValuePair(
+                                'mission_changed',
+                                manifest[ i ].mission_changed
+                            );
+                        }
+                        if ( manifest[ i ].explanation ) {
+                            insertInPlace += generateKeyValuePair(
+                                'explanation',
+                                manifest[ i ].explanation
+                            );
+                        }
+                        if ( manifest[ i ].group_page ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_page',
+                                manifest[ i ].group_page.trim()
+                            );
+                        }
+                        if ( manifest[ i ].member_count ) {
+                            insertInPlace += generateKeyValuePair(
+                                'member_count',
+                                manifest[ i ].member_count
+                            );
+                        }
+                        if ( manifest[ i ].facebook ) {
+                            insertInPlace += generateKeyValuePair(
+                                'facebook',
+                                manifest[ i ].facebook.trim()
+                            );
+                        }
+                        if ( manifest[ i ].twitter ) {
+                            insertInPlace += generateKeyValuePair(
+                                'twitter',
+                                manifest[ i ].twitter.trim()
+                            );
+                        }
+                        if ( manifest[ i ].other ) {
+                            insertInPlace += generateKeyValuePair(
+                                'other',
+                                manifest[ i ].other.trim()
+                            );
+                        }
+                        if ( manifest[ i ].dm_structure ) {
+                            insertInPlace += generateKeyValuePair(
+                                'dm_structure',
+                                manifest[ i ].dm_structure
+                            );
+                        }
+                        if ( manifest[ i ].group_contact1 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_contact1',
+                                'User:' + manifest[ i ].group_contact1
+                            );
+                        }
+                        if ( manifest[ i ].group_contact2 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_contact2',
+                                'User:' + manifest[ i ].group_contact2
+                            );
+                        }
+                        if ( manifest[ i ].board_contacts ) {
+                            insertInPlace += generateKeyValuePair(
+                                'board_contacts',
+                                manifest[ i ].board_contacts
+                            );
+                        }
+                        if ( manifest[ i ].agreement_date ){
+                            insertInPlace += generateKeyValuePair(
+                                'agreement_date',
+                                manifest[ i ].agreement_date
+                            );
+                        }
+                        if ( manifest[ i ].fiscal_year_start ){
+                            insertInPlace += generateKeyValuePair(
+                                'fiscal_year_start',
+                                manifest[ i ].fiscal_year_start
+                            );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'fiscal_year_start',
+                                ''
+                            );
+                        }
+                        if ( manifest[ i ].fiscal_year_end ){
+                            insertInPlace += generateKeyValuePair(
+                                'fiscal_year_end',
+                                manifest[ i ].fiscal_year_end
+                            );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'fiscal_year_end',
+                                ''
+                            );
+                        }
+                        if ( manifest[ i ].uptodate_reporting ){
+                            insertInPlace += generateKeyValuePair(
+                                'uptodate_reporting',
+                                manifest[ i ].uptodate_reporting
+                            );
+                        }
+                        if ( manifest[ i ].notes_on_reporting ){
+                            insertInPlace += generateKeyValuePair(
+                                'notes_on_reporting',
+                                manifest[ i ].notes_on_reporting
+                            );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'notes_on_reporting',
+                                ''
+                            );
+                        }
+                        if ( manifest[ i ].recognition_status ){
+                            insertInPlace += generateKeyValuePair(
+                                'recognition_status',
+                                manifest[ i ].recognition_status
+                            );
+                        }
+                        if ( manifest[i].me_bypass_ooc_autochecks ) {
+                            insertInPlace += generateKeyValuePair(
+                                'me_bypass_ooc_autochecks',
+                                manifest[ i ].me_bypass_ooc_autochecks
+                            );
+                        }
+                        if ( manifest[ i ].out_of_compliance_level ){
+                            insertInPlace += generateKeyValuePair(
+                                'out_of_compliance_level',
+                                manifest[ i ].out_of_compliance_level
+                            );
+                        }
+                        if ( manifest[ i ].derecognition_date ){
+                            insertInPlace += generateKeyValuePair(
+                                'derecognition_date',
+                                manifest[ i ].derecognition_date
+                            );
+                        }
+                        if ( manifest[ i ].derecognition_note ){
+                            insertInPlace += generateKeyValuePair(
+                                'derecognition_note',
+                                manifest[ i ].derecognition_note
+                            );
+                        }
+                        if ( manifest[ i ].dos_stamp ) {
+                            insertInPlace += generateKeyValuePair(
+                                'dos_stamp',
+                                manifest[ i ].dos_stamp
+                            );
+                        }
+                        insertInPlace += '\t},\n';
+                    }
+                    insertInPlace += '}';
 
-                // Re-generate the Lua table based on `manifest`
-                insertInPlace = 'return {\n';
-                for ( i = 0; i < manifest.length; i++ ) {
-                    // Keep a list copy of the affiliate name
-                    mrl_affiliates += manifest[ i ].group_name + ',\n';
-                    insertInPlace += '\t{\n';
-                    if ( manifest[ i ].unique_id ) {
-                        insertInPlace += generateKeyValuePair(
-                            'unique_id',
-                            manifest[ i ].unique_id
-                        );
-                    }
-                    if ( manifest[ i ].affiliate_code ){
-                        insertInPlace += generateKeyValuePair(
-                            'affiliate_code',
-                            manifest[ i ].affiliate_code
-                        );
-                    }
-                    if ( manifest[ i ].group_name ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_name',
-                            manifest[ i ].group_name
-                        );
-                    }
-                    if ( manifest[ i ].org_type ) {
-                        insertInPlace += generateKeyValuePair(
-                            'org_type',
-                            manifest[ i ].org_type
-                        );
-                    }
-                    if ( manifest[ i ].region ) {
-                        insertInPlace += generateKeyValuePair(
-                            'region',
-                            manifest[ i ].region
-                        );
-                    }
-                    if ( manifest[ i ].group_country ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_country',
-                            manifest[ i ].group_country
-                        );
-                    }
-                    if ( !manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
-                        insertInPlace += generateKeyValuePair(
-                            'legal_entity',
-                            'No'
-                        );
-                    } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
-                        insertInPlace += generateKeyValuePair(
-                            'legal_entity',
-                            manifest[ i ].legal_entity
-                        );
-                    } else {
-                        insertInPlace += generateKeyValuePair(
-                            'legal_entity',
-                            'Yes'
-                        );
-                    }
-                    if ( manifest[ i ].mission_changed ) {
-                        insertInPlace += generateKeyValuePair(
-                            'mission_changed',
-                            manifest[ i ].mission_changed
-                        );
-                    }
-                    if ( manifest[ i ].explanation ) {
-                        insertInPlace += generateKeyValuePair(
-                            'explanation',
-                            manifest[ i ].explanation
-                        );
-                    }
-                    if ( manifest[ i ].group_page ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_page',
-                            manifest[ i ].group_page.trim()
-                        );
-                    }
-                    if ( manifest[ i ].member_count ) {
-                        insertInPlace += generateKeyValuePair(
-                            'member_count',
-                            manifest[ i ].member_count
-                        );
-                    }
-                    if ( manifest[ i ].facebook ) {
-                        insertInPlace += generateKeyValuePair(
-                            'facebook',
-                            manifest[ i ].facebook.trim()
-                        );
-                    }
-                    if ( manifest[ i ].twitter ) {
-                        insertInPlace += generateKeyValuePair(
-                            'twitter',
-                            manifest[ i ].twitter.trim()
-                        );
-                    }
-                    if ( manifest[ i ].other ) {
-                        insertInPlace += generateKeyValuePair(
-                            'other',
-                            manifest[ i ].other.trim()
-                        );
-                    }
-                    if ( manifest[ i ].dm_structure ) {
-                        insertInPlace += generateKeyValuePair(
-                            'dm_structure',
-                            manifest[ i ].dm_structure
-                        );
-                    }
-                    if ( manifest[ i ].group_contact1 ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_contact1',
-                            'User:' + manifest[ i ].group_contact1
-                        );
-                    }
-                    if ( manifest[ i ].group_contact2 ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_contact2',
-                            'User:' + manifest[ i ].group_contact2
-                        );
-                    }
-                    if ( manifest[ i ].board_contacts ) {
-                        insertInPlace += generateKeyValuePair(
-                            'board_contacts',
-                            manifest[ i ].board_contacts
-                        );
-                    }
-                    if ( manifest[ i ].agreement_date ){
-                        insertInPlace += generateKeyValuePair(
-                            'agreement_date',
-                            manifest[ i ].agreement_date
-                        );
-                    }
-                    if ( manifest[ i ].fiscal_year_start ){
-                        insertInPlace += generateKeyValuePair(
-                            'fiscal_year_start',
-                            manifest[ i ].fiscal_year_start
-                        );
-                    } else {
-                        insertInPlace += generateKeyValuePair(
-                            'fiscal_year_start',
-                            ''
-                        );
-                    }
-                    if ( manifest[ i ].fiscal_year_end ){
-                        insertInPlace += generateKeyValuePair(
-                            'fiscal_year_end',
-                            manifest[ i ].fiscal_year_end
-                        );
-                    } else {
-                        insertInPlace += generateKeyValuePair(
-                            'fiscal_year_end',
-                            ''
-                        );
-                    }
-                    if ( manifest[ i ].uptodate_reporting ){
-                        insertInPlace += generateKeyValuePair(
-                            'uptodate_reporting',
-                            manifest[ i ].uptodate_reporting
-                        );
-                    }
-                    if ( manifest[ i ].notes_on_reporting ){
-                        insertInPlace += generateKeyValuePair(
-                            'notes_on_reporting',
-                            manifest[ i ].notes_on_reporting
-                        );
-                    } else {
-                        insertInPlace += generateKeyValuePair(
-                            'notes_on_reporting',
-                            ''
-                        );
-                    }
-                    if ( manifest[ i ].recognition_status ){
-                        insertInPlace += generateKeyValuePair(
-                            'recognition_status',
-                            manifest[ i ].recognition_status
-                        );
-                    }
-                    if ( manifest[i].me_bypass_ooc_autochecks ) {
-                        insertInPlace += generateKeyValuePair(
-                            'me_bypass_ooc_autochecks',
-                            manifest[ i ].me_bypass_ooc_autochecks
-                        );
-                    }
-                    if ( manifest[ i ].out_of_compliance_level ){
-                        insertInPlace += generateKeyValuePair(
-                            'out_of_compliance_level',
-                            manifest[ i ].out_of_compliance_level
-                        );
-                    }
-                    if ( manifest[ i ].derecognition_date ){
-                        insertInPlace += generateKeyValuePair(
-                            'derecognition_date',
-                            manifest[ i ].derecognition_date
-                        );
-                    }
-                    if ( manifest[ i ].derecognition_note ){
-                        insertInPlace += generateKeyValuePair(
-                            'derecognition_note',
-                            manifest[ i ].derecognition_note
-                        );
-                    }
-                    if ( manifest[ i ].dos_stamp ) {
-                        insertInPlace += generateKeyValuePair(
-                            'dos_stamp',
-                            manifest[ i ].dos_stamp
-                        );
-                    }
-                    insertInPlace += '\t},\n';
-                }
-                insertInPlace += '}';
-
-                // Make changes to the Org Info table as required.
-                new mw.Api().postWithToken(
-                    'csrf',
-                    {
-                        action: 'edit',
-                        bot: true,
-                        nocreate: true,
-                        summary: editSummary,
-                        pageid: 10603224,  // [[Module:Organizational_Informations]]
-                        text: insertInPlace,
-                        contentmodel: 'Scribunto'
-                    }
-                ).then( function () {
-                    dialog.close();
-
-                    /** After saving, show a message box */
-                    var messageDialog = new OO.ui.MessageDialog();
-                    var windowManager = new OO.ui.WindowManager();
-
-                    $( 'body' ).append( windowManager.$element );
-                    // Add the dialog to the window manager.
-                    windowManager.addWindows( [ messageDialog ] );
-
-                    // Configure the message dialog when it is opened with the window manager's openWindow() method.
-                    windowManager.openWindow( messageDialog, {
-                        title: gadgetMsg[ 'success-message' ],
-                        message: gadgetMsg[ 'org-info-saved' ],
-                        actions: [
-                            {
-                                action: 'accept',
-                                label: 'Dismiss',
-                                flags: 'primary'
-                            }
-                        ]
-                    });
-
-                    // Purge the cache of the page from which the edit was made
+                    // Make changes to the Org Info table as required.
                     new mw.Api().postWithToken(
                         'csrf',
-                        { action: 'purge', titles: mw.config.values.wgPageName }
+                        {
+                            action: 'edit',
+                            bot: true,
+                            nocreate: true,
+                            summary: editSummary,
+                            pageid: 10603224,  // [[Module:Organizational_Informations]]
+                            text: insertInPlace,
+                            contentmodel: 'Scribunto'
+                        }
                     ).then( function () {
-                        // Defer reconstruction MRL of affiliates to background.
+                        dialog.close();
+
                         new mw.Api().postWithToken(
                             'csrf',
                             {
                                 action: 'edit',
                                 bot: true,
                                 nocreate: true,
-                                summary: 'Reconstructed MRL of affiliates for all affiliates in the system.',
-                                pageid: 11608672, // [[WADP/MRL/List Of All Wikimedia Affiliates]]
-                                text: mrl_affiliates,
-                                contentmodel: 'wikitext'
+                                summary: 'Log changes to new affiliate contacts',
+                                pageid: 11620639,  // [[Module:Organizational_Informations/Group_Contacts]]
+                                text: insertInPlaceGC,
+                                contentmodel: 'Scribunto'
                             }
-                        );
-                        location.reload();
+                        ).then( function () {
+                            /** After saving, show a message box */
+                            var messageDialog = new OO.ui.MessageDialog();
+                            var windowManager = new OO.ui.WindowManager();
+
+                            $( 'body' ).append( windowManager.$element );
+                            // Add the dialog to the window manager.
+                            windowManager.addWindows( [ messageDialog ] );
+
+                            // Configure the message dialog when it is opened with the window manager's openWindow() method.
+                            windowManager.openWindow( messageDialog, {
+                                title: gadgetMsg[ 'success-message' ],
+                                message: gadgetMsg[ 'org-info-saved' ],
+                                actions: [
+                                    {
+                                        action: 'accept',
+                                        label: 'Dismiss',
+                                        flags: 'primary'
+                                    }
+                                ]
+                            });
+
+                            // Purge the cache of the page from which the edit was made
+                            new mw.Api().postWithToken(
+                                'csrf',
+                                { action: 'purge', titles: mw.config.values.wgPageName }
+                            ).then( function () {
+                                // Defer reconstruction MRL of affiliates to background.
+                                new mw.Api().postWithToken(
+                                    'csrf',
+                                    {
+                                        action: 'edit',
+                                        bot: true,
+                                        nocreate: true,
+                                        summary: 'Reconstructed MRL of affiliates for all affiliates in the system.',
+                                        pageid: 11608672, // [[WADP/MRL/List Of All Wikimedia Affiliates]]
+                                        text: mrl_affiliates,
+                                        contentmodel: 'wikitext'
+                                    }
+                                );
+                                location.reload();
+                            } );
+                        } );
+                    } ).catch( function ( error ) {
+                        alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
+                        dialog.close();
+                        console.error( error );
                     } );
-                } ).catch( function ( error ) {
-                    alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
-                    dialog.close();
-                    console.error( error );
                 } );
             } );
         };
