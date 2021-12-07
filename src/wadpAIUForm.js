@@ -12,8 +12,6 @@
         convertDateToYyyyMmDdFormat,
         generateKeyValuePair,
         getAffiliatesList,
-        getAIUDataModuleQuery,
-        getAIUProgramsModuleQuery,
         getRelevantRawEntry,
         openWindow1,
         openWindow2,
@@ -25,43 +23,46 @@
         pmcEntriesDialog = [],
         pmcTabs = false,
         pmcTabsArray = [],
-        queryAffiliatesPage,
         sanitizeInput,
         userLang,
         windowManager,
-        gadgetMsg = {};
+        gadgetMsg = {},
+        getModuleContent,
+        getWikiPageContent;
 
     userLang = mw.config.get( 'wgUserLanguage' );
 
     // This is called after translation messages are ready
     function initAfterMessages() {
         /**
-         * Provides API parameters for getting the content from
-         * [[Module:Affiliate_Indicators]]
+         * Provides API parameters for getting module content
+         * specified by `moduleName`.
          *
+         * @param {string} moduleName
          * @return {Object}
          */
-        getAIUDataModuleQuery = function () {
+        getModuleContent = function ( moduleName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
-                titles: 'Module:Affiliate_Indicators',
+                titles: 'Module:' + moduleName,
                 rvprop: 'content',
                 rvlimit: 1
             };
         };
 
         /**
-         * Provides API parameters for getting the content from
-         * [[Module:Affiliate_Indicators/Programs]]
+         * Provides API parameters for getting the content
+         * of a page specified by `pageName`
          *
+         * @param {string} pageName
          * @return {Object}
          */
-        getAIUProgramsModuleQuery = function () {
+        getWikiPageContent = function ( pageName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
-                titles: 'Module:Affiliate_Indicators/Programs',
+                titles: pageName,
                 rvprop: 'content',
                 rvlimit: 1
             };
@@ -205,22 +206,6 @@
         };
 
         /**
-         * Provides API parameters for getting the content from
-         * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
-         *
-         * @return {Object}
-         */
-        queryAffiliatesPage = function () {
-            return {
-                action: 'query',
-                prop: 'revisions',
-                titles: 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates',
-                rvprop: 'content',
-                rvlimit: 1
-            };
-        };
-
-        /**
          * Get an entire content (wikitext) of a given page
          *
          * @param {Object} sourceblob The original API return
@@ -261,7 +246,9 @@
             var value = this.getValue();
             return this.getValidity().then( function () {
                 // Query the API to get the list of affiliates
-                return new mw.Api().get( queryAffiliatesPage() ).then( function ( data ) {
+                return new mw.Api().get(
+                    getWikiPageContent( 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates' )
+                ).then( function ( data ) {
                     var affiliates, affiliatesContent;
                     affiliatesContent = getAffiliatesList( data.query.pages );
                     affiliates = affiliatesContent.split(',\n');
@@ -661,7 +648,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
+            new mw.Api().get( getModuleContent( 'Affiliate_Indicators' ) ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, entries;
 
@@ -808,7 +795,7 @@
                  *
                  * Also, make sure to also delete PMC entries for matching persistent ID
                  */
-                new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
+                new mw.Api().get( getModuleContent( 'Affiliate_Indicators/Programs' ) ).then( function ( data ) {
                     var manifest = [];
 
                     entries = parseAIUDataModule( data.query.pages );
@@ -1217,7 +1204,7 @@
                         { action: 'purge', titles: mw.config.values.wgPageName }
                     ).then( function () {
                         if ( persistentId !== '' ) {
-                            new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
+                            new mw.Api().get( getModuleContent( 'Affiliate_Indicators' ) ).then( function ( data ) {
                                 var entryData;
 
                                 entryData = cleanRawEntry(
@@ -1547,7 +1534,7 @@
             } else if ( action === 'back' && persistentId !== '' ) {
                 dialog.close();
                 return new OO.ui.Process( function () {
-                    new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
+                    new mw.Api().get( getModuleContent( 'Affiliate_Indicators' ) ).then( function ( data ) {
                         var entryData;
 
                         entryData = cleanRawEntry(
@@ -1574,7 +1561,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
+            new mw.Api().get( getModuleContent( 'Affiliate_Indicators' ) ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, entries;
 
@@ -1695,7 +1682,7 @@
                  *
                  * Also, make sure to also delete PMC entries for matching persistent ID
                  */
-                new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
+                new mw.Api().get( getModuleContent( 'Affiliate_Indicators/Programs' ) ).then( function ( data ) {
                     var manifest = [];
 
                     entries = parseAIUDataModule( data.query.pages );
@@ -3076,10 +3063,10 @@
             } else if ( action === 'back' && persistentId !== '' ) {
                 dialog.close();
                 return new OO.ui.Process( function () {
-                    new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
-                        var entryData, entry;
+                    new mw.Api().get( getModuleContent( 'Affiliate_Indicators' ) ).then( function ( data ) {
+                        var entryData, entry, i;
 
-                        new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
+                        new mw.Api().get( getModuleContent( 'Affiliate_Indicators/Programs' ) ).then( function ( data ) {
                             pmcEntries = parseAIUDataModule( data.query.pages );
                             if ( pmcEntries ) {
                                 for ( i = 0; i < pmcEntries.length; i++ ) {
@@ -3128,7 +3115,7 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
+            new mw.Api().get( getModuleContent( 'Affiliate_Indicators/Programs' ) ).then( function ( data ) {
                 var i, insertInPlace, processWorkingEntry,
                     editSummary, manifest = [], workingEntry, entries;
 
@@ -3257,7 +3244,7 @@
                  * entries for matching persistent ID.
                  */
                 if ( deleteFlag === 'delete' && persistentId !== '' ) {
-                    new mw.Api().get( getAIUDataModuleQuery() ).then( function ( data ) {
+                    new mw.Api().get( getModuleContent( 'Affiliate_Indicators' ) ).then( function ( data ) {
                         var manifest = [];
                         entries = parseAIUDataModule( data.query.pages );
 
@@ -3668,12 +3655,12 @@
                     ).then( function () {
                         if ( deleteFlag === 'add' ) {
                             pmcTabs = true;
-                            new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
+                            new mw.Api().get( getModuleContent( 'Affiliate_Indicators/Programs' ) ).then( function ( data ) {
                                 pmcEntries = parseAIUDataModule( data.query.pages );
                                 openWindow3( {} );
                             } );
                         } else if ( deleteFlag === 'update' ) {
-                            new mw.Api().get( getAIUProgramsModuleQuery() ).then( function ( data ) {
+                            new mw.Api().get( getModuleContent( 'Affiliate_Indicators/Programs' ) ).then( function ( data ) {
                                 pmcEntries = parseAIUDataModule( data.query.pages );
                                 openWindow3( {} );
                             } );

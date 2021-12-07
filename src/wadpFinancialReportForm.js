@@ -6,8 +6,6 @@
     'use strict';
 
     var gadgetMsg = {},
-        getContentModuleQuery,
-        getSandboxContentModuleQuery,
         getRelevantRawEntry,
         parseContentModule,
         openWindow,
@@ -24,7 +22,8 @@
         sanitizeInput,
         sandbox_financial_reports,
         apiObj,
-        convertDateToDdMmYyyyFormat;
+        convertDateToDdMmYyyyFormat,
+        getModuleContent;
 
     var PAGEID = 10624702, // Live mode page ID
         EDITMODE = '';
@@ -34,31 +33,17 @@
     // This is called after translation messages are ready
     function initAfterMessages() {
         /**
-         * Provides API parameters for getting the content from [[Module:Financial_Reports]]
+         * Provides API parameters for getting module content
+         * specified by `moduleName`.
          *
+         * @param {string} moduleName
          * @return {Object}
          */
-        getContentModuleQuery = function () {
+        getModuleContent = function ( moduleName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
-                titles: 'Module:Financial_Reports',
-                rvprop: 'content',
-                rvlimit: 1
-            };
-        };
-
-        /**
-         * Provides API parameters for getting the content from
-         * [[Module:Financial_Reports/Sandbox]]
-         *
-         * @return {Object}
-         */
-        getSandboxContentModuleQuery = function () {
-            return {
-                action: 'query',
-                prop: 'revisions',
-                titles: 'Module:Financial_Reports/Sandbox',
+                titles: 'Module:' + moduleName,
                 rvprop: 'content',
                 rvlimit: 1
             };
@@ -159,8 +144,8 @@
          * @return {Object} The cleaned up object
          */
         cleanRawEntry = function ( relevantRawEntry ) {
-            var entryData = {},
-                i, j;
+            var entryData = {}, i;
+
             for ( i = 0; i < relevantRawEntry.length; i++ ) {
                 entryData[ relevantRawEntry[ i ].key.name ] = relevantRawEntry[ i ].value.value;
             }
@@ -663,264 +648,264 @@
             dialog.pushPending();
 
             apiObj = new mw.Api();
-            apiObj.get( getSandboxContentModuleQuery() ).then( function ( data ) {
-                sandbox_financial_reports = data;
-            } );
+            apiObj.get( getModuleContent( 'Financial_Reports/Sandbox' ) ).then( function ( sandboxData ) {
+                apiObj.get( getModuleContent( 'Financial_Reports' ) ).then( function ( data ) {
+                    var i,
+                        insertInPlace,
+                        processWorkingEntry,
+                        editSummary,
+                        manifest = [],
+                        workingEntry,
+                        entries;
 
-            apiObj.get( getContentModuleQuery() ).then( function ( data ) {
-                var i,
-                    insertInPlace,
-                    processWorkingEntry,
-                    editSummary,
-                    manifest = [],
-                    workingEntry,
-                    entries;
+                    sandbox_financial_reports = sandboxData;
 
-                /**
-                 * Compares a given [[Module:Financial_Reports]] entry against the edit fields
-                 * and applies changes where relevant.
-                 *
-                 * @param {Object} workingEntry the entry being worked on
-                 * @return {Object} The same entry but with modifications
-                 */
-                processWorkingEntry = function ( workingEntry ) {
-                    if ( dialog.fieldGroupName.getValue() ) {
-                        workingEntry.group_name = dialog.fieldGroupName.getValue().split( ' ~ ' )[ 0 ];
-                    } else if ( !dialog.fieldGroupName.getValue() && workingEntry.group_name ) {
-                        delete workingEntry.group_name;
-                    }
+                    /**
+                     * Compares a given [[Module:Financial_Reports]] entry against the edit fields
+                     * and applies changes where relevant.
+                     *
+                     * @param {Object} workingEntry the entry being worked on
+                     * @return {Object} The same entry but with modifications
+                     */
+                    processWorkingEntry = function ( workingEntry ) {
+                        if ( dialog.fieldGroupName.getValue() ) {
+                            workingEntry.group_name = dialog.fieldGroupName.getValue().split( ' ~ ' )[ 0 ];
+                        } else if ( !dialog.fieldGroupName.getValue() && workingEntry.group_name ) {
+                            delete workingEntry.group_name;
+                        }
 
-                    if ( dialog.fieldReportType.getValue() === 'Annual Financial Report' ) {
-                        workingEntry.report_type = dialog.fieldReportType.getValue();
-                    } else if ( dialog.fieldReportType.getValue() === 'Multi-year Financial Report' ) {
-                        workingEntry.report_type = dialog.fieldReportType.getValue();
-                        workingEntry.multiyear_duration = dialog.fieldMultiyear.getValue();
-                    } else if ( !dialog.fieldReportType.getValue() && workingEntry.report_type ) {
-                        delete workingEntry.report_type;
-                    }
+                        if ( dialog.fieldReportType.getValue() === 'Annual Financial Report' ) {
+                            workingEntry.report_type = dialog.fieldReportType.getValue();
+                        } else if ( dialog.fieldReportType.getValue() === 'Multi-year Financial Report' ) {
+                            workingEntry.report_type = dialog.fieldReportType.getValue();
+                            workingEntry.multiyear_duration = dialog.fieldMultiyear.getValue();
+                        } else if ( !dialog.fieldReportType.getValue() && workingEntry.report_type ) {
+                            delete workingEntry.report_type;
+                        }
 
-                    if ( dialog.fieldTotalBudget.getValue() ) {
-                        workingEntry.total_budget = dialog.fieldTotalBudget.getValue();
-                    } else if ( !dialog.fieldTotalBudget.getValue() && workingEntry.total_budget ) {
-                        delete workingEntry.total_budget;
-                    }
+                        if ( dialog.fieldTotalBudget.getValue() ) {
+                            workingEntry.total_budget = dialog.fieldTotalBudget.getValue();
+                        } else if ( !dialog.fieldTotalBudget.getValue() && workingEntry.total_budget ) {
+                            delete workingEntry.total_budget;
+                        }
 
-                    if ( dialog.fieldTotalExpense.getValue() ) {
-                        workingEntry.total_expense = dialog.fieldTotalExpense.getValue();
-                    } else if ( !dialog.fieldTotalExpense.getValue() && workingEntry.total_expense ) {
-                        delete workingEntry.total_expense;
-                    }
+                        if ( dialog.fieldTotalExpense.getValue() ) {
+                            workingEntry.total_expense = dialog.fieldTotalExpense.getValue();
+                        } else if ( !dialog.fieldTotalExpense.getValue() && workingEntry.total_expense ) {
+                            delete workingEntry.total_expense;
+                        }
 
-                    if ( dialog.fieldCurrency.getValue() ) {
-                        workingEntry.currency = dialog.fieldCurrency.getValue();
-                    } else if ( !dialog.fieldCurrency.getValue() && workingEntry.currency ) {
-                        delete workingEntry.currency;
-                    }
+                        if ( dialog.fieldCurrency.getValue() ) {
+                            workingEntry.currency = dialog.fieldCurrency.getValue();
+                        } else if ( !dialog.fieldCurrency.getValue() && workingEntry.currency ) {
+                            delete workingEntry.currency;
+                        }
 
-                    if ( dialog.fieldReportLink.getValue() ) {
-                        workingEntry.report_link = dialog.fieldReportLink.getValue();
-                    } else if ( !dialog.fieldReportLink.getValue() && workingEntry.report_link ) {
-                        delete workingEntry.report_link;
-                    }
+                        if ( dialog.fieldReportLink.getValue() ) {
+                            workingEntry.report_link = dialog.fieldReportLink.getValue();
+                        } else if ( !dialog.fieldReportLink.getValue() && workingEntry.report_link ) {
+                            delete workingEntry.report_link;
+                        }
 
-                    if ( dialog.fieldStartDate.getValue() ) {
-                        workingEntry.start_date = convertDateToDdMmYyyyFormat( dialog.fieldStartDate.getValue() );
-                    } else if ( !dialog.fieldStartDate.getValue() && workingEntry.start_date ) {
-                        delete workingEntry.start_date;
-                    }
+                        if ( dialog.fieldStartDate.getValue() ) {
+                            workingEntry.start_date = convertDateToDdMmYyyyFormat( dialog.fieldStartDate.getValue() );
+                        } else if ( !dialog.fieldStartDate.getValue() && workingEntry.start_date ) {
+                            delete workingEntry.start_date;
+                        }
 
-                    if ( dialog.fieldEndDate.getValue() ) {
-                        workingEntry.end_date = convertDateToDdMmYyyyFormat( dialog.fieldEndDate.getValue() );
-                    } else if ( !dialog.fieldEndDate.getValue() && workingEntry.end_date ) {
-                        delete workingEntry.end_date;
-                    }
+                        if ( dialog.fieldEndDate.getValue() ) {
+                            workingEntry.end_date = convertDateToDdMmYyyyFormat( dialog.fieldEndDate.getValue() );
+                        } else if ( !dialog.fieldEndDate.getValue() && workingEntry.end_date ) {
+                            delete workingEntry.end_date;
+                        }
 
-                    if ( dialog.fieldReportLangCode.getValue() ) {
-                        workingEntry.report_lang_code = dialog.fieldReportLangCode.getValue();
-                    } else if ( !dialog.fieldReportLangCode.getValue() && workingEntry.report_lang_code ) {
-                        delete workingEntry.report_lang_code;
-                    }
+                        if ( dialog.fieldReportLangCode.getValue() ) {
+                            workingEntry.report_lang_code = dialog.fieldReportLangCode.getValue();
+                        } else if ( !dialog.fieldReportLangCode.getValue() && workingEntry.report_lang_code ) {
+                            delete workingEntry.report_lang_code;
+                        }
 
-                    if ( dialog.fieldReportInEnglishLink.getValue() ) {
-                        workingEntry.report_link_en = dialog.fieldReportInEnglishLink.getValue();
-                    } else if ( !dialog.fieldReportInEnglishLink.getValue() && workingEntry.report_link_en ) {
-                        delete workingEntry.report_link_en;
-                    }
+                        if ( dialog.fieldReportInEnglishLink.getValue() ) {
+                            workingEntry.report_link_en = dialog.fieldReportInEnglishLink.getValue();
+                        } else if ( !dialog.fieldReportInEnglishLink.getValue() && workingEntry.report_link_en ) {
+                            delete workingEntry.report_link_en;
+                        }
 
-                    if ( dialog.fieldSandboxReport.isSelected() ) {
-                        PAGEID = 11018946; // Set page id to [[m:Module:Financial_Reports/Sandbox]]
-                    }
+                        if ( dialog.fieldSandboxReport.isSelected() ) {
+                            PAGEID = 11018946; // Set page id to [[m:Module:Financial_Reports/Sandbox]]
+                        }
 
-                    if ( dialog.fieldImportedReportDate.getValue() ) {
-                        workingEntry.dos_stamp = dialog.fieldImportedReportDate.getValue();
-                        workingEntry.dos_stamp += 'T00:00:00.000Z';
+                        if ( dialog.fieldImportedReportDate.getValue() ) {
+                            workingEntry.dos_stamp = dialog.fieldImportedReportDate.getValue();
+                            workingEntry.dos_stamp += 'T00:00:00.000Z';
+                        } else {
+                            /* Get today's date and time in YYYY-MM-DDTHH:MM:SSZ */
+                            /* format. dos stands for "date of submission" */
+                            workingEntry.dos_stamp = new Date().toISOString();
+                        }
+
+                        return workingEntry;
+                    };
+
+                    // Cycle through existing entries. If we are editing an existing
+                    // entry, that entry will be modified in place. Also, edit sandbox table
+                    // instead if we're editing in 'sandbox' mode
+                    if ( EDITMODE === 'sandbox' ) {
+                        entries = parseContentModule( sandbox_financial_reports.query.pages );
                     } else {
-                        /* Get today's date and time in YYYY-MM-DDTHH:MM:SSZ */
-                        /* format. dos stands for "date of submission" */
-                        workingEntry.dos_stamp = new Date().toISOString();
+                        entries = parseContentModule( data.query.pages );
                     }
 
-                    return workingEntry;
-                };
+                    for ( i = 0; i < entries.length; i++ ) {
+                        workingEntry = cleanRawEntry( entries[ i ].value.fields );
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
+                            manifest.push( workingEntry );
+                        }
+                    }
 
-                // Cycle through existing entries. If we are editing an existing
-                // entry, that entry will be modified in place. Also, edit sandbox table
-                // instead if we're editing in 'sandbox' mode
-                if ( EDITMODE === 'sandbox' ) {
-                    entries = parseContentModule( sandbox_financial_reports.query.pages );
-                } else {
-                    entries = parseContentModule( data.query.pages );
-                }
-
-                for ( i = 0; i < entries.length; i++ ) {
-                    workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                    if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
+                    // No unique ID means this is a new entry
+                    if ( !dialog.uniqueId ) {
+                        workingEntry = {
+                            unique_id: Math.random().toString( 36 ).substring( 2 )
+                        };
+                        workingEntry = processWorkingEntry( workingEntry );
+                        editSummary = gadgetMsg[ 'added-new-financial-report' ] + ' ' + workingEntry.group_name;
                         manifest.push( workingEntry );
                     }
-                }
 
-                // No unique ID means this is a new entry
-                if ( !dialog.uniqueId ) {
-                    workingEntry = {
-                        unique_id: Math.random().toString( 36 ).substring( 2 )
-                    };
-                    workingEntry = processWorkingEntry( workingEntry );
-                    editSummary = gadgetMsg[ 'added-new-financial-report' ] + ' ' + workingEntry.group_name;
-                    manifest.push( workingEntry );
-                }
+                    // Re-generate the Lua table based on `manifest`
+                    insertInPlace = 'return {\n';
+                    for ( i = 0; i < manifest.length; i++ ) {
+                        insertInPlace += '\t{\n';
+                        if ( manifest[ i ].unique_id ) {
+                            insertInPlace += generateKeyValuePair(
+                                'unique_id',
+                                manifest[ i ].unique_id
+                            );
+                        }
+                        if ( manifest[ i ].group_name ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_name',
+                                manifest[ i ].group_name
+                            );
+                        }
+                        if ( manifest[ i ].report_type ) {
+                            insertInPlace += generateKeyValuePair(
+                                'report_type',
+                                manifest[ i ].report_type
+                            );
+                        }
+                        if ( manifest[ i ].multiyear_duration ) {
+                            insertInPlace += generateKeyValuePair(
+                                'multiyear_duration',
+                                manifest[ i ].multiyear_duration
+                            );
+                        }
+                        if ( manifest[ i ].total_budget ) {
+                            insertInPlace += generateKeyValuePair(
+                                'total_budget',
+                                manifest[ i ].total_budget
+                            );
+                        }
+                        if ( manifest[ i ].total_expense ) {
+                            insertInPlace += generateKeyValuePair(
+                                'total_expense',
+                                manifest[ i ].total_expense
+                            );
+                        }
+                        if ( manifest[ i ].currency ) {
+                            insertInPlace += generateKeyValuePair(
+                                'currency',
+                                manifest[ i ].currency
+                            );
+                        }
+                        if ( manifest[ i ].report_link ) {
+                            insertInPlace += generateKeyValuePair(
+                                'report_link',
+                                manifest[ i ].report_link.trim()
+                            );
+                        }
+                        if ( manifest[ i ].report_lang_code ) {
+                            insertInPlace += generateKeyValuePair(
+                                'report_lang_code',
+                                manifest[ i ].report_lang_code.toLowerCase()
+                            );
+                        }
+                        if ( manifest[ i ].report_link_en ) {
+                            insertInPlace += generateKeyValuePair(
+                                'report_link_en',
+                                manifest[ i ].report_link_en.trim()
+                            );
+                        }
+                        if ( manifest[ i ].start_date ) {
+                            insertInPlace += generateKeyValuePair(
+                                'start_date',
+                                manifest[ i ].start_date
+                            );
+                        }
+                        if ( manifest[ i ].end_date ) {
+                            insertInPlace += generateKeyValuePair(
+                                'end_date',
+                                manifest[ i ].end_date
+                            );
+                        }
+                        if ( manifest[ i ].dos_stamp ) {
+                            insertInPlace += generateKeyValuePair(
+                                'dos_stamp',
+                                manifest[ i ].dos_stamp
+                            );
+                        }
+                        insertInPlace += '\t},\n';
+                    }
+                    insertInPlace += '}';
 
-                // Re-generate the Lua table based on `manifest`
-                insertInPlace = 'return {\n';
-                for ( i = 0; i < manifest.length; i++ ) {
-                    insertInPlace += '\t{\n';
-                    if ( manifest[ i ].unique_id ) {
-                        insertInPlace += generateKeyValuePair(
-                            'unique_id',
-                            manifest[ i ].unique_id
-                        );
-                    }
-                    if ( manifest[ i ].group_name ) {
-                        insertInPlace += generateKeyValuePair(
-                            'group_name',
-                            manifest[ i ].group_name
-                        );
-                    }
-                    if ( manifest[ i ].report_type ) {
-                        insertInPlace += generateKeyValuePair(
-                            'report_type',
-                            manifest[ i ].report_type
-                        );
-                    }
-                    if ( manifest[ i ].multiyear_duration ) {
-                        insertInPlace += generateKeyValuePair(
-                            'multiyear_duration',
-                            manifest[ i ].multiyear_duration
-                        );
-                    }
-                    if ( manifest[ i ].total_budget ) {
-                        insertInPlace += generateKeyValuePair(
-                            'total_budget',
-                            manifest[ i ].total_budget
-                        );
-                    }
-                    if ( manifest[ i ].total_expense ) {
-                        insertInPlace += generateKeyValuePair(
-                            'total_expense',
-                            manifest[ i ].total_expense
-                        );
-                    }
-                    if ( manifest[ i ].currency ) {
-                        insertInPlace += generateKeyValuePair(
-                            'currency',
-                            manifest[ i ].currency
-                        );
-                    }
-                    if ( manifest[ i ].report_link ) {
-                        insertInPlace += generateKeyValuePair(
-                            'report_link',
-                            manifest[ i ].report_link.trim()
-                        );
-                    }
-                    if ( manifest[ i ].report_lang_code ) {
-                        insertInPlace += generateKeyValuePair(
-                            'report_lang_code',
-                            manifest[ i ].report_lang_code.toLowerCase()
-                        );
-                    }
-                    if ( manifest[ i ].report_link_en ) {
-                        insertInPlace += generateKeyValuePair(
-                            'report_link_en',
-                            manifest[ i ].report_link_en.trim()
-                        );
-                    }
-                    if ( manifest[ i ].start_date ) {
-                        insertInPlace += generateKeyValuePair(
-                            'start_date',
-                            manifest[ i ].start_date
-                        );
-                    }
-                    if ( manifest[ i ].end_date ) {
-                        insertInPlace += generateKeyValuePair(
-                            'end_date',
-                            manifest[ i ].end_date
-                        );
-                    }
-                    if ( manifest[ i ].dos_stamp ) {
-                        insertInPlace += generateKeyValuePair(
-                            'dos_stamp',
-                            manifest[ i ].dos_stamp
-                        );
-                    }
-                    insertInPlace += '\t},\n';
-                }
-                insertInPlace += '}';
-
-                // Add the new Report into the Lua table.
-                apiObj.postWithToken(
-                    'csrf',
-                    {
-                        action: 'edit',
-                        bot: true,
-                        nocreate: true,
-                        summary: editSummary,
-                        pageid: PAGEID,  // Live page or Sandbox based on edit mode
-                        text: insertInPlace,
-                        contentmodel: 'Scribunto'
-                    }
-                ).then( function () {
-                    dialog.close();
-                    /** After saving, show a message box */
-                    var messageDialog = new OO.ui.MessageDialog();
-                    var windowManager = new OO.ui.WindowManager();
-
-                    $( 'body' ).append( windowManager.$element );
-                    // Add the dialog to the window manager.
-                    windowManager.addWindows( [ messageDialog ] );
-
-                    // Configure the message dialog when it is opened with the window manager's openWindow() method.
-                    windowManager.openWindow( messageDialog, {
-                        title: gadgetMsg[ 'success-message' ],
-                        message: gadgetMsg[ 'financial-report-saved' ],
-                        actions: [
-                            {
-                                action: 'accept',
-                                label: 'Dismiss',
-                                flags: 'primary'
-                            }
-                        ]
-                    });
-
-                    // Purge the cache of the page from which the edit was made
+                    // Add the new Report into the Lua table.
                     apiObj.postWithToken(
                         'csrf',
-                        { action: 'purge', titles: mw.config.values.wgPageName }
+                        {
+                            action: 'edit',
+                            bot: true,
+                            nocreate: true,
+                            summary: editSummary,
+                            pageid: PAGEID,  // Live page or Sandbox based on edit mode
+                            text: insertInPlace,
+                            contentmodel: 'Scribunto'
+                        }
                     ).then( function () {
-                        location.reload();
+                        dialog.close();
+                        /** After saving, show a message box */
+                        var messageDialog = new OO.ui.MessageDialog();
+                        var windowManager = new OO.ui.WindowManager();
+
+                        $( 'body' ).append( windowManager.$element );
+                        // Add the dialog to the window manager.
+                        windowManager.addWindows( [ messageDialog ] );
+
+                        // Configure the message dialog when it is opened with the window manager's openWindow() method.
+                        windowManager.openWindow( messageDialog, {
+                            title: gadgetMsg[ 'success-message' ],
+                            message: gadgetMsg[ 'financial-report-saved' ],
+                            actions: [
+                                {
+                                    action: 'accept',
+                                    label: 'Dismiss',
+                                    flags: 'primary'
+                                }
+                            ]
+                        });
+
+                        // Purge the cache of the page from which the edit was made
+                        apiObj.postWithToken(
+                            'csrf',
+                            { action: 'purge', titles: mw.config.values.wgPageName }
+                        ).then( function () {
+                            location.reload();
+                        } );
+                    } ).catch( function ( error ) {
+                        alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
+                        dialog.close();
+                        console.error( error );
                     } );
-                } ).catch( function ( error ) {
-                    alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
-                    dialog.close();
-                    console.error( error );
                 } );
             } );
         };

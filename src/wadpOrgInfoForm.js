@@ -13,7 +13,6 @@
     ];
 
     var gadgetMsg = {},
-        getContentModuleQuery,
         getRelevantRawEntry,
         parseContentModule,
         openWindow,
@@ -23,46 +22,48 @@
         AffiliateLookupTextInputWidget,
         CountryLookupTextInputWidget,
         getContentList,
-        queryAffiliatesPage,
-        queryCountriesPage,
         generateKeyValuePair,
         sanitizeInput,
         convertDateToDdMmYyyyFormat,
         convertDateToYyyyMmDdFormat,
         fieldDerecognitionDate,
         fieldDerecognitionNote,
-        getGroupContactsModule;
+        getModuleContent,
+        getWikiPageContent;
 
     userLang = mw.config.get( 'wgUserLanguage' );
 
     // This is called after translation messages are ready
     function initAfterMessages() {
         /**
-         * Provides API parameters for getting the content from [[Module:Organizational_Informations]]
+         * Provides API parameters for getting module content
+         * specified by `moduleName`.
          *
+         * @param {string} moduleName
          * @return {Object}
          */
-        getContentModuleQuery = function () {
+        getModuleContent = function ( moduleName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
-                titles: 'Module:Organizational_Informations',
+                titles: 'Module:' + moduleName,
                 rvprop: 'content',
                 rvlimit: 1
             };
         };
 
         /**
-         * Provides API parameters for getting the content from the
-         * [[Module:Organizational_Informations/Group_Contacts]] module.
+         * Provides API parameters for getting the content
+         * of a page specified by `pageName`
          *
+         * @param {string} pageName
          * @return {Object}
          */
-        getGroupContactsModule = function () {
+        getWikiPageContent = function ( pageName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
-                titles: 'Module:Organizational_Informations/Group_Contacts',
+                titles: pageName,
                 rvprop: 'content',
                 rvlimit: 1
             };
@@ -213,38 +214,6 @@
         };
 
         /**
-         * Provides API parameters for getting the content from
-         * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
-         *
-         * @return {Object}
-         */
-        queryAffiliatesPage = function () {
-            return {
-                action: 'query',
-                prop: 'revisions',
-                titles: 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates',
-                rvprop: 'content',
-                rvlimit: 1
-            };
-        };
-
-        /**
-         * Provides API parameters for getting the content from
-         * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Countries]]
-         *
-         * @return {Object}
-         */
-        queryCountriesPage = function () {
-            return {
-                action: 'query',
-                prop: 'revisions',
-                titles: 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Countries',
-                rvprop: 'content',
-                rvlimit: 1
-            };
-        };
-
-        /**
          * Get an entire content (wikitext) of a given page
          *
          * @param {Object} sourceblob The original API return
@@ -286,7 +255,9 @@
             var value = this.getValue();
             return this.getValidity().then( function () {
                 // Query the API to get the list of affiliates
-                return new mw.Api().get( queryAffiliatesPage() ).then( function ( data ) {
+                return new mw.Api().get(
+                    getWikiPageContent( 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates' )
+                ).then( function ( data ) {
                     var affiliates, affiliatesContent;
                     affiliatesContent = getContentList( data.query.pages );
                     affiliates = affiliatesContent.split(',\n');
@@ -355,7 +326,9 @@
             var value = this.getValue();
             return this.getValidity().then( function () {
                 // Query the API to get the list of countries
-                return new mw.Api().get( queryCountriesPage() ).then( function ( data ) {
+                return new mw.Api().get(
+                    getWikiPageContent( 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Countries' )
+                ).then( function ( data ) {
                     var countries, countriesContent;
                     countriesContent = getContentList( data.query.pages );
                     countries = countriesContent.split(',\n');
@@ -1172,8 +1145,10 @@
 
             dialog.pushPending();
 
-            new mw.Api().get( getContentModuleQuery() ).then( function ( data ) {
-                new mw.Api().get( getGroupContactsModule() ).then( function ( existingGroupContacts ) {
+            new mw.Api().get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
+                new mw.Api().get(
+                    getModuleContent( 'Organizational_Informations/Group_Contacts' )
+                ).then( function ( existingGroupContacts ) {
                     var i, j,
                         insertInPlace,
                         processWorkingEntry,
@@ -1763,8 +1738,8 @@
                 if ( mw.config.get ( 'wgUserName' ) === null ) {
                     alert( gadgetMsg[ 'you-need-to-log-in' ] );
                 } else {
-                    new mw.Api().get( getContentModuleQuery() ).then( function ( data ) {
-                        var entryData, record, content;
+                    new mw.Api().get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
+                        var entryData, record;
 
                         record = editButton.$element
                             .closest( '.record' )

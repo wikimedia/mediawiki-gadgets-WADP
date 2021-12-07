@@ -6,14 +6,11 @@
     'use strict';
 
     var apiObj,
-        getReports,
         generateKeyValuePair,
         sanitizeInput,
-        getOrgInfos,
         parseModuleContent,
         cleanRawEntry,
         getLatestReport,
-        getOOCLevel,
         compareDates,
         getAffiliateTalkPageWikiText,
         parseAndExtractAffiliateTalkPageContent,
@@ -21,7 +18,8 @@
         oocLevel2MessageGenerator,
         sendEmailToMEStaff,
         oocLevelLogGenerator,
-        postTalkPageNotification;
+        postTalkPageNotification,
+        getModuleContent;
 
     function init() {
         /**
@@ -58,47 +56,17 @@
         };
 
         /**
-         * Get reports saved in a Lua module
+         * Provides API parameters for getting module content
+         * specified by `moduleName`.
          *
-         * @param {string} report_type Report type.
+         * @param {string} moduleName
          * @return {Object}
          */
-        getReports = function ( report_type ) {
+        getModuleContent = function ( moduleName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
-                titles: 'Module:' + report_type,
-                rvprop: 'content',
-                rvlimit: 1
-            };
-        };
-
-        /**
-         * Provides API parameters for getting the content from [[Module:Organizational_Informations]]
-         *
-         * @return {Object}
-         */
-        getOrgInfos = function () {
-            return {
-                action: 'query',
-                prop: 'revisions',
-                titles: 'Module:Organizational_Informations',
-                rvprop: 'content',
-                rvlimit: 1
-            };
-        };
-
-        /**
-         * Provides API parameters for getting the content from
-         * [[Module:Organizational_Informations/Out_Of_Compliance_Level]]
-         *
-         * @return {Object}
-         */
-        getOOCLevel = function () {
-            return {
-                action: 'query',
-                prop: 'revisions',
-                titles: 'Module:Organizational_Informations/Out_Of_Compliance_Level',
+                titles: 'Module:' + moduleName,
                 rvprop: 'content',
                 rvlimit: 1
             };
@@ -368,10 +336,10 @@
 
         apiObj = new mw.Api();
 
-        apiObj.get( getOrgInfos() ).then( function ( orgInfosData ) {
-            apiObj.get( getReports( 'Activities_Reports' ) ).then( function ( activitiesReportsData ) {
-                apiObj.get( getReports( 'Financial_Reports' ) ).then( function ( financialReportsData ) {
-                    apiObj.get( getOOCLevel() ).then( function ( oocLevelsData ) {
+        apiObj.get( getModuleContent( 'Organizational_Informations' ) ).then( function ( orgInfosData ) {
+            apiObj.get( getModuleContent( 'Activities_Reports' ) ).then( function ( activitiesReportsData ) {
+                apiObj.get( getModuleContent( 'Financial_Reports' ) ).then( function ( financialReportsData ) {
+                    apiObj.get( getModuleContent( 'Organizational_Informations/Out_Of_Compliance_Level' ) ).then( function ( oocLevelsData ) {
                         var activitiesReports,
                             financialReports,
                             orgInfo,
