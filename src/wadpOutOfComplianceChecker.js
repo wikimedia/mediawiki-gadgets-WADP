@@ -1099,6 +1099,12 @@
                                     manifest[i].member_count
                                 );
                             }
+                            if ( manifest[ i ].non_editors_count ) {
+                                insertInPlaceOocData += generateKeyValuePair(
+                                    'non_editors_count',
+                                    manifest[ i ].non_editors_count
+                                );
+                            }
                             if ( manifest[i].facebook ) {
                                 insertInPlaceOocData += generateKeyValuePair(
                                     'facebook',

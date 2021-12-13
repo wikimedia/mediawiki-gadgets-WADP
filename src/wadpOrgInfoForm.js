@@ -389,6 +389,7 @@
             this.explanation = '';
             this.group_page = '';
             this.member_count = '';
+            this.non_editors_count = '';
             this.facebook = '';
             this.twitter = '';
             this.other = '';
@@ -437,6 +438,9 @@
             }
             if ( config.member_count ) {
                 this.member_count = config.member_count;
+            }
+            if ( config.non_editors_count ) {
+                this.non_editors_count = config.non_editors_count;
             }
             if ( config.facebook ) {
                 this.facebook = config.facebook;
@@ -660,13 +664,21 @@
                 value: this.group_page,
                 placeholder: gadgetMsg[ 'group-membership-page-link' ]
             } );
-            this.fieldMembershipCount = new OO.ui.TextInputWidget( {
+            this.fieldEditorsMemberCount = new OO.ui.TextInputWidget( {
                 icon: 'clock',
                 value: this.member_count,
                 type: 'number',
                 indicator: 'required',
                 required: true,
-                placeholder: gadgetMsg[ 'membership-count-placeholder' ]
+                placeholder: gadgetMsg[ 'editors-count-placeholder' ]
+            } );
+            this.fieldNonEditorsMemberCount = new OO.ui.TextInputWidget( {
+                icon: 'clock',
+                value: this.non_editors_count,
+                type: 'number',
+                indicator: 'required',
+                required: true,
+                placeholder: gadgetMsg[ 'non-editors-count-placeholder' ]
             } );
             this.fieldFacebook = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
@@ -964,9 +976,16 @@
                     }
                 ),
                 new OO.ui.FieldLayout(
-                    this.fieldMembershipCount,
+                    this.fieldEditorsMemberCount,
                     {
-                        label: gadgetMsg[ 'membership-count' ],
+                        label: gadgetMsg[ 'editors-count' ],
+                        align: 'top'
+                    }
+                ),
+                new OO.ui.FieldLayout(
+                    this.fieldNonEditorsMemberCount,
+                    {
+                        label: gadgetMsg[ 'non-editors-count' ],
                         align: 'top'
                     }
                 ),
@@ -1111,7 +1130,8 @@
             // form but instead reveal which input fields are not yet filled.
             if( dialog.fieldGroupName.getValue() &&
                 dialog.fieldGroupCode.getValue() &&
-                dialog.fieldMembershipCount.getValue() &&
+                dialog.fieldEditorsMemberCount.getValue() &&
+                dialog.fieldNonEditorsMemberCount.getValue() &&
                 dialog.fieldGroupCountry.getValue() &&
                 dialog.fieldLegalEntity.findSelectedItem().getData() &&
                 dialog.fieldMissionChanged.findSelectedItem().getData() &&
@@ -1157,9 +1177,8 @@
                         workingEntry,
                         entries,
                         mrl_affiliates = '',
-                        groupContactEntries,
-                        groupContactEntry,
-                        groupContactsManifest = [],
+                        membershipInfosEntries,
+                        membershipInfosManifest = [],
                         insertInPlaceGC;
 
                     /**
@@ -1223,10 +1242,16 @@
                             delete workingEntry.group_page;
                         }
 
-                        if ( dialog.fieldMembershipCount.getValue() ) {
-                            workingEntry.member_count = dialog.fieldMembershipCount.getValue();
-                        } else if ( !dialog.fieldMembershipCount.getValue() && workingEntry.member_count ) {
+                        if ( dialog.fieldEditorsMemberCount.getValue() ) {
+                            workingEntry.member_count = dialog.fieldEditorsMemberCount.getValue();
+                        } else if ( !dialog.fieldEditorsMemberCount.getValue() && workingEntry.member_count ) {
                             delete workingEntry.member_count;
+                        }
+
+                        if ( dialog.fieldNonEditorsMemberCount.getValue() ) {
+                            workingEntry.non_editors_count = dialog.fieldNonEditorsMemberCount.getValue();
+                        } else if ( !dialog.fieldNonEditorsMemberCount.getValue() && workingEntry.non_editors_count ) {
+                            delete workingEntry.non_editors_count;
                         }
 
                         if ( dialog.fieldFacebook.getValue() ) {
@@ -1338,20 +1363,27 @@
                     // entry, that entry will be modified in place.
                     entries = parseContentModule( data.query.pages );
 
-                    groupContactEntries = parseContentModule( existingGroupContacts.query.pages );
-                    for ( i = 0; i < groupContactEntries.length; i++ ) {
-                        groupContactsManifest.push( cleanRawEntry( groupContactEntries[i].value.fields ) );
+                    membershipInfosEntries = parseContentModule( existingGroupContacts.query.pages );
+                    for ( i = 0; i < membershipInfosEntries.length; i++ ) {
+                        membershipInfosManifest.push( cleanRawEntry( membershipInfosEntries[i].value.fields ) );
                     }
 
                     for ( i = 0; i < entries.length; i++ ) {
                         workingEntry = cleanRawEntry( entries[ i ].value.fields );
                         if ( workingEntry.group_name === dialog.group_name ) {
-                            var newGroupContact1, newGroupContact2, oldGroupContact1, oldGroupContact2;
+                            var newGroupContact1,
+                                newGroupContact2,
+                                oldGroupContact1,
+                                oldGroupContact2,
+                                oldEditorsCount,
+                                oldNonEditorsCount;
 
                             newGroupContact1 = dialog.fieldGroupContact1.getValue().normalize();
                             newGroupContact2 = dialog.fieldGroupContact2.getValue().normalize()
                             oldGroupContact1 = workingEntry.group_contact1.normalize().substring( 5 );
                             oldGroupContact2 = workingEntry.group_contact2.normalize().substring( 5 );
+                            oldEditorsCount = workingEntry.member_count;
+                            oldNonEditorsCount = workingEntry.non_editors_count;
 
                             /** Quickly check if group contacts have changed and log those first. */
                             if ( oldGroupContact1 !== newGroupContact1 && oldGroupContact2 !== newGroupContact2 ) {
@@ -1360,59 +1392,79 @@
                                     group_name: workingEntry.group_name,
                                     group_contact1: oldGroupContact1,
                                     group_contact2: oldGroupContact2,
+                                    editors_count: oldEditorsCount,
+                                    non_editors_count: oldNonEditorsCount,
                                     dos_stamp: new Date().toISOString()
                                 };
-                                groupContactsManifest.push( groupOldContacts );
+                                membershipInfosManifest.push( groupOldContacts );
                             } else if ( oldGroupContact1 !== newGroupContact1 && oldGroupContact2 === newGroupContact2 ) {
                                 var groupOldContacts = {
                                     unique_id: Math.random().toString( 36 ).substring( 2 ),
                                     group_name: workingEntry.group_name,
                                     group_contact1: oldGroupContact1,
+                                    group_contact2: oldGroupContact2,
+                                    editors_count: oldEditorsCount,
+                                    non_editors_count: oldNonEditorsCount,
                                     dos_stamp: new Date().toISOString()
                                 };
-                                groupContactsManifest.push( groupOldContacts );
+                                membershipInfosManifest.push( groupOldContacts );
                             } else if ( oldGroupContact1 === newGroupContact1 && oldGroupContact2 !== newGroupContact2 ) {
                                 var groupOldContacts = {
                                     unique_id: Math.random().toString( 36 ).substring( 2 ),
                                     group_name: workingEntry.group_name,
+                                    group_contact1: oldGroupContact1,
                                     group_contact2: oldGroupContact2,
+                                    editors_count: oldEditorsCount,
+                                    non_editors_count: oldNonEditorsCount,
                                     dos_stamp: new Date().toISOString()
                                 };
-                                groupContactsManifest.push( groupOldContacts );
+                                membershipInfosManifest.push( groupOldContacts );
                             }
 
-                            // Re-generate the group contacts Lua table based on `groupContactsManifest`
+                            // Re-generate the group contacts Lua table based on `membershipInfosManifest`
                             insertInPlaceGC = 'return {\n';
-                            for ( j = 0; j < groupContactsManifest.length; j++ ) {
+                            for ( j = 0; j < membershipInfosManifest.length; j++ ) {
                                 insertInPlaceGC += '\t{\n';
-                                if ( groupContactsManifest[ j ].unique_id ) {
+                                if ( membershipInfosManifest[ j ].unique_id ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'unique_id',
-                                        groupContactsManifest[ j ].unique_id
+                                        membershipInfosManifest[ j ].unique_id
                                     );
                                 }
-                                if ( groupContactsManifest[ j ].group_name ){
+                                if ( membershipInfosManifest[ j ].group_name ){
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_name',
-                                        groupContactsManifest[ j ].group_name
+                                        membershipInfosManifest[ j ].group_name
                                     );
                                 }
-                                if ( groupContactsManifest[ j ].group_contact1 ) {
+                                if ( membershipInfosManifest[ j ].group_contact1 ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact1',
-                                        groupContactsManifest[ j ].group_contact1
+                                        membershipInfosManifest[ j ].group_contact1
                                     );
                                 }
-                                if ( groupContactsManifest[ j ].group_contact2 ) {
+                                if ( membershipInfosManifest[ j ].group_contact2 ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact2',
-                                        groupContactsManifest[ j ].group_contact2
+                                        membershipInfosManifest[ j ].group_contact2
                                     );
                                 }
-                                if ( groupContactsManifest[ j ].dos_stamp ) {
+                                if ( membershipInfosManifest[ j ].editors_count ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'editors_count',
+                                        membershipInfosManifest[ j ].editors_count
+                                    );
+                                }
+                                if ( membershipInfosManifest[ j ].non_editors_count ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'non_editors_count',
+                                        membershipInfosManifest[ j ].non_editors_count
+                                    );
+                                }
+                                if ( membershipInfosManifest[ j ].dos_stamp ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'dos_stamp',
-                                        groupContactsManifest[ j ].dos_stamp
+                                        membershipInfosManifest[ j ].dos_stamp
                                     );
                                 }
                                 insertInPlaceGC += '\t},\n';
@@ -1517,6 +1569,21 @@
                             insertInPlace += generateKeyValuePair(
                                 'member_count',
                                 manifest[ i ].member_count
+                            );
+                        }
+                        if ( manifest[ i ].non_editors_count ) {
+                            insertInPlace += generateKeyValuePair(
+                                'non_editors_count',
+                                manifest[ i ].non_editors_count
+                            );
+                        } else {
+                            // TODO: Remove after once successful run.
+                            // This is used to init the lua table involved.
+                            // Default to 0 for now while giving room for
+                            // affiliates to update this data point.
+                            insertInPlace += generateKeyValuePair(
+                                'non_editors_count',
+                                '0'
                             );
                         }
                         if ( manifest[ i ].facebook ) {
