@@ -1147,7 +1147,7 @@
 
             new mw.Api().get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
                 new mw.Api().get(
-                    getModuleContent( 'Organizational_Informations/Group_Contacts' )
+                    getModuleContent( 'Organizational_Informations/Membership_Infos' )
                 ).then( function ( existingGroupContacts ) {
                     var i, j,
                         insertInPlace,
@@ -1668,7 +1668,7 @@
                                 bot: true,
                                 nocreate: true,
                                 summary: 'Log changes to new affiliate contacts',
-                                pageid: 11620639,  // [[Module:Organizational_Informations/Group_Contacts]]
+                                pageid: 11620639,  // [[Module:Organizational_Informations/Membership_Infos]]
                                 text: insertInPlaceGC,
                                 contentmodel: 'Scribunto'
                             }
