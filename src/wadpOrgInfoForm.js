@@ -1375,51 +1375,52 @@
                                 newGroupContact2,
                                 oldGroupContact1,
                                 oldGroupContact2,
+                                newEditorsCount,
+                                newNonEditorsCount,
                                 oldEditorsCount,
-                                oldNonEditorsCount;
+                                oldNonEditorsCount,
+                                membershipObj = {},
+                                oldMembershipInfos = {};
 
                             newGroupContact1 = dialog.fieldGroupContact1.getValue().normalize();
                             newGroupContact2 = dialog.fieldGroupContact2.getValue().normalize()
                             oldGroupContact1 = workingEntry.group_contact1.normalize().substring( 5 );
                             oldGroupContact2 = workingEntry.group_contact2.normalize().substring( 5 );
+                            newEditorsCount = dialog.fieldEditorsMemberCount.getValue();
+                            newNonEditorsCount = dialog.fieldNonEditorsMemberCount.getValue();
                             oldEditorsCount = workingEntry.member_count;
                             oldNonEditorsCount = workingEntry.non_editors_count;
 
+                            // Track membership count changes as well.
+                            if ( oldEditorsCount !== newEditorsCount || oldNonEditorsCount !== newNonEditorsCount ) {
+                                oldMembershipInfos["oldEditorsCount"] = oldEditorsCount;
+                                oldMembershipInfos["oldNonEditorsCount"] = oldNonEditorsCount;
+                            }
                             /** Quickly check if group contacts have changed and log those first. */
                             if ( oldGroupContact1 !== newGroupContact1 && oldGroupContact2 !== newGroupContact2 ) {
-                                var groupOldContacts = {
-                                    unique_id: Math.random().toString( 36 ).substring( 2 ),
-                                    group_name: workingEntry.group_name,
-                                    group_contact1: oldGroupContact1,
-                                    group_contact2: oldGroupContact2,
-                                    editors_count: oldEditorsCount,
-                                    non_editors_count: oldNonEditorsCount,
-                                    dos_stamp: new Date().toISOString()
-                                };
-                                membershipInfosManifest.push( groupOldContacts );
+                                oldMembershipInfos["oldGroupContact1"] = oldGroupContact1;
+                                oldMembershipInfos["oldGroupContact2"] = oldGroupContact2;
                             } else if ( oldGroupContact1 !== newGroupContact1 && oldGroupContact2 === newGroupContact2 ) {
-                                var groupOldContacts = {
-                                    unique_id: Math.random().toString( 36 ).substring( 2 ),
-                                    group_name: workingEntry.group_name,
-                                    group_contact1: oldGroupContact1,
-                                    group_contact2: oldGroupContact2,
-                                    editors_count: oldEditorsCount,
-                                    non_editors_count: oldNonEditorsCount,
-                                    dos_stamp: new Date().toISOString()
-                                };
-                                membershipInfosManifest.push( groupOldContacts );
+                                oldMembershipInfos["oldGroupContact1"] = oldGroupContact1;
                             } else if ( oldGroupContact1 === newGroupContact1 && oldGroupContact2 !== newGroupContact2 ) {
-                                var groupOldContacts = {
-                                    unique_id: Math.random().toString( 36 ).substring( 2 ),
-                                    group_name: workingEntry.group_name,
-                                    group_contact1: oldGroupContact1,
-                                    group_contact2: oldGroupContact2,
-                                    editors_count: oldEditorsCount,
-                                    non_editors_count: oldNonEditorsCount,
-                                    dos_stamp: new Date().toISOString()
-                                };
-                                membershipInfosManifest.push( groupOldContacts );
+                                oldMembershipInfos["oldGroupContact2"] = oldGroupContact2
                             }
+
+                            membershipObj = {
+                                unique_id: Math.random().toString( 36 ).substring( 2 ),
+                                group_name: workingEntry.group_name,
+                                group_contact1: oldMembershipInfos["oldGroupContact1"] ?
+                                    oldMembershipInfos["oldGroupContact1"] : oldGroupContact1,
+                                group_contact2: oldMembershipInfos["oldGroupContact2"] ?
+                                    oldMembershipInfos["oldGroupContact2"] : oldGroupContact2,
+                                editors_count: oldMembershipInfos["oldEditorsCount"] ?
+                                    oldMembershipInfos["oldEditorsCount"] : oldEditorsCount,
+                                non_editors_count: oldMembershipInfos["oldNonEditorsCount"] ?
+                                    oldMembershipInfos["oldNonEditorsCount"] : oldNonEditorsCount,
+                                dos_stamp: new Date().toISOString()
+                            };
+
+                            membershipInfosManifest.push( membershipObj );
 
                             // Re-generate the group contacts Lua table based on `membershipInfosManifest`
                             insertInPlaceGC = 'return {\n';
