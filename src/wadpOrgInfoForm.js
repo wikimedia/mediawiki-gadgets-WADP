@@ -1135,6 +1135,8 @@
                 dialog.fieldGroupCountry.getValue() &&
                 dialog.fieldLegalEntity.findSelectedItem().getData() &&
                 dialog.fieldMissionChanged.findSelectedItem().getData() &&
+                dialog.fieldEditorsMemberCount.getValue() &&
+                dialog.fieldNonEditorsMemberCount.getValue() &&
                 dialog.fieldGroupContact1.getValue() &&
                 dialog.fieldGroupContact2.getValue() &&
                 dialog.fieldAgreementDate.getValue()
@@ -1384,8 +1386,20 @@
 
                             newGroupContact1 = dialog.fieldGroupContact1.getValue().normalize();
                             newGroupContact2 = dialog.fieldGroupContact2.getValue().normalize()
-                            oldGroupContact1 = workingEntry.group_contact1.normalize().substring( 5 );
-                            oldGroupContact2 = workingEntry.group_contact2.normalize().substring( 5 );
+                            if ( workingEntry.group_contact1 ) {
+                                oldGroupContact1 = workingEntry.group_contact1.normalize().substring( 5 );
+                            } else {
+                                // fallback to new name
+                                oldGroupContact1 = newGroupContact1;
+                            }
+
+                            if ( workingEntry.group_contact2 ) {
+                                oldGroupContact2 = workingEntry.group_contact2.normalize().substring( 5 );
+                            } else {
+                                // fallback to new name
+                                oldGroupContact2 = newGroupContact2;
+                            }
+
                             newEditorsCount = dialog.fieldEditorsMemberCount.getValue();
                             newNonEditorsCount = dialog.fieldNonEditorsMemberCount.getValue();
                             oldEditorsCount = workingEntry.member_count;
