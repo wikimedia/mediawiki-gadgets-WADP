@@ -4072,6 +4072,7 @@
                         openSubWindow( {} );
                     } else if ( dialog.fieldAffiliateComposition1.isSelected() && dialog.fieldAffiliateComposition1.getValue() === 'ARP-Q7' ) {
                         var count = 0;
+                        clearCounterCache();
                         entries = parseContentModule( data.query.pages );
                         for ( i = 0; i < entries.length; i++ ) {
                             entry = cleanRawEntry( entries[ i ].value.fields );
