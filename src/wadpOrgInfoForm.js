@@ -1390,14 +1390,14 @@
                                 oldGroupContact1 = workingEntry.group_contact1.normalize().substring( 5 );
                             } else {
                                 // fallback to new name
-                                oldGroupContact1 = newGroupContact1;
+                                oldGroupContact1 = newGroupContact1.substring( 5 );
                             }
 
                             if ( workingEntry.group_contact2 ) {
                                 oldGroupContact2 = workingEntry.group_contact2.normalize().substring( 5 );
                             } else {
                                 // fallback to new name
-                                oldGroupContact2 = newGroupContact2;
+                                oldGroupContact2 = newGroupContact2.substring( 5 );
                             }
 
                             newEditorsCount = dialog.fieldEditorsMemberCount.getValue();
@@ -1452,16 +1452,26 @@
                                         membershipInfosManifest[ j ].group_name
                                     );
                                 }
-                                if ( membershipInfosManifest[ j ].group_contact1 ) {
+                                if ( membershipInfosManifest[ j ].group_contact1.indexOf( "User:" ) !== -1 ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact1',
                                         membershipInfosManifest[ j ].group_contact1
                                     );
+                                } else if ( membershipInfosManifest[ j ].group_contact1 ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'group_contact1',
+                                        'User:' + membershipInfosManifest[ j ].group_contact1
+                                    );
                                 }
-                                if ( membershipInfosManifest[ j ].group_contact2 ) {
+                                if ( membershipInfosManifest[ j ].group_contact2.indexOf( "User:" ) !== -1 ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact2',
                                         membershipInfosManifest[ j ].group_contact2
+                                    );
+                                } else if ( membershipInfosManifest[ j ].group_contact2 ) {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'group_contact2',
+                                        'User:' + membershipInfosManifest[ j ].group_contact2
                                     );
                                 }
                                 if ( membershipInfosManifest[ j ].editors_count ) {
@@ -1625,13 +1635,23 @@
                                 manifest[ i ].dm_structure
                             );
                         }
-                        if ( manifest[ i ].group_contact1 ) {
+                        if ( typeof manifest[ i ].group_contact1 !== 'undefined' && manifest[ i ].group_contact1.indexOf( "User:" ) !== -1 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_contact1',
+                                manifest[ i ].group_contact1
+                            );
+                        } else if ( manifest[ i ].group_contact1 ) {
                             insertInPlace += generateKeyValuePair(
                                 'group_contact1',
                                 'User:' + manifest[ i ].group_contact1
                             );
                         }
-                        if ( manifest[ i ].group_contact2 ) {
+                        if ( typeof manifest[ i ].group_contact2 !== 'undefined' && manifest[ i ].group_contact2.indexOf( "User:" ) !== -1 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_contact2',
+                                manifest[ i ].group_contact2
+                            );
+                        } else if ( manifest[ i ].group_contact2 ) {
                             insertInPlace += generateKeyValuePair(
                                 'group_contact2',
                                 'User:' + manifest[ i ].group_contact2
