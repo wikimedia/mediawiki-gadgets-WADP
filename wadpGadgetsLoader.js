@@ -1,8 +1,7 @@
 /**
- * Main entry point script for loading forms (Editing interfaces) that will be
- * used, for the submission of reports. The data collected will edit Lua tables
- * and can be later used for userfacing purposes to build the reports page on
- * Meta-Wiki.
+ * Main entry point script for loading forms (Editing interfaces) that are used
+ * for the submission of reports. The data collected will edit Lua tables and
+ * can be later used for userfacing purposes to build the report page on Meta-Wiki.
  *
  * @author Derick Alangi (WMF)
  */
@@ -10,8 +9,10 @@
 ( function () {
     'use strict';
 
-    if ( mw.config.values.wgPageName.startsWith( 'Wikimedia_Affiliates_Data_Portal' ) ) {
-        // TODO: During maintenance mode, lock app from writing to lua tables
+    var pageName = mw.config.values.wgPageName;
+
+    if ( pageName.startsWith( 'Wikimedia_Affiliates_Data_Portal' ) ) {
+        /** TODO: During maintenance mode, lock app from writing to lua tables */
 
         var me_staff = [ 'DAlangi (WMF)', 'DNdubane (WMF)', 'MKaur (WMF)' ];
 
@@ -26,13 +27,6 @@
             mw.loader.load( 'ext.gadget.wadpOrgInfoForm' );
         }
 
-        /* Load Affiliates Indicator Upload form to M&E staff */
-        mw.loader.load( 'ext.gadget.wadpAIUForm' );
-
-        /* Load Grants Report Form */
-        // Disabled till further notice, not used for now.
-        // mw.loader.load( 'ext.gadget.wadpGrantReportForm' );
-
         /* Load Financial Report Form */
         mw.loader.load( 'ext.gadget.wadpFinancialReportForm' );
 
@@ -41,9 +35,16 @@
 
         /* Load the WADP Query Form */
         mw.loader.load( 'ext.gadget.wadpQueryForm' );
+
+        /* Load Affiliates Indicator Upload form to M&E staff */
+        mw.loader.load( 'ext.gadget.wadpAIUForm' );
+
+        /* Load Grants Report Form */
+        // Disabled till further notice, not used for now.
+        // mw.loader.load( 'ext.gadget.wadpGrantReportForm' );
     }
 
-    if ( mw.config.values.wgPageName.split( 'Wikimedia_Affiliates_Data_Portal/' )[1] === 'Organizations_Information' ) {
+    if ( pageName.split( 'Wikimedia_Affiliates_Data_Portal/' )[1] === 'Organizations_Information' ) {
         /* Load the org info form for end users to update affiliate info */
         mw.loader.load( 'ext.gadget.wadpOrgInfoForm' );
     }
