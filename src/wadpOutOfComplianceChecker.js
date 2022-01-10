@@ -345,6 +345,7 @@
                             orgInfo,
                             orgInfos,
                             currentYear,
+                            reportingDueDateYear,
                             manifest = [],
                             latestActivityReportYear,
                             latestFinancialReportYear,
@@ -418,12 +419,19 @@
                                 }
 
                                 // generate due date for affiliate to submit report.
-                                reportingDueDate = new Date(
-                                    currentYear,
-                                    parseInt( fiscalYear[1] ) - 1,
-                                    parseInt( fiscalYear[0] )
-                                );
+                                // Log this date into the DB until we reset OOC level of
+                                // affiliate back to 0 and reset the date as well.
+                                if ( orgInfo.reporting_due_date ) {
+                                    reportingDueDate = new Date( orgInfo.reporting_due_date );
+                                } else {
+                                    reportingDueDate = new Date(
+                                        currentYear,
+                                        parseInt( fiscalYear[1] ) - 1,
+                                        parseInt( fiscalYear[0] )
+                                    );
+                                }
                                 todayDate = new Date();
+                                reportingDueDateYear = reportingDueDate.toISOString().substring(0, 4);
 
                                 /**== Level 0 - 1: For new affiliates, handle them differently ==*/
                                 if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
@@ -431,7 +439,8 @@
                                     orgInfo.out_of_compliance_level === '0'
                                 ) {
                                     orgInfo.out_of_compliance_level = '1';
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', currentYear );
+                                    orgInfo.reporting_due_date = reportingDueDate;
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
 
                                     emailDispatcherCount["l050"]++;
@@ -445,7 +454,7 @@
                                         orgInfo.out_of_compliance_level === '0'
                                     ) {
                                         orgInfo.out_of_compliance_level = '1';
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         emailDispatcherCount["l050"]++;
@@ -459,7 +468,7 @@
                                             orgInfo.uptodate_reporting = 'Tick';
                                         }
                                         orgInfo.out_of_compliance_level = '0';
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         emailDispatcherCount["l050"]++;
@@ -482,11 +491,11 @@
                                         orgInfo.out_of_compliance_level = '2';
                                         orgInfo.uptodate_reporting = "Cross";
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Initial Review)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
@@ -498,11 +507,11 @@
                                         orgInfo.out_of_compliance_level = '2';
                                         orgInfo.uptodate_reporting = "Cross";
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Initial Review)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
@@ -515,11 +524,11 @@
                                         orgInfo.out_of_compliance_level = '2';
                                         orgInfo.uptodate_reporting = "Cross";
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Initial Review)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
@@ -536,7 +545,7 @@
                                         orgInfo.out_of_compliance_level = '2';
                                         orgInfo.uptodate_reporting = "Cross-N";
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         emailDispatcherCount["l050"]++;
@@ -548,11 +557,11 @@
                                         orgInfo.out_of_compliance_level = '2';
                                         orgInfo.uptodate_reporting = "Cross-N";
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '2', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Initial Review)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Initial Review)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 1 -> 2.";
@@ -567,8 +576,9 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
+                                    orgInfo.reporting_due_date = '';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
 
                                     emailDispatcherCount["l050"]++;
@@ -590,11 +600,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(First Reminder)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -605,11 +615,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(First Reminder)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -623,11 +633,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(First Reminder)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -646,11 +656,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(First Reminder)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -661,11 +671,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(First Reminder)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -675,11 +685,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '3', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(First Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(First Reminder)' );
 
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 2 -> 3.";
@@ -693,8 +703,9 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
+                                    orgInfo.reporting_due_date = '';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
 
                                     emailDispatcherCount["l050"]++;
@@ -715,11 +726,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Second Reminder)' );
 
                                         /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                         emailDispatcherCount["l34"]++;
@@ -734,11 +745,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Second Reminder)' );
 
                                         /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                         emailDispatcherCount["l34"]++;
@@ -754,11 +765,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Second Reminder)' );
 
                                         /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                         emailDispatcherCount["l34"]++;
@@ -778,11 +789,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Second Reminder)' );
 
                                         /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                         emailDispatcherCount["l34"]++;
@@ -796,11 +807,11 @@
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '4', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Second Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Second Reminder)' );
 
                                         /** Email list of Chaps & ThOrgs from level 3 - 4 to M&E staff. */
                                         emailDispatcherCount["l34"]++;
@@ -818,8 +829,9 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
+                                    orgInfo.reporting_due_date = '';
 
-                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', currentYear );
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
 
                                     emailDispatcherCount["l050"]++;
@@ -842,11 +854,11 @@
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Third Reminder)' );
 
                                         /** Email list of UG from level 4 - 5 to M&E staff. */
                                         emailDispatcherCount["l45"]++;
@@ -862,11 +874,11 @@
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Third Reminder)' );
 
                                         /** Email list of UG from level 4 - 5 to M&E staff. */
                                         emailDispatcherCount["l45"]++;
@@ -885,11 +897,11 @@
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
-                                        ooc_manifest.push(oocLevel);
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', reportingDueDateYear );
+                                        ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Third Reminder)' );
 
                                         /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
                                         emailDispatcherCount["l45"]++;
@@ -910,11 +922,11 @@
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Third Reminder)' );
 
                                         /** Email list of UG from level 4 - 5 to M&E staff. */
                                         emailDispatcherCount["l45"]++;
@@ -929,11 +941,11 @@
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', currentYear );
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '5', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
                                         /** After writing to DB, post a talk page notification */
-                                        postTalkPageNotification( orgInfo, currentYear, reportingDueDate, '(Third Reminder)' );
+                                        postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '(Third Reminder)' );
 
                                         /** Email list of Chaps & ThOrgs from level 4 - 5 to M&E staff. */
                                         emailDispatcherCount["l45"]++;
@@ -993,6 +1005,12 @@
                                 insertInPlaceOOC += generateKeyValuePair(
                                     'financial_year',
                                     ooc_manifest[i].financial_year
+                                );
+                            }
+                            if ( ooc_manifest[i].reporting_due_date ) {
+                                insertInPlaceOOC += generateKeyValuePair(
+                                    'reporting_due_date',
+                                    ooc_manifest[i].reporting_due_date
                                 );
                             }
                             if ( ooc_manifest[i].created_at ) {
@@ -1208,6 +1226,18 @@
                                 insertInPlaceOocData += generateKeyValuePair(
                                     'out_of_compliance_level',
                                     manifest[i].out_of_compliance_level
+                                );
+                            }
+                            // Track the reporting due date, so we can compute in a new year.
+                            if ( manifest[i].reporting_due_date ) {
+                                insertInPlaceOocData += generateKeyValuePair(
+                                    'reporting_due_date',
+                                    manifest[i].reporting_due_date
+                                );
+                            } else { // Just use an empty string if the affiliate is compliant.
+                                insertInPlaceOocData += generateKeyValuePair(
+                                    'reporting_due_date',
+                                    ''
                                 );
                             }
                             if ( manifest[i].derecognition_date ) {

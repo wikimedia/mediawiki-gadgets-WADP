@@ -404,6 +404,7 @@
             this.recognition_status = '';
             this.me_bypass_ooc_autochecks = '';
             this.out_of_compliance_level = '';
+            this.reporting_due_date = '';
             this.dos_stamp = '';
 
             if ( config.unique_id ) {
@@ -486,6 +487,9 @@
             }
             if ( config.out_of_compliance_level ) {
                 this.out_of_compliance_level = config.out_of_compliance_level;
+            }
+            if ( config.reporting_due_date ) {
+                this.reporting_due_date = config.reporting_due_date;
             }
             if ( config.derecognition_date ) {
                 this.derecognition_date = config.derecognition_date;
@@ -1601,15 +1605,6 @@
                                 'non_editors_count',
                                 manifest[ i ].non_editors_count
                             );
-                        } else {
-                            // TODO: Remove after once successful run.
-                            // This is used to init the lua table involved.
-                            // Default to 0 for now while giving room for
-                            // affiliates to update this data point.
-                            insertInPlace += generateKeyValuePair(
-                                'non_editors_count',
-                                '0'
-                            );
                         }
                         if ( manifest[ i ].facebook ) {
                             insertInPlace += generateKeyValuePair(
@@ -1724,6 +1719,17 @@
                             insertInPlace += generateKeyValuePair(
                                 'out_of_compliance_level',
                                 manifest[ i ].out_of_compliance_level
+                            );
+                        }
+                        if ( manifest[i].reporting_due_date ) {
+                            insertInPlace += generateKeyValuePair(
+                                'reporting_due_date',
+                                manifest[i].reporting_due_date
+                            );
+                        } else { // Just use an empty string if the affiliate is compliant.
+                            insertInPlace += generateKeyValuePair(
+                                'reporting_due_date',
+                                ''
                             );
                         }
                         if ( manifest[ i ].derecognition_date ){
