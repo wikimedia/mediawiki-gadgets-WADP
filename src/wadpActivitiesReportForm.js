@@ -217,6 +217,7 @@
             // Parent constructor
             OO.ui.TextInputWidget.call( this, $.extend(
                 {
+                    icon: 'userGroup',
                     indicator: 'required',
                     required: true,
                     validate: 'text',

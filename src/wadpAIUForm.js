@@ -229,6 +229,7 @@
                 {
                     indicator: 'required',
                     id: 'group_name',
+                    icon: 'userGroup',
                     required: true,
                     validate: 'text',
                     value: config,

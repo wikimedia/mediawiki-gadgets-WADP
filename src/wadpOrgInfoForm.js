@@ -236,6 +236,7 @@
             // Parent constructor
             OO.ui.TextInputWidget.call( this, $.extend(
                 {
+                    icon: 'userGroup',
                     id: 'group_name',
                     indicator: 'required',
                     required: true,
@@ -307,6 +308,7 @@
             // Parent constructor
             OO.ui.TextInputWidget.call( this, $.extend(
                 {
+                    icon: 'mapPin',
                     id: 'country',
                     indicator: 'required',
                     required: true,
@@ -659,6 +661,7 @@
             }
 
             this.fieldExplanation = new OO.ui.MultilineTextInputWidget( {
+                icon: 'textFlow',
                 value: this.explanation,
                 rows: 3,
                 placeholder: gadgetMsg[ 'explanation-text' ]
