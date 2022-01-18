@@ -415,11 +415,7 @@
             } );
 
             // On edit, pass in the group name as config to be rendered.
-            if ( this.group_name ) {
-                this.group_name = this.group_name + ' ~ ' + this.affiliate_code;
-            } else {
-                this.group_name = '';
-            }
+            this.group_name = this.group_name ? this.group_name : '';
             this.fieldGroupName = new AffiliateLookupTextInputWidget( this.group_name );
 
             this.fieldStartDate = new mw.widgets.DateInputWidget( {
@@ -441,22 +437,16 @@
             this.fieldNoOfDonations = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.no_of_donations,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
             this.fieldDonationRenewalRate = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.donation_renewal_rate,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldIndexScoreDonorSatisfaction = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.index_score_donor_satisfaction,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldSetSpdr.addItems( [
@@ -471,29 +461,21 @@
             this.fieldMembersReported = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.members_reported,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldMembershipDuration = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.membership_duration,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
             this.fieldNetMembersYoY = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.net_members_yoy,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
             this.fieldIndexScoreMemberSatisfaction = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.index_score_member_satisfaction,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldSetSpm.addItems( [
@@ -509,22 +491,16 @@
             this.fieldP2pScore = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.pp_score,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldNetNoOfPartnersYoY = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.net_no_of_partners_yoy,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldIndexScorePartnerSatisfaction = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.index_score_partner_satisfaction,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldSetSpp.addItems( [
@@ -539,29 +515,21 @@
             this.fieldRevenueReliability = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.revenue_reliability,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'amount-usd' ]
             } );
             this.fieldBudgetSurpluses = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.budget_surpluses,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'amount-usd' ]
             } );
             this.fieldOverheadCostTotalBudget = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.overhead_cost_total_budget,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
             this.fieldLiquidMonths = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.liquid_months,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'amount-usd' ]
             } );
             this.fieldSetFp.addItems( [
@@ -1368,24 +1336,18 @@
             this.fieldAverageProgramFrequencies = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.average_program_frequencies,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
             this.fieldProgramSuccessRate = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.program_success_rate,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
 
             this.fieldMembershipToProgramThreshold = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.membership_to_program_threshold,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
 
@@ -1403,32 +1365,24 @@
             this.fieldNoOfPartnerships = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.no_of_partnerships,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
             this.fieldAverageAgeOfPartnerships = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.average_age_of_partnerships,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
             this.fieldAffiliateSatisfactionLevel = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.affiliate_satisfaction_level,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
 
             this.fieldPrevalenceServicesToMembers = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.prevalence_services_to_members,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
 
@@ -1446,24 +1400,18 @@
             this.fieldBoardLevelRoleUnderstanding = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.board_level_role_understanding,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
 
             this.fieldBoardDiversityIndex = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.board_diversity_index,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
 
             this.fieldBoardTrainingOpportunities = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.board_training_opportunities,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
@@ -1486,8 +1434,6 @@
             this.fieldLevelRoleUnderstandingMembers = new OO.ui.TextInputWidget( {
                 type: 'number',
                 value: this.level_role_understanding_members,
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-percentage' ]
             } );
 
@@ -2242,23 +2188,19 @@
 
                         dialog.fieldProgramName = new OO.ui.TextInputWidget( {
                             value: entry.program_name,
-                            indicator: 'required',
-                            required: true,
                             placeholder: gadgetMsg[ 'program-name-placeholder' ]
                         } );
 
                         dialog.fieldPmcStartDate = new mw.widgets.DateInputWidget( {
                             value: entry.pmc_start_date ? convertDateToYyyyMmDdFormat( entry.pmc_start_date ) : entry.pmc_start_date,
                             classes: [ 'full-width' ],
-                            placeholderLabel: gadgetMsg[ 'start-date-placeholder' ],
-                            required: true
+                            placeholderLabel: gadgetMsg[ 'start-date-placeholder' ]
                         } );
 
                         dialog.fieldPmcEndDate = new mw.widgets.DateInputWidget( {
                             value: entry.pmc_end_date ? convertDateToYyyyMmDdFormat( entry.pmc_end_date ) : entry.pmc_end_date,
                             classes: [ 'full-width' ],
-                            placeholderLabel: gadgetMsg[ 'end-date-placeholder' ],
-                            required: true
+                            placeholderLabel: gadgetMsg[ 'end-date-placeholder' ]
                         } );
 
                         dialog.fieldProgramType = new OO.ui.DropdownInputWidget( {
@@ -2375,36 +2317,26 @@
 
                         dialog.fieldActiveEditorsInvolved = new OO.ui.TextInputWidget( {
                             value: entry.active_editors_involved,
-                            indicator: 'required',
-                            required: true,
                             placeholder: gadgetMsg[ 'enter-number' ]
                         } );
 
                         dialog.fieldNewMediaAdded = new OO.ui.TextInputWidget( {
                             value: entry.new_media_added,
-                            indicator: 'required',
-                            required: true,
                             placeholder: gadgetMsg[ 'enter-number' ]
                         } );
 
                         dialog.fieldActiveEditorsInvolved = new OO.ui.TextInputWidget( {
                             value: entry.active_editors_involved,
-                            indicator: 'required',
-                            required: true,
                             placeholder: gadgetMsg[ 'enter-number' ]
                         } );
 
                         dialog.fieldIndividualsInvolved = new OO.ui.TextInputWidget( {
                             value: entry.individuals_involved,
-                            indicator: 'required',
-                            required: true,
                             placeholder: gadgetMsg[ 'enter-number' ]
                         } );
 
                         dialog.fieldArticlesAdded = new OO.ui.TextInputWidget( {
                             value: entry.articles_added,
-                            indicator: 'required',
-                            required: true,
                             placeholder: gadgetMsg[ 'enter-number' ]
                         } );
 
@@ -2438,8 +2370,6 @@
 
                         dialog.fieldPartnerNameLinkedToProgram = new OO.ui.TextInputWidget( {
                             value: entry.partner_name_linked_to_program,
-                            indicator: 'required',
-                            required: true,
                             placeholder: gadgetMsg[ 'partner-name-linked-to-program-placeholder' ]
                         } );
 
@@ -2660,20 +2590,16 @@
             } );
 
             dialog.fieldProgramName = new OO.ui.TextInputWidget( {
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'program-name-placeholder' ]
             } );
 
             dialog.fieldPmcStartDate = new mw.widgets.DateInputWidget( {
                 classes: [ 'full-width' ],
-                placeholderLabel: gadgetMsg[ 'start-date-placeholder' ],
-                required: true
+                placeholderLabel: gadgetMsg[ 'start-date-placeholder' ]
             } );
             dialog.fieldPmcEndDate = new mw.widgets.DateInputWidget( {
                 classes: [ 'full-width' ],
-                placeholderLabel: gadgetMsg[ 'end-date-placeholder' ],
-                required: true
+                placeholderLabel: gadgetMsg[ 'end-date-placeholder' ]
             } );
 
             dialog.fieldProgramType = new OO.ui.DropdownInputWidget( {
@@ -2783,32 +2709,22 @@
             } );
 
             dialog.fieldActiveEditorsInvolved = new OO.ui.TextInputWidget( {
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
             dialog.fieldNewMediaAdded = new OO.ui.TextInputWidget( {
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
             dialog.fieldActiveEditorsInvolved = new OO.ui.TextInputWidget( {
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
             dialog.fieldIndividualsInvolved = new OO.ui.TextInputWidget( {
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
             dialog.fieldArticlesAdded = new OO.ui.TextInputWidget( {
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'enter-number' ]
             } );
 
@@ -2838,8 +2754,6 @@
             } );
 
             dialog.fieldPartnerNameLinkedToProgram = new OO.ui.TextInputWidget( {
-                indicator: 'required',
-                required: true,
                 placeholder: gadgetMsg[ 'partner-name-linked-to-program-placeholder' ]
             } );
 
