@@ -543,7 +543,7 @@
                 width: 400,
                 height: 90,
                 head: true,
-                classes: [ 'wadp-popup-widget-position' ]
+                id: 'wadp-popup-widget-position'
             } );
 
             this.fieldGroupCode = new OO.ui.TextInputWidget( {

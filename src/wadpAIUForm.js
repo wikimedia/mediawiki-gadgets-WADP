@@ -414,6 +414,16 @@
                 expanded: false
             } );
 
+            // Popup to be used after form validation
+            this.fieldPopup = new OO.ui.PopupWidget( {
+                $content: $( '<p style="color: red; text-align: center;">Error! Some required fields are not filled yet. Check and try submitting again.</p>' ),
+                padded: true,
+                width: 400,
+                height: 90,
+                head: true,
+                id: 'wadp-popup-widget-position'
+            } );
+
             // On edit, pass in the group name as config to be rendered.
             this.group_name = this.group_name ? this.group_name : '';
             this.fieldGroupName = new AffiliateLookupTextInputWidget( this.group_name );
@@ -543,6 +553,9 @@
             this.fieldSet = new OO.ui.FieldsetLayout( {
                 items: [
                     new OO.ui.FieldLayout(
+                        this.fieldPopup, {}
+                    ),
+                    new OO.ui.FieldLayout(
                         this.fieldGroupName,
                         {
                             label: gadgetMsg[ 'group-name' ],
@@ -587,10 +600,23 @@
          * In the event "Select" is pressed
          */
         AffiliateIndicatorEditorW1.prototype.getActionProcess = function ( action ) {
-            var dialog = this;
-            if ( action === 'continue' && dialog.fieldGroupName.getValue() ) {
+            var dialog = this, allRequiredFieldsAvailable = false;
+
+            if (
+                dialog.fieldGroupName.getValue() &&
+                dialog.fieldStartDate.getValue() &&
+                dialog.fieldEndDate.getValue()
+            ) {
+                allRequiredFieldsAvailable = true;
+            }
+
+            if ( action === 'continue' && allRequiredFieldsAvailable ) {
                 return new OO.ui.Process( function () {
                     dialog.saveItem();
+                } );
+            } else if ( action === 'continue' && !allRequiredFieldsAvailable ) {
+                return new OO.ui.Process( function () {
+                    dialog.fieldPopup.toggle( true );
                 } );
             } else if ( action === 'cancel' && persistentId ) {
                 return new OO.ui.Process( function () {
@@ -2971,6 +2997,7 @@
          */
         AffiliateIndicatorEditorW3.prototype.getActionProcess = function ( action ) {
             var dialog = this;
+
             if ( action === 'continue' && persistentId !== '' ) {
                 return new OO.ui.Process( function () {
                     dialog.saveItem();
