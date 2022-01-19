@@ -431,7 +431,7 @@
                                     );
                                 }
                                 todayDate = new Date();
-                                reportingDueDateYear = reportingDueDate.toISOString().substring(0, 4);
+                                reportingDueDateYear = parseInt( reportingDueDate.toISOString().substring(0, 4) );
 
                                 /**== Level 0 - 1: For new affiliates, handle them differently ==*/
                                 if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
@@ -460,6 +460,22 @@
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 0 -> 1.";
                                     } else if ( latestActivityReportYear === currentYear &&
+                                        orgInfo.out_of_compliance_level === '1'
+                                    ) {
+                                        // NOTE: If it's a new affiliate, just mark it directly as compliant.
+                                        // And also, it's no longer a new affiliate as it now has at least 1 report.
+                                        if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
+                                            orgInfo.uptodate_reporting = 'Tick';
+                                        }
+                                        orgInfo.out_of_compliance_level = '0';
+                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
+                                        ooc_manifest.push( oocLevel );
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 0.";
+                                    }
+                                    if ( latestActivityReportYear === reportingDueDateYear &&
+                                        orgInfo.reporting_due_date &&
                                         orgInfo.out_of_compliance_level === '1'
                                     ) {
                                         // NOTE: If it's a new affiliate, just mark it directly as compliant.
@@ -569,6 +585,23 @@
                                 }
                                 /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
                                 if ( latestActivityReportYear === currentYear &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    // Also check for new chaps or thorgs and catch them too - 'Cross-N'.
+                                    ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
+                                    orgInfo.out_of_compliance_level === '2'
+                                ) {
+                                    orgInfo.uptodate_reporting = "Tick";
+                                    orgInfo.out_of_compliance_level = '0';
+                                    orgInfo.reporting_due_date = '';
+
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
+                                    ooc_manifest.push( oocLevel );
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
+                                }
+                                if ( latestActivityReportYear === reportingDueDateYear &&
+                                    orgInfo.reporting_due_date &&
                                     latestActivityReportYear !== 'nlr' &&
                                     // Also check for new chaps or thorgs and catch them too - 'Cross-N'.
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
@@ -711,6 +744,25 @@
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                                 }
+                                if ( latestActivityReportYear === reportingDueDateYear &&
+                                    orgInfo.reporting_due_date &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
+                                    orgInfo.out_of_compliance_level === '3'
+                                ) {
+                                    // Catch the edge cases of affiliates that reported at the very
+                                    // last days of the year without OOC compliance check runs before
+                                    // the new year.
+                                    orgInfo.uptodate_reporting = "Tick";
+                                    orgInfo.out_of_compliance_level = '0';
+                                    orgInfo.reporting_due_date = '';
+
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
+                                    ooc_manifest.push( oocLevel );
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
+                                }
                                 /**== Level 3 to 4 OOC algorithm for all affiliates (UGs, Chaps, ThOrgs) ==*/
                                 if ( orgInfo.out_of_compliance_level === '3' &&
                                     latestActivityReportYear < currentYear &&
@@ -823,6 +875,22 @@
                                 }
                                 /**== Level 4 - 0: backward logic for all affiliates ==*/
                                 if ( latestActivityReportYear === currentYear &&
+                                    orgInfo.reporting_due_date &&
+                                    latestActivityReportYear !== 'nlr' &&
+                                    ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
+                                    orgInfo.out_of_compliance_level === '4'
+                                ) {
+                                    orgInfo.uptodate_reporting = "Tick";
+                                    orgInfo.out_of_compliance_level = '0';
+                                    orgInfo.reporting_due_date = '';
+
+                                    oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
+                                    ooc_manifest.push( oocLevel );
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
+                                }
+                                if ( latestActivityReportYear === reportingDueDateYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
                                     orgInfo.out_of_compliance_level === '4'
