@@ -1144,8 +1144,10 @@
                 dialog.fieldMissionChanged.findSelectedItem().getData() &&
                 dialog.fieldEditorsMemberCount.getValue() &&
                 dialog.fieldNonEditorsMemberCount.getValue() &&
-                dialog.fieldGroupContact1.getValue() &&
-                dialog.fieldGroupContact2.getValue() &&
+                /* TODO: Make group contacts optional for now
+                   M&E need to submit other org info without this. */
+                // dialog.fieldGroupContact1.getValue() &&
+                // dialog.fieldGroupContact2.getValue() &&
                 dialog.fieldAgreementDate.getValue()
             ) {
                 allRequiredFieldsAvailable = true;
