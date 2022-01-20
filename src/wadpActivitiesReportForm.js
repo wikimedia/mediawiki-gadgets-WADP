@@ -583,7 +583,8 @@
                     { data: 'Uzbekistan' }, { data: 'Vanuatu' }, { data: 'Venezuela' }, { data: 'Vietnam' }, { data: 'Virgin Islands' },
                     { data: 'Wallis and Futuna' }, { data: 'Western Sahara' }, { data: 'Yemen' }, { data: 'Zambia' },
                     { data: 'Zimbabwe' }, { data: 'International' }
-                ]
+                ],
+                placeholder: gadgetMsg[ 'countries-affiliate-operates-in-placeholder' ]
             } );
 
             this.fieldSandboxReport = new OO.ui.CheckboxInputWidget( {
