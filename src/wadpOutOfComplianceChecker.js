@@ -584,7 +584,8 @@
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
                                 }
-                                if ( latestActivityReportYear === reportingDueDateYear &&
+                                if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
+                                    ( orgInfo.org_type === 'Chapter' && ( reportingDueDateYear - parseInt( latestFinancialReportYear ) ) <= 2 ) &&
                                     orgInfo.reporting_due_date &&
                                     latestActivityReportYear !== 'nlr' &&
                                     // Also check for new chaps or thorgs and catch them too - 'Cross-N'.
@@ -728,7 +729,8 @@
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                                 }
-                                if ( latestActivityReportYear === reportingDueDateYear &&
+                                if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
+                                    ( orgInfo.org_type === 'Chapter' && ( reportingDueDateYear - parseInt( latestFinancialReportYear ) ) <= 2 ) &&
                                     orgInfo.reporting_due_date &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
@@ -874,7 +876,8 @@
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
                                 }
-                                if ( latestActivityReportYear === reportingDueDateYear &&
+                                if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
+                                    ( orgInfo.org_type === 'Chapter' && ( reportingDueDateYear - parseInt( latestFinancialReportYear ) ) <= 2 ) &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
                                     orgInfo.out_of_compliance_level === '4'
