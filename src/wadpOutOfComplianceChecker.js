@@ -474,22 +474,6 @@
                                         emailDispatcherCount["l050"]++;
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 0.";
                                     }
-                                    if ( latestActivityReportYear === reportingDueDateYear &&
-                                        orgInfo.reporting_due_date &&
-                                        orgInfo.out_of_compliance_level === '1'
-                                    ) {
-                                        // NOTE: If it's a new affiliate, just mark it directly as compliant.
-                                        // And also, it's no longer a new affiliate as it now has at least 1 report.
-                                        if ( orgInfo.uptodate_reporting === 'Tick-N' ) {
-                                            orgInfo.uptodate_reporting = 'Tick';
-                                        }
-                                        orgInfo.out_of_compliance_level = '0';
-                                        oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
-                                        ooc_manifest.push( oocLevel );
-
-                                        emailDispatcherCount["l050"]++;
-                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 0.";
-                                    }
                                 }
                                 /**== Level 1 - 2: For UG, Chaps & ThOrgs ==*/
                                 if ( latestActivityReportYear < currentYear &&

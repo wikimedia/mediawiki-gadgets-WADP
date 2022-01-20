@@ -107,7 +107,7 @@
         generateKeyValuePair = function ( k, v ) {
             var res, jsonarray;
             res = '\t\t'.concat( k, ' = ' );
-            if ( k === 'partnership_info' ) {
+            if ( k === 'partnership_info' || k === 'countries_affiliate_operates_in' ) {
                 jsonarray = JSON.stringify( v );
                 // Lua uses { } for "arrays"
                 jsonarray = jsonarray.replace( '[', '{' );
@@ -185,6 +185,17 @@
                         j++
                     ) {
                         entryData.partnership_info.push(
+                            relevantRawEntry[ i ].value.fields[ j ].value.value
+                        );
+                    }
+                } else if ( relevantRawEntry[ i ].key.name === 'countries_affiliate_operates_in' ) {
+                    entryData.countries_affiliate_operates_in = [];
+                    for (
+                        j = 0;
+                        j < relevantRawEntry[ i ].value.fields.length;
+                        j++
+                    ) {
+                        entryData.countries_affiliate_operates_in.push(
                             relevantRawEntry[ i ].value.fields[ j ].value.value
                         );
                     }
@@ -296,6 +307,7 @@
             this.partnership_info = [];
             this.imported_report_date = '';
             this.dos_stamp = '';
+            this.countries_affiliate_operates_in = [];
 
             if ( config.unique_id ) {
                 this.uniqueId = config.unique_id;
@@ -318,6 +330,9 @@
             }
             if ( config.partnership_info ) {
                 this.partnership_info = config.partnership_info;
+            }
+            if ( config.countries_affiliate_operates_in ) {
+                this.countries_affiliate_operates_in = config.countries_affiliate_operates_in;
             }
             if ( config.imported_report_date ) {
                 this.imported_report_date = config.imported_report_date;
@@ -354,7 +369,8 @@
             var i,
                 fieldPartnershipInfoSelected,
                 fieldArMultiyear,
-                tmpReportType;
+                tmpReportType,
+                fieldCountriesAffiliateOperateInSelected;
 
             ActivitiesEditor.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
@@ -499,6 +515,77 @@
                 fieldPartnershipOtherInput.toggle( isSelected );
             } );
 
+            fieldCountriesAffiliateOperateInSelected = [];
+            for ( i = 0; i < this.countries_affiliate_operates_in.length; i++ ) {
+                fieldCountriesAffiliateOperateInSelected.push( {
+                    data: this.countries_affiliate_operates_in[ i ]
+                } );
+            }
+            this.fieldCountriesAffiliateOperateIn = new OO.ui.MenuTagMultiselectWidget( {
+                selected: fieldCountriesAffiliateOperateInSelected,
+                icon: 'mapPin',
+                options: [
+                    { data: 'Afghanistan' }, { data: 'Albania' }, { data: 'Algeria' }, { data: 'American Samoa' },
+                    { data: 'Andorra' }, { data: 'Angola' }, { data: 'Anguilla' }, { data: 'Antarctica' },
+                    { data: 'Antigua and Barbuda' }, { data: 'Argentina' }, { data: 'Armenia' }, { data: 'Aruba' },
+                    { data: 'Australia' }, { data: 'Austria' }, { data: 'Azerbaijan' }, { data: 'Bahamas' },
+                    { data: 'Bahrain' }, { data: 'Bangladesh' }, { data: 'Barbados' }, { data: 'Bashkortostan' },
+                    { data: 'Belarus' }, { data: 'Belgium' }, { data: 'Belize' }, { data: 'Benin' },
+                    { data: 'Bermuda' }, { data: 'Bhutan' }, { data: 'Bolivia' }, { data: 'Bosnia and Herzegovina' },
+                    { data: 'Botswana' }, { data: 'Bouvet Island' }, { data: 'Brazil' }, { data: 'British Indian Ocean Territory' },
+                    { data: 'Brunei Darussalam' }, { data: 'Bulgaria' }, { data: 'Burkina Faso' }, { data: 'Burundi' },
+                    { data: 'Cambodia' }, { data: 'Cameroon' }, { data: 'Canada' }, { data: 'Cape Verde' },
+                    { data: 'Cayman Islands' }, { data: 'Central African Republic' }, { data: 'Chad' }, { data: 'Chile' },
+                    { data: 'China' }, { data: 'Christmas Island' }, { data: 'Cocos (Keeling) Islands' }, { data: 'Colombia' },
+                    { data: 'Comoros' }, { data: 'Congo' }, { data: 'Democratic Republic of The Congo' }, { data: 'Cook Islands' },
+                    { data: 'Costa Rica' }, { data: 'Cote D\'ivoire' }, { data: 'Croatia' }, { data: 'Cuba' },
+                    { data: 'Cyprus' }, { data: 'Czech Republic' }, { data: 'Denmark' }, { data: 'Djibouti' },
+                    { data: 'Dominica' }, { data: 'Dominican Republic' }, { data: 'Ecuador' }, { data: 'Egypt' },
+                    { data: 'El Salvador' }, { data: 'Equatorial Guinea' }, { data: 'Eritrea' }, { data: 'Estonia' },
+                    { data: 'Ethiopia' }, { data: 'Falkland Islands(Malvinas)' }, { data: 'Faroe Islands' }, { data: 'Fiji' },
+                    { data: 'Finland' }, { data: 'France' }, { data: 'French Guiana' }, { data: 'French Polynesia' },
+                    { data: 'French Southern Territories' }, { data: 'Gabon' }, { data: 'Gambia' }, { data: 'Georgia' },
+                    { data: 'Germany' }, { data: 'Ghana' }, { data: 'Gibraltar' }, { data: 'Greece' },
+                    { data: 'Greenland' }, { data: 'Grenada' }, { data: 'Guadeloupe' }, { data: 'Guam' }, { data: 'Guatemala' },
+                    { data: 'Guinea' }, { data: 'Guinea - bissau' }, { data: 'Guyana' }, { data: 'Haiti' },
+                    { data: 'Heard Island and Mcdonald Islands' }, { data: 'Holy See (Vatican City State)' }, { data: 'Honduras' },
+                    { data: 'Hong Kong' }, { data: 'Hungary' }, { data: 'Iceland' }, { data: 'India' }, { data: 'Indonesia' },
+                    { data: 'Iran' }, { data: 'Islamic Republic of' }, { data: 'Iraq' }, { data: 'Ireland' }, { data: 'Israel' },
+                    { data: 'Italy' }, { data: 'Jamaica' }, { data: 'Japan' }, { data: 'Jordan' }, { data: 'Kazakhstan' },
+                    { data: 'Kenya' }, { data: 'Kiribati' }, { data: 'Korea' }, { data: 'Kuwait' }, { data: 'Kyrgyzstan' },
+                    { data: 'Latvia' }, { data: 'Lebanon' }, { data: 'Lesotho' }, { data: 'Liberia' }, { data: 'Libyan Arab Jamahiriya' },
+                    { data: 'Liechtenstein' }, { data: 'Lithuania' }, { data: 'Luxembourg' }, { data: 'Macao' }, { data: 'Macedonia' },
+                    { data: 'The Former Yugoslav Republic of' }, { data: 'Madagascar' }, { data: 'Malawi' }, { data: 'Malaysia' },
+                    { data: 'Maldives' }, { data: 'Mali' }, { data: 'Malta' }, { data: 'Marshall Islands' }, { data: 'Martinique' },
+                    { data: 'Mauritania' }, { data: 'Mauritius' }, { data: 'Mayotte' }, { data: 'Mexico' }, { data: 'Micronesia' },
+                    { data: 'Moldova' }, { data: 'Monaco' }, { data: 'Mongolia' }, { data: 'Montserrat' }, { data: 'Morocco' },
+                    { data: 'Mozambique' }, { data: 'Myanmar' }, { data: 'Namibia' }, { data: 'Nauru' }, { data: 'Nepal' },
+                    { data: 'Netherlands' }, { data: 'Netherlands Antilles' }, { data: 'New Caledonia' }, { data: 'New Zealand' },
+                    { data: 'Nicaragua' }, { data: 'Niger' }, { data: 'Nigeria' }, { data: 'Niue' }, { data: 'Norfolk Island' },
+                    { data: 'Northern Mariana Islands' }, { data: 'Norway' }, { data: 'Oman' }, { data: 'Pakistan' },
+                    { data: 'Palau' }, { data: 'Palestinian Territory' }, { data: 'Panama' }, { data: 'Papua New Guinea' },
+                    { data: 'Paraguay' }, { data: 'Peru' }, { data: 'Philippines' }, { data: 'Pitcairn' }, { data: 'Poland' },
+                    { data: 'Portugal' }, { data: 'Puerto Rico' }, { data: 'Qatar' }, { data: 'Reunion' }, { data: 'Republika Srpska' },
+                    { data: 'Romania' }, { data: 'Romania & Moldova' }, { data: 'Russia' }, { data: 'Russian Federation' },
+                    { data: 'Rwanda' }, { data: 'Saint Helena' }, { data: 'Saint Kitts and Nevis' }, { data: 'Saint Lucia' },
+                    { data: 'Saint Pierre and Miquelon' }, { data: 'Saint Vincent and The Grenadines' }, { data: 'Samoa' },
+                    { data: 'San Marino' }, { data: 'Sao Tome and Principe' }, { data: 'Saudi Arabia' }, { data: 'Senegal' },
+                    { data: 'Serbia' }, { data: 'Seychelles' }, { data: 'Sierra Leone' }, { data: 'Singapore' }, { data: 'Slovakia' },
+                    { data: 'Slovenia' }, { data: 'Solomon Islands' }, { data: 'Somalia' }, { data: 'South Africa' },
+                    { data: 'South Georgia and The South Sandwich Islands' }, { data: 'Spain' }, { data: 'Sri Lanka' },
+                    { data: 'Sudan' }, { data: 'Suriname' }, { data: 'Svalbard and Jan Mayen' }, { data: 'Swaziland' },
+                    { data: 'Sweden' }, { data: 'Switzerland' }, { data: 'Syrian Arab Republic' }, { data: 'Taiwan' },
+                    { data: 'Province of China' }, { data: 'Tajikistan' }, { data: 'Tanzania' }, { data: 'Thailand' },
+                    { data: 'Timor - leste' }, { data: 'Togo' }, { data: 'Tokelau' }, { data: 'Tonga' }, { data: 'Trinidad and Tobago' },
+                    { data: 'Tunisia' }, { data: 'Turkey' }, { data: 'Turkmenistan' }, { data: 'Turks and Caicos Islands' },
+                    { data: 'Tuvalu' }, { data: 'Uganda' }, { data: 'Ukraine' }, { data: 'United Arab Emirates' }, { data: 'United Kingdom' },
+                    { data: 'United States' }, { data: 'United States Minor Outlying Islands' }, { data: 'Uruguay' },
+                    { data: 'Uzbekistan' }, { data: 'Vanuatu' }, { data: 'Venezuela' }, { data: 'Vietnam' }, { data: 'Virgin Islands' },
+                    { data: 'Wallis and Futuna' }, { data: 'Western Sahara' }, { data: 'Yemen' }, { data: 'Zambia' },
+                    { data: 'Zimbabwe' }, { data: 'International' }
+                ]
+            } );
+
             this.fieldSandboxReport = new OO.ui.CheckboxInputWidget( {
             } );
             this.fieldSandboxReport.on( 'change', function ( isSelected ) {
@@ -601,6 +688,13 @@
                         this.fieldPartnershipOtherInput,
                         {
                             align: 'inline'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldCountriesAffiliateOperateIn,
+                        {
+                            label: gadgetMsg[ 'countries-affiliate-operates-in' ],
+                            align: 'top'
                         }
                     ),
                     new OO.ui.FieldLayout(
@@ -752,6 +846,12 @@
                             delete workingEntry.partnership_info;
                         }
 
+                        if ( dialog.fieldCountriesAffiliateOperateIn.getValue() ) {
+                            workingEntry.countries_affiliate_operates_in = dialog.fieldCountriesAffiliateOperateIn.getValue();
+                        } else if ( !dialog.fieldCountriesAffiliateOperateIn.getValue() && workingEntry.countries_affiliate_operates_in ) {
+                            delete workingEntry.countries_affiliate_operates_in;
+                        }
+
                         if ( dialog.fieldSandboxReport.isSelected() ) {
                             PAGEID = 11019248; // Set page id to [[m:Module:Activities_Reports/Sandbox]]
                         }
@@ -856,6 +956,12 @@
                             insertInPlace += generateKeyValuePair(
                                 'partnership_info',
                                 manifest[ i ].partnership_info
+                            );
+                        }
+                        if ( manifest[ i ].countries_affiliate_operates_in ) {
+                            insertInPlace += generateKeyValuePair(
+                                'countries_affiliate_operates_in',
+                                manifest[ i ].countries_affiliate_operates_in
                             );
                         }
                         if ( manifest[ i ].dos_stamp ) {
