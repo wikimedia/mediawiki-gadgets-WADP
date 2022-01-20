@@ -1461,26 +1461,44 @@
                                         membershipInfosManifest[ j ].group_name
                                     );
                                 }
-                                if ( membershipInfosManifest[ j ].group_contact1.indexOf( "User:" ) !== -1 ) {
+                                if ( typeof membershipInfosManifest[ j ].group_contact1 !== 'undefined' &&
+                                    membershipInfosManifest[ j ].group_contact1.indexOf( "User:" ) !== -1
+                                ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact1',
                                         membershipInfosManifest[ j ].group_contact1
                                     );
-                                } else if ( membershipInfosManifest[ j ].group_contact1 ) {
+                                } else if ( typeof membershipInfosManifest[ j ].group_contact1 !== 'undefined' &&
+                                    membershipInfosManifest[ j ].group_contact1
+                                ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact1',
                                         'User:' + membershipInfosManifest[ j ].group_contact1
                                     );
+                                } else {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'group_contact1',
+                                        ''
+                                    );
                                 }
-                                if ( membershipInfosManifest[ j ].group_contact2.indexOf( "User:" ) !== -1 ) {
+                                if ( typeof membershipInfosManifest[ j ].group_contact2 !== 'undefined' &&
+                                    membershipInfosManifest[ j ].group_contact2.indexOf( "User:" ) !== -1
+                                ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact2',
                                         membershipInfosManifest[ j ].group_contact2
                                     );
-                                } else if ( membershipInfosManifest[ j ].group_contact2 ) {
+                                } else if ( typeof membershipInfosManifest[ j ].group_contact2 !== 'undefined' &&
+                                    membershipInfosManifest[ j ].group_contact2
+                                ) {
                                     insertInPlaceGC += generateKeyValuePair(
                                         'group_contact2',
                                         'User:' + membershipInfosManifest[ j ].group_contact2
+                                    );
+                                } else {
+                                    insertInPlaceGC += generateKeyValuePair(
+                                        'group_contact2',
+                                        ''
                                     );
                                 }
                                 if ( membershipInfosManifest[ j ].editors_count ) {
