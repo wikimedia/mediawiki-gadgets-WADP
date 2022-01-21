@@ -17,11 +17,10 @@
         var me_staff = [ 'DAlangi (WMF)', 'DNdubane (WMF)', 'MKaur (WMF)' ];
 
         if ( me_staff.indexOf( mw.config.values.wgUserName ) > -1 ) {
-            /* Load Organizational Info Form */
-            mw.loader.load( 'ext.gadget.wadpOrgInfoForm' );
-
-            /* Load the out of compliance checker */
-            mw.loader.load( 'ext.gadget.wadpOutOfComplianceChecker' );
+            /* Load OrgInfo Form: should load first before OOC checker */
+            mw.loader.using( 'ext.gadget.wadpOrgInfoForm', function () {
+                mw.loader.load( 'ext.gadget.wadpOutOfComplianceChecker' );
+            } );
         } else {
             /* Load Organizational Info Form for end users. */
             mw.loader.load( 'ext.gadget.wadpOrgInfoForm' );
