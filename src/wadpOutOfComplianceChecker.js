@@ -433,6 +433,25 @@
                                 todayDate = new Date();
                                 reportingDueDateYear = parseInt( reportingDueDate.toISOString().substring(0, 4) );
 
+                                /** Special case: all chaps/thorgs with no financial reports should be
+                                 *  marked as non-compliant and with message "No financial report" */
+                                if (
+                                    ( orgInfo.org_type === "Chapter" || orgInfo === "Thematic Organization" ) &&
+                                    typeof latestActivityReport === 'object' && latestActivityReport !== null &&
+                                    latestFinancialReport === 'nlr'
+                                ) {
+                                    orgInfo.out_of_compliance_level = '5';
+                                    orgInfo.uptodate_reporting = "Cross";
+                                    orgInfo.notes_on_reporting = "No financial report";
+                                    orgInfo.me_bypass_ooc_autochecks = 'Yes';
+
+                                    emailDispatcherCount["l050"]++;
+                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - No financial report. Needs M&E followup!";
+
+                                    manifest.push( orgInfo );
+                                    continue;
+                                }
+
                                 /**== Level 0 - 1: For new affiliates, handle them differently ==*/
                                 if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
                                     orgInfo.uptodate_reporting === 'Tick-N' &&
