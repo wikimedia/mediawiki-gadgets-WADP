@@ -528,7 +528,7 @@
          * to initialize widgets, and to set up event handlers.
          */
         OrgInfoEditor.prototype.initialize = function () {
-            var i, fieldDMStructureSelected, dm_structure = [];
+            var i, fieldDMStructureSelected, dm_structure = [], fieldMEByPass, fieldMEByPassReason;
 
             OrgInfoEditor.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
@@ -834,7 +834,7 @@
                 this.fieldRecognitionStatus.setValue( this.recognition_status );
             }
 
-            this.fieldMEByPassOOCAutoChecks = new OO.ui.DropdownInputWidget( {
+            fieldMEByPass = this.fieldMEByPassOOCAutoChecks = new OO.ui.DropdownInputWidget( {
                 options: [
                     { data: 'No', },
                     { data: 'Yes', }
@@ -842,6 +842,27 @@
             } );
             if ( this.me_bypass_ooc_autochecks ) {
                 this.fieldMEByPassOOCAutoChecks.setValue( this.me_bypass_ooc_autochecks );
+            }
+
+            fieldMEByPassReason = this.fieldMEByPassReason = new OO.ui.DropdownInputWidget( {
+                options: [
+                    { data: 'Report past due' },
+                    { data: 'Old report submitted' },
+                    { data: 'Empty report submitted' },
+                    { data: 'Incomplete report submitted' }
+                ]
+            } );
+            fieldMEByPassReason.toggle();
+            fieldMEByPass.on('change', function () {
+                if ( fieldMEByPass.getValue() === 'Yes'  ) {
+                    fieldMEByPassReason.toggle(true);
+                } else {
+                    fieldMEByPassReason.toggle(false);
+                }
+            } );
+            if ( this.notes_on_reporting ) {
+                this.fieldMEByPassReason.setValue( this.notes_on_reporting );
+                fieldMEByPassReason.toggle(true);
             }
 
             this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
@@ -1098,6 +1119,13 @@
                         }
                     ),
                     new OO.ui.FieldLayout(
+                        this.fieldMEByPassReason,
+                        {
+                            label: gadgetMsg[ 'bypass-ooc-autochecks-reason' ],
+                            align: 'top',
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
                         this.fieldDerecognitionDate,
                         {
                             align: 'top',
@@ -1337,7 +1365,10 @@
                             delete workingEntry.recognition_status;
                         }
 
-                        if ( dialog.fieldMEByPassOOCAutoChecks.getValue() ) {
+                        if ( dialog.fieldMEByPassOOCAutoChecks.getValue() === "Yes" ) {
+                            workingEntry.me_bypass_ooc_autochecks = dialog.fieldMEByPassOOCAutoChecks.getValue();
+                            workingEntry.notes_on_reporting = dialog.fieldMEByPassReason.getValue();
+                        } else if ( dialog.fieldMEByPassOOCAutoChecks.getValue() === "No" ) {
                             workingEntry.me_bypass_ooc_autochecks = dialog.fieldMEByPassOOCAutoChecks.getValue();
                         } else if ( !dialog.fieldMEByPassOOCAutoChecks.getValue() && workingEntry.me_bypass_ooc_autochecks ) {
                             delete workingEntry.me_bypass_ooc_autochecks;
