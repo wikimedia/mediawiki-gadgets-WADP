@@ -435,21 +435,38 @@
 
                                 /** Special case: all chaps/thorgs with no financial reports should be
                                  *  marked as non-compliant and with message "No financial report" */
-                                if (
-                                    ( orgInfo.org_type === "Chapter" || orgInfo === "Thematic Organization" ) &&
-                                    typeof latestActivityReport === 'object' && latestActivityReport !== null &&
-                                    latestFinancialReport === 'nlr'
-                                ) {
-                                    orgInfo.out_of_compliance_level = '5';
-                                    orgInfo.uptodate_reporting = "Cross";
-                                    orgInfo.notes_on_reporting = "No financial report";
-                                    orgInfo.me_bypass_ooc_autochecks = 'Yes';
+                                if ( orgInfo.org_type === "Chapter" || orgInfo === "Thematic Organization" ) {
+                                    if ( typeof latestActivityReport === 'object' &&
+                                        latestActivityReport !== null &&
+                                        latestFinancialReport === 'nlr' &&
+                                        todayDate.valueOf() > reportingDueDate.valueOf()
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '5'; // TODO: Add RDD logic for correct level.
+                                        orgInfo.uptodate_reporting = "Cross";
+                                        orgInfo.notes_on_reporting = "No financial report";
+                                        orgInfo.me_bypass_ooc_autochecks = 'Yes';
 
-                                    emailDispatcherCount["l050"]++;
-                                    systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - No financial report. Needs M&E followup!";
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - No financial report. Needs M&E followup!";
 
-                                    manifest.push( orgInfo );
-                                    continue;
+                                        manifest.push( orgInfo );
+                                        continue;
+                                    }
+
+                                    if ( ( currentYear - latestActivityReportYear ) > 2 && // AR isn't the latest
+                                        ( latestActivityReportYear - latestFinancialReportYear ) > 2 &&
+                                        todayDate.valueOf() > reportingDueDate.valueOf()
+                                    ) {
+                                        orgInfo.out_of_compliance_level = '5' // TODO: Add RDD logic for correct level.
+                                        orgInfo.uptodate_reporting = "Cross";
+                                        orgInfo.me_bypass_ooc_autochecks = 'Yes';
+
+                                        emailDispatcherCount["l050"]++;
+                                        systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - Financial report too old & activity report not latest.";
+
+                                        manifest.push( orgInfo );
+                                        continue;
+                                    }
                                 }
 
                                 /**== Level 0 - 1: For new affiliates, handle them differently ==*/
