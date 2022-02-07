@@ -107,7 +107,10 @@
         generateKeyValuePair = function ( k, v ) {
             var res, jsonarray;
             res = '\t\t'.concat( k, ' = ' );
-            if ( k === 'partnership_info' || k === 'countries_affiliate_operates_in' ) {
+            if ( k === 'partnership_info' ||
+                k === 'countries_affiliate_operates_in' ||
+                k === 'languages_supported_by_affiliate'
+            ) {
                 jsonarray = JSON.stringify( v );
                 // Lua uses { } for "arrays"
                 jsonarray = jsonarray.replace( '[', '{' );
@@ -196,6 +199,17 @@
                         j++
                     ) {
                         entryData.countries_affiliate_operates_in.push(
+                            relevantRawEntry[ i ].value.fields[ j ].value.value
+                        );
+                    }
+                } else if ( relevantRawEntry[ i ].key.name === 'languages_supported_by_affiliate' ) {
+                    entryData.languages_supported_by_affiliate = [];
+                    for (
+                        j = 0;
+                        j < relevantRawEntry[ i ].value.fields.length;
+                        j++
+                    ) {
+                        entryData.languages_supported_by_affiliate.push(
                             relevantRawEntry[ i ].value.fields[ j ].value.value
                         );
                     }
@@ -308,6 +322,7 @@
             this.imported_report_date = '';
             this.dos_stamp = '';
             this.countries_affiliate_operates_in = [];
+            this.languages_supported_by_affiliate = [];
 
             if ( config.unique_id ) {
                 this.uniqueId = config.unique_id;
@@ -333,6 +348,9 @@
             }
             if ( config.countries_affiliate_operates_in ) {
                 this.countries_affiliate_operates_in = config.countries_affiliate_operates_in;
+            }
+            if ( config.languages_supported_by_affiliate ) {
+                this.languages_supported_by_affiliate = config.languages_supported_by_affiliate;
             }
             if ( config.imported_report_date ) {
                 this.imported_report_date = config.imported_report_date;
@@ -370,7 +388,8 @@
                 fieldPartnershipInfoSelected,
                 fieldArMultiyear,
                 tmpReportType,
-                fieldCountriesAffiliateOperateInSelected;
+                fieldCountriesAffiliateOperateInSelected,
+                fieldLanguagesSupportedByAffiliateSelected;
 
             ActivitiesEditor.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
@@ -586,6 +605,323 @@
                 placeholder: gadgetMsg[ 'countries-affiliate-operates-in-placeholder' ]
             } );
 
+            fieldLanguagesSupportedByAffiliateSelected = [];
+            for ( i = 0; i < this.languages_supported_by_affiliate.length; i++ ) {
+                fieldLanguagesSupportedByAffiliateSelected.push( {
+                    data: this.languages_supported_by_affiliate[ i ]
+                } );
+            }
+            this.fieldLanguagesSupportedByAffiliate = new OO.ui.MenuTagMultiselectWidget( {
+                selected: fieldLanguagesSupportedByAffiliateSelected,
+                icon: 'language',
+                options: [
+                    { data: 'Abkhazian~ab', label: 'Abkhazian' },
+                    { data: 'Achinese~ace', label: 'Achinese' },
+                    { data: 'Adyghe~ady', label: 'Adyghe' },
+                    { data: 'Afrikaans~af', label: 'Afrikaans' },
+                    { data: 'Akan~ak', label: 'Akan' },
+                    { data: 'Alsatian~als', label: 'Alsatian' },
+                    { data: 'Amharic~am', label: 'Amharic' },
+                    { data: 'Aragonese~an', label: 'Aragonese' },
+                    { data: 'Old English~ang', label: 'Old English' },
+                    { data: 'Arabic~ar', label: 'Arabic' },
+                    { data: 'Aramaic~arc', label: 'Aramaic' },
+                    { data: 'Moroccan Arabic~ary', label: 'Moroccan Arabic' },
+                    { data: 'Egyptian Arabic~arz', label: 'Egyptian Arabic' },
+                    { data: 'Assamese~as', label: 'Assamese' },
+                    { data: 'Asturian~ast', label: 'Asturian' },
+                    { data: 'Atikamekw~atj', label: 'Atikamekw' },
+                    { data: 'Avaric~av', label: 'Avaric' },
+                    { data: 'Kotava~avk', label: 'Kotava' },
+                    { data: 'Awadhi~awa', label: 'Awadhi' },
+                    { data: 'Aymara~ay', label: 'Aymara' },
+                    { data: 'Azerbaijani~az', label: 'Azerbaijani' },
+                    { data: 'South Azerbaijani~azb', label: 'South Azerbaijani' },
+                    { data: 'Bashkir~ba', label: 'Bashkir' },
+                    { data: 'Balinese~ban', label: 'Balinese' },
+                    { data: 'Bavarian~bar', label: 'Bavarian' },
+                    { data: 'Samogitian~bat-smg', label: 'Samogitian' },
+                    { data: 'Central Bikol~bcl', label: 'Central Bikol' },
+                    { data: 'Belarusian~be', label: 'Belarusian' },
+                    { data: 'Belarusian (old)~be-x-old', label: 'Belarusian (old)' },
+                    { data: 'Bulgarian~bg', label: 'Bulgarian' },
+                    { data: 'Bhojpuri~bh', label: 'Bhojpuri' },
+                    { data: 'Bislama~bi', label: 'Bislama' },
+                    { data: 'Banjar~bjn', label: 'Banjar' },
+                    { data: 'Bambara~bm', label: 'Bambara' },
+                    { data: 'Bangla~bn', label: 'Bangla' },
+                    { data: 'Tibetan~bo', label: 'Tibetan' },
+                    { data: 'Bishnupriya~bpy', label: 'Bishnupriya' },
+                    { data: 'Breton~br', label: 'Breton' },
+                    { data: 'Bosnian~bs', label: 'Bosnian' },
+                    { data: 'Buginese~bug', label: 'Buginese' },
+                    { data: 'Russia Buriat~bxr', label: 'Russia Buriat' },
+                    { data: 'Catalan~ca', label: 'Catalan' },
+                    { data: 'Chavacano~cbk-zam', label: 'Chavacano' },
+                    { data: 'Min Dong Chinese~cdo', label: 'Min Dong Chinese' },
+                    { data: 'Chechen~ce', label: 'Chechen' },
+                    { data: 'Cebuano~ceb', label: 'Cebuano' },
+                    { data: 'Chamorro~ch', label: 'Chamorro' },
+                    { data: 'Cherokee~chr', label: 'Cherokee' },
+                    { data: 'Cheyenne~chy', label: 'Cheyenne' },
+                    { data: 'Central Kurdish~ckb', label: 'Central Kurdish' },
+                    { data: 'Corsican~co', label: 'Corsican' },
+                    { data: 'Cree~cr', label: 'Cree' },
+                    { data: 'Crimean Turkish~crh', label: 'Crimean Turkish' },
+                    { data: 'Czech~cs', label: 'Czech' },
+                    { data: 'Kashubian~csb', label: 'Kashubian' },
+                    { data: 'Church Slavic~cu', label: 'Church Slavic' },
+                    { data: 'Chuvash~cv', label: 'Chuvash' },
+                    { data: 'Welsh~cy', label: 'Welsh' },
+                    { data: 'Danish~da', label: 'Danish' },
+                    { data: 'German~de', label: 'German' },
+                    { data: 'Dinka~din', label: 'Dinka' },
+                    { data: 'Zazaki~diq', label: 'Zazaki' },
+                    { data: 'Lower Sorbian~dsb', label: 'Lower Sorbian' },
+                    { data: 'Divehi~dv', label: 'Divehi' },
+                    { data: 'Dzongkha~dz', label: 'Dzongkha' },
+                    { data: 'Ewe~ee', label: 'Ewe' },
+                    { data: 'Greek~el', label: 'Greek' },
+                    { data: 'Emiliano-Romagnolo~eml', label: 'Emiliano-Romagnolo' },
+                    { data: 'English~en', label: 'English' },
+                    { data: 'Esperanto~eo', label: 'Esperanto' },
+                    { data: 'Spanish~es', label: 'Spanish' },
+                    { data: 'Estonian~et', label: 'Estonian' },
+                    { data: 'Basque~eu', label: 'Basque' },
+                    { data: 'Extremaduran~ext', label: 'Extremaduran' },
+                    { data: 'Persian~fa', label: 'Persian' },
+                    { data: 'Fulah~ff', label: 'Fulah' },
+                    { data: 'Finnish~fi', label: 'Finnish' },
+                    { data: 'Võro~fiu-vro', label: 'Võro' },
+                    { data: 'Fijian~fj', label: 'Fijian' },
+                    { data: 'Faroese~fo', label: 'Faroese' },
+                    { data: 'French~fr', label: 'French' },
+                    { data: 'Arpitan~frp', label: 'Arpitan' },
+                    { data: 'Northern Frisian~frr', label: 'Northern Frisian' },
+                    { data: 'Friulian~fur', label: 'Friulian' },
+                    { data: 'Western Frisian~fy', label: 'Western Frisian' },
+                    { data: 'Irish~ga', label: 'Irish' },
+                    { data: 'Gagauz~gag', label: 'Gagauz' },
+                    { data: 'Gan Chinese~gan', label: 'Gan Chinese' },
+                    { data: 'Guianan Creole~gcr', label: 'Guianan Creole' },
+                    { data: 'Scottish Gaelic~gd', label: 'Scottish Gaelic' },
+                    { data: 'Galician~gl', label: 'Galician' },
+                    { data: 'Gilaki~glk', label: 'Gilaki' },
+                    { data: 'Guarani~gn', label: 'Guarani' },
+                    { data: 'Goan Konkani~gom', label: 'Goan Konkani' },
+                    { data: 'Gorontalo~gor', label: 'Gorontalo' },
+                    { data: 'Gothic~got', label: 'Gothic' },
+                    { data: 'Gujarati~gu', label: 'Gujarati' },
+                    { data: 'Manx~gv', label: 'Manx' },
+                    { data: 'Hausa~ha', label: 'Hausa' },
+                    { data: 'Hakka Chinese~hak', label: 'Hakka Chinese' },
+                    { data: 'Hawaiian~haw', label: 'Hawaiian' },
+                    { data: 'Hebrew~he', label: 'Hebrew' },
+                    { data: 'Hindi~hi', label: 'Hindi' },
+                    { data: 'Fiji Hindi~hif', label: 'Fiji Hindi' },
+                    { data: 'Croatian~hr', label: 'Croatian' },
+                    { data: 'Upper Sorbian~hsb', label: 'Upper Sorbian' },
+                    { data: 'Haitian Creole~ht', label: 'Haitian Creole' },
+                    { data: 'Hungarian~hu', label: 'Hungarian' },
+                    { data: 'Armenian~hy', label: 'Armenian' },
+                    { data: 'Western Armenian~hyw', label: 'Western Armenian' },
+                    { data: 'Interlingua~ia', label: 'Interlingua' },
+                    { data: 'Indonesian~id', label: 'Indonesian' },
+                    { data: 'Interlingue~ie', label: 'Interlingue' },
+                    { data: 'Igbo~ig', label: 'Igbo' },
+                    { data: 'Inupiaq~ik', label: 'Inupiaq' },
+                    { data: 'Iloko~ilo', label: 'Iloko' },
+                    { data: 'Ingush~inh', label: 'Ingush' },
+                    { data: 'Ido~io', label: 'Ido' },
+                    { data: 'Icelandic~is', label: 'Icelandic' },
+                    { data: 'Italian~it', label: 'Italian' },
+                    { data: 'Inuktitut~iu', label: 'Inuktitut' },
+                    { data: 'Japanese~ja', label: 'Japanese' },
+                    { data: 'Jamaican Creole English~jam', label: 'Jamaican Creole English' },
+                    { data: 'Lojban~jbo', label: 'Lojban' },
+                    { data: 'Javanese~jv', label: 'Javanese' },
+                    { data: 'Georgian~ka', label: 'Georgian' },
+                    { data: 'Kara-Kalpak~kaa', label: 'Kara-Kalpak' },
+                    { data: 'Kabyle~kab', label: 'Kabyle' },
+                    { data: 'Kabardian~kbd', label: 'Kabardian' },
+                    { data: 'Kabiye~kbp', label: 'Kabiye' },
+                    { data: 'Kongo~kg', label: 'Kongo' },
+                    { data: 'Kikuyu~ki', label: 'Kikuyu' },
+                    { data: 'Kazakh~kk', label: 'Kazakh' },
+                    { data: 'Kalaallisut~kl', label: 'Kalaallisut' },
+                    { data: 'Khmer~km', label: 'Khmer' },
+                    { data: 'Kannada~kn', label: 'Kannada' },
+                    { data: 'Korean~ko', label: 'Korean' },
+                    { data: 'Komi-Permyak~koi', label: 'Komi-Permyak' },
+                    { data: 'Karachay-Balkar~krc', label: 'Karachay-Balkar' },
+                    { data: 'Kashmiri~ks', label: 'Kashmiri' },
+                    { data: 'Colognian~ksh', label: 'Colognian' },
+                    { data: 'Kurdish~ku', label: 'Kurdish' },
+                    { data: 'Komi~kv', label: 'Komi' },
+                    { data: 'Cornish~kw', label: 'Cornish' },
+                    { data: 'Kyrgyz~ky', label: 'Kyrgyz' },
+                    { data: 'Latin~la', label: 'Latin' },
+                    { data: 'Ladino~lad', label: 'Ladino' },
+                    { data: 'Luxembourgish~lb', label: 'Luxembourgish' },
+                    { data: 'Lak~lbe', label: 'Lak' },
+                    { data: 'Lezghian~lez', label: 'Lezghian' },
+                    { data: 'Lingua Franca Nova~lfn', label: 'Lingua Franca Nova' },
+                    { data: 'Ganda~lg', label: 'Ganda' },
+                    { data: 'Limburgish~li', label: 'Limburgish' },
+                    { data: 'Ligurian~lij', label: 'Ligurian' },
+                    { data: 'Ladin~lld', label: 'Ladin' },
+                    { data: 'Lombard~lmo', label: 'Lombard' },
+                    { data: 'Lingala~ln', label: 'Lingala' },
+                    { data: 'Lao~lo', label: 'Lao' },
+                    { data: 'Northern Luri~lrc', label: 'Northern Luri' },
+                    { data: 'Lithuanian~lt', label: 'Lithuanian' },
+                    { data: 'Latgalian~ltg', label: 'Latgalian' },
+                    { data: 'Latvian~lv', label: 'Latvian' },
+                    { data: 'Maithili~mai', label: 'Maithili' },
+                    { data: 'Banyumasan~map-bms', label: 'Banyumasan' },
+                    { data: 'Moksha~mdf', label: 'Moksha' },
+                    { data: 'Malagasy~mg', label: 'Malagasy' },
+                    { data: 'Eastern Mari~mhr', label: 'Eastern Mari' },
+                    { data: 'Maori~mi', label: 'Maori' },
+                    { data: 'Minangkabau~min', label: 'Minangkabau' },
+                    { data: 'Macedonian~mk', label: 'Macedonian' },
+                    { data: 'Malayalam~ml', label: 'Malayalam' },
+                    { data: 'Mongolian~mn', label: 'Mongolian' },
+                    { data: 'Mon~mnw', label: 'Mon' },
+                    { data: 'Marathi~mr', label: 'Marathi' },
+                    { data: 'Western Mari~mrj', label: 'Western Mari' },
+                    { data: 'Malay~ms', label: 'Malay' },
+                    { data: 'Maltese~mt', label: 'Maltese' },
+                    { data: 'Mirandese~mwl', label: 'Mirandese' },
+                    { data: 'Burmese~my', label: 'Burmese' },
+                    { data: 'Erzya~myv', label: 'Erzya' },
+                    { data: 'Mazanderani~mzn', label: 'Mazanderani' },
+                    { data: 'Nauru~na', label: 'Nauru' },
+                    { data: 'Nahuatl~nah', label: 'Nahuatl' },
+                    { data: 'Neapolitan~nap', label: 'Neapolitan' },
+                    { data: 'Low German~nds', label: 'Low German' },
+                    { data: 'Low Saxon~nds-nl', label: 'Low Saxon' },
+                    { data: 'Nepali~ne', label: 'Nepali' },
+                    { data: 'Newari~new', label: 'Newari' },
+                    { data: 'Dutch~nl', label: 'Dutch' },
+                    { data: 'Norwegian Nynorsk~nn', label: 'Norwegian Nynorsk' },
+                    { data: 'Norwegian~no', label: 'Norwegian' },
+                    { data: 'Novial~nov', label: 'Novial' },
+                    { data: 'N’Ko~nqo', label: 'N’Ko' },
+                    { data: 'Norman~nrm', label: 'Norman' },
+                    { data: 'Northern Sotho~nso', label: 'Northern Sotho' },
+                    { data: 'Navajo~nv', label: 'Navajo' },
+                    { data: 'Nyanja~ny', label: 'Nyanja' },
+                    { data: 'Occitan~oc', label: 'Occitan' },
+                    { data: 'Livvi-Karelian~olo', label: 'Livvi-Karelian' },
+                    { data: 'Oromo~om', label: 'Oromo' },
+                    { data: 'Odia~or', label: 'Odia' },
+                    { data: 'Ossetic~os', label: 'Ossetic' },
+                    { data: 'Punjabi~pa', label: 'Punjabi' },
+                    { data: 'Pangasinan~pag', label: 'Pangasinan' },
+                    { data: 'Pampanga~pam', label: 'Pampanga' },
+                    { data: 'Papiamento~pap', label: 'Papiamento' },
+                    { data: 'Picard~pcd', label: 'Picard' },
+                    { data: 'Pennsylvania German~pdc', label: 'Pennsylvania German' },
+                    { data: 'Palatine German~pfl', label: 'Palatine German' },
+                    { data: 'Pali~pi', label: 'Pali' },
+                    { data: 'Norfuk-Pitkern~pih', label: 'Norfuk-Pitkern' },
+                    { data: 'Polish~pl', label: 'Polish' },
+                    { data: 'Piedmontese~pms', label: 'Piedmontese' },
+                    { data: 'Western Punjabi~pnb', label: 'Western Punjabi' },
+                    { data: 'Pontic~pnt', label: 'Pontic' },
+                    { data: 'Pashto~ps', label: 'Pashto' },
+                    { data: 'Portuguese~pt', label: 'Portuguese' },
+                    { data: 'Quechua~qu', label: 'Quechua' },
+                    { data: 'Romansh~rm', label: 'Romansh' },
+                    { data: 'Vlax Romani~rmy', label: 'Vlax Romani' },
+                    { data: 'Rundi~rn', label: 'Rundi' },
+                    { data: 'Romanian~ro', label: 'Romanian' },
+                    { data: 'Aromanian~roa-rup', label: 'Aromanian' },
+                    { data: 'Tarantino~roa-tara', label: 'Tarantino' },
+                    { data: 'Russian~ru', label: 'Russian' },
+                    { data: 'Rusyn~rue', label: 'Rusyn' },
+                    { data: 'Kinyarwanda~rw', label: 'Kinyarwanda' },
+                    { data: 'Sanskrit~sa', label: 'Sanskrit' },
+                    { data: 'Sakha~sah', label: 'Sakha' },
+                    { data: 'Santali~sat', label: 'Santali' },
+                    { data: 'Sardinian~sc', label: 'Sardinian' },
+                    { data: 'Sicilian~scn', label: 'Sicilian' },
+                    { data: 'Scots~sco', label: 'Scots' },
+                    { data: 'Sindhi~sd', label: 'Sindhi' },
+                    { data: 'Northern Sami~se', label: 'Northern Sami' },
+                    { data: 'Sango~sg', label: 'Sango' },
+                    { data: 'Serbo-Croatian~sh', label: 'Serbo-Croatian' },
+                    { data: 'Shan~shn', label: 'Shan' },
+                    { data: 'Shawiya~shy', label: 'Shawiya' },
+                    { data: 'Sinhala~si', label: 'Sinhala' },
+                    { data: 'Simple English~simple', label: 'Simple English' },
+                    { data: 'Slovak~sk', label: 'Slovak' },
+                    { data: 'Slovenian~sl', label: 'Slovenian' },
+                    { data: 'Samoan~sm', label: 'Samoan' },
+                    { data: 'Shona~sn', label: 'Shona' },
+                    { data: 'Somali~so', label: 'Somali' },
+                    { data: 'Albanian~sq', label: 'Albanian' },
+                    { data: 'Serbian~sr', label: 'Serbian' },
+                    { data: 'Sranan Tongo~srn', label: 'Sranan Tongo' },
+                    { data: 'Swati~ss', label: 'Swati' },
+                    { data: 'Southern Sotho~st', label: 'Southern Sotho' },
+                    { data: 'Saterland Frisian~stq', label: 'Saterland Frisian' },
+                    { data: 'Sundanese~su', label: 'Sundanese' },
+                    { data: 'Swedish~sv', label: 'Swedish' },
+                    { data: 'Swahili~sw', label: 'Swahili' },
+                    { data: 'Silesian~szl', label: 'Silesian' },
+                    { data: 'Sakizaya~szy', label: 'Sakizaya' },
+                    { data: 'Tamil~ta', label: 'Tamil' },
+                    { data: 'Tulu~tcy', label: 'Tulu' },
+                    { data: 'Telugu~te', label: 'Telugu' },
+                    { data: 'Tetum~tet', label: 'Tetum' },
+                    { data: 'Tajik~tg', label: 'Tajik' },
+                    { data: 'Thai~th', label: 'Thai' },
+                    { data: 'Tigrinya~ti', label: 'Tigrinya' },
+                    { data: 'Turkmen~tk', label: 'Turkmen' },
+                    { data: 'Tagalog~tl', label: 'Tagalog' },
+                    { data: 'Tswana~tn', label: 'Tswana' },
+                    { data: 'Tongan~to', label: 'Tongan' },
+                    { data: 'Tok Pisin~tpi', label: 'Tok Pisin' },
+                    { data: 'Turkish~tr', label: 'Turkish' },
+                    { data: 'Tsonga~ts', label: 'Tsonga' },
+                    { data: 'Tatar~tt', label: 'Tatar' },
+                    { data: 'Tumbuka~tum', label: 'Tumbuka' },
+                    { data: 'Twi~tw', label: 'Twi' },
+                    { data: 'Tahitian~ty', label: 'Tahitian' },
+                    { data: 'Tuvinian~tyv', label: 'Tuvinian' },
+                    { data: 'Udmurt~udm', label: 'Udmurt' },
+                    { data: 'Uyghur~ug', label: 'Uyghur' },
+                    { data: 'Ukrainian~uk', label: 'Ukrainian' },
+                    { data: 'Urdu~ur', label: 'Urdu' },
+                    { data: 'Uzbek~uz', label: 'Uzbek' },
+                    { data: 'Venda~ve', label: 'Venda' },
+                    { data: 'Venetian~vec', label: 'Venetian' },
+                    { data: 'Veps~vep', label: 'Veps' },
+                    { data: 'Vietnamese~vi', label: 'Vietnamese' },
+                    { data: 'West Flemish~vls', label: 'West Flemish' },
+                    { data: 'Volapük~vo', label: 'Volapük' },
+                    { data: 'Walloon~wa', label: 'Walloon' },
+                    { data: 'Waray~war', label: 'Waray' },
+                    { data: 'Wolof~wo', label: 'Wolof' },
+                    { data: 'Wu Chinese~wuu', label: 'Wu Chinese' },
+                    { data: 'Kalmyk~xal', label: 'Kalmyk' },
+                    { data: 'Xhosa~xh', label: 'Xhosa' },
+                    { data: 'Mingrelian~xmf', label: 'Mingrelian' },
+                    { data: 'Yiddish~yi', label: 'Yiddish' },
+                    { data: 'Yoruba~yo', label: 'Yoruba' },
+                    { data: 'Zhuang~za', label: 'Zhuang' },
+                    { data: 'Zeelandic~zea', label: 'Zeelandic' },
+                    { data: 'Chinese~zh', label: 'Chinese' },
+                    { data: 'Classical Chinese~zh-classical', label: 'Classical Chinese' },
+                    { data: 'Chinese (Min Nan)~zh-min-nan', label: 'Chinese (Min Nan)' },
+                    { data: 'Cantonese~zh-yue', label: 'Cantonese' },
+                    { data: 'Zulu~zu', label: 'Zulu' }
+                ],
+                placeholder: gadgetMsg['languages-supported-by-affiliate-placeholder']
+            } );
+
             this.fieldSandboxReport = new OO.ui.CheckboxInputWidget( {
             } );
             this.fieldSandboxReport.on( 'change', function ( isSelected ) {
@@ -694,6 +1030,13 @@
                         this.fieldCountriesAffiliateOperateIn,
                         {
                             label: gadgetMsg[ 'countries-affiliate-operates-in' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldLanguagesSupportedByAffiliate,
+                        {
+                            label: gadgetMsg[ 'languages-supported-by-affiliate' ],
                             align: 'top'
                         }
                     ),
@@ -852,6 +1195,12 @@
                             delete workingEntry.countries_affiliate_operates_in;
                         }
 
+                        if ( dialog.fieldLanguagesSupportedByAffiliate.getValue() ) {
+                            workingEntry.languages_supported_by_affiliate = dialog.fieldLanguagesSupportedByAffiliate.getValue();
+                        } else if ( !dialog.fieldLanguagesSupportedByAffiliate.getValue() && workingEntry.languages_supported_by_affiliate ) {
+                            delete workingEntry.languages_supported_by_affiliate;
+                        }
+
                         if ( dialog.fieldSandboxReport.isSelected() ) {
                             PAGEID = 11019248; // Set page id to [[m:Module:Activities_Reports/Sandbox]]
                         }
@@ -962,6 +1311,12 @@
                             insertInPlace += generateKeyValuePair(
                                 'countries_affiliate_operates_in',
                                 manifest[ i ].countries_affiliate_operates_in
+                            );
+                        }
+                        if ( manifest[ i ].languages_supported_by_affiliate ) {
+                            insertInPlace += generateKeyValuePair(
+                                'languages_supported_by_affiliate',
+                                manifest[ i ].languages_supported_by_affiliate
                             );
                         }
                         if ( manifest[ i ].dos_stamp ) {
