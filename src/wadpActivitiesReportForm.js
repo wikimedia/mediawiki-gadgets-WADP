@@ -451,7 +451,6 @@
                 required: true
             } );
             this.fieldReportLink = new OO.ui.TextInputWidget( {
-                type: 'url',
                 icon: 'link',
                 value: this.report_link,
                 indicator: 'required',
