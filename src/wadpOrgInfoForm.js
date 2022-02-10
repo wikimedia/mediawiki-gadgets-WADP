@@ -1427,17 +1427,17 @@
                             newGroupContact1 = dialog.fieldGroupContact1.getValue().normalize();
                             newGroupContact2 = dialog.fieldGroupContact2.getValue().normalize()
                             if ( workingEntry.group_contact1 ) {
-                                oldGroupContact1 = workingEntry.group_contact1.normalize().substring( 5 );
+                                oldGroupContact1 = workingEntry.group_contact1.normalize();
                             } else {
                                 // fallback to new name
-                                oldGroupContact1 = newGroupContact1.substring( 5 );
+                                oldGroupContact1 = newGroupContact1;
                             }
 
                             if ( workingEntry.group_contact2 ) {
-                                oldGroupContact2 = workingEntry.group_contact2.normalize().substring( 5 );
+                                oldGroupContact2 = workingEntry.group_contact2.normalize();
                             } else {
                                 // fallback to new name
-                                oldGroupContact2 = newGroupContact2.substring( 5 );
+                                oldGroupContact2 = newGroupContact2;
                             }
 
                             newEditorsCount = dialog.fieldEditorsMemberCount.getValue();
