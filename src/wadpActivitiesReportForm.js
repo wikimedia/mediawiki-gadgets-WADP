@@ -8,7 +8,8 @@
     var gadgetMsg = {},
         getRelevantRawEntry,
         parseContentModule,
-        openWindow,
+        openWindow1,
+        openWindow2,
         userLang,
         cleanRawEntry,
         windowManager,
@@ -24,8 +25,11 @@
         sandbox_activities_reports,
         apiObj,
         convertDateToDdMmYyyyFormat,
+        convertDateToYyyyMmDdFormat,
         getModuleContent,
-        getWikiPageContent;
+        getWikiPageContent,
+        groupNameGlb,
+        uniqueIdGlb;
 
     var PAGEID = 10624730, // Live mode page ID
         EDITMODE = '';
@@ -83,6 +87,21 @@
         };
 
         /**
+         * Convert date to DD/MM/YYYY format
+         * @param {string} date
+         *
+         * @return {string} date
+         */
+        convertDateToYyyyMmDdFormat = function ( date ) {
+            var splitted_date;
+            // Put in a format our calendar OOUI will feed on, in YYYY-MM-DD format
+            splitted_date = date.split('/');
+            date = splitted_date[2] + "-" + splitted_date[1] + "-" + splitted_date[0];
+
+            return date;
+        };
+
+        /**
          * Sanitizes input for saving to wiki
          *
          * @param {string} s
@@ -109,7 +128,8 @@
             res = '\t\t'.concat( k, ' = ' );
             if ( k === 'partnership_info' ||
                 k === 'countries_affiliate_operates_in' ||
-                k === 'languages_supported_by_affiliate'
+                k === 'languages_supported_by_affiliate' ||
+                k === 'past_programs'
             ) {
                 jsonarray = JSON.stringify( v );
                 // Lua uses { } for "arrays"
@@ -213,6 +233,17 @@
                             relevantRawEntry[ i ].value.fields[ j ].value.value
                         );
                     }
+                } else if ( relevantRawEntry[ i ].key.name === 'past_programs' ) {
+                    entryData.past_programs = [];
+                    for (
+                        j = 0;
+                        j < relevantRawEntry[ i ].value.fields.length;
+                        j++
+                    ) {
+                        entryData.past_programs.push(
+                            relevantRawEntry[ i ].value.fields[ j ].value.value
+                        );
+                    }
                 } else {
                     entryData[ relevantRawEntry[ i ].key.name ] = relevantRawEntry[ i ].value.value;
                 }
@@ -303,21 +334,27 @@
             return items;
         };
 
+        /********************** Window 1 dialog logic start ***************/
         /**
-         * Subclass ProcessDialog
+         * Subclass ProcessDialog - window 1 for collecting
+         * activities related to Wikimedia affiliates.
          *
-         * @class ActivitiesEditor
+         * @class ActivitiesEditorW1
          * @extends OO.ui.ProcessDialog
          *
          * @constructor
          * @param {Object} config
          */
-        function ActivitiesEditor( config ) {
+        function ActivitiesEditorW1( config ) {
             this.group_name = '';
             this.report_type = '';
+            this.multiyear_duation = ''
             this.start_date = '';
             this.end_date = '';
             this.report_link = '';
+            this.report_link_not_en_status = '';
+            this.report_lang_code = '';
+            this.report_link_en = '';
             this.partnership_info = [];
             this.imported_report_date = '';
             this.dos_stamp = '';
@@ -334,6 +371,9 @@
             if ( config.report_type ) {
                 this.report_type = config.report_type;
             }
+            if ( config.multiyear_duation ) {
+                this.multiyear_duation = config.multiyear_duation;
+            }
             if ( config.start_date ) {
                 this.start_date = config.start_date;
             }
@@ -342,6 +382,15 @@
             }
             if ( config.report_link ) {
                 this.report_link = config.report_link;
+            }
+            if ( config.report_link_not_en_status ) {
+                this.report_link_not_en_status = config.report_link_not_en_status;
+            }
+            if ( config.report_lang_code ) {
+                this.report_lang_code = config.report_lang_code;
+            }
+            if ( config.report_link_en ) {
+                this.report_link_en = config.report_link_en;
             }
             if ( config.partnership_info ) {
                 this.partnership_info = config.partnership_info;
@@ -358,17 +407,17 @@
             if ( config.dos_stamp ) {
                 this.dos_stamp = config.dos_stamp;
             }
-            ActivitiesEditor.super.call( this, config );
+            ActivitiesEditorW1.super.call( this, config );
         }
-        OO.inheritClass( ActivitiesEditor, OO.ui.ProcessDialog );
+        OO.inheritClass( ActivitiesEditorW1, OO.ui.ProcessDialog );
 
-        ActivitiesEditor.static.name = 'activitiesEditor';
-        ActivitiesEditor.static.title = gadgetMsg[ 'activities-report-header' ];
-        ActivitiesEditor.static.actions = [
+        ActivitiesEditorW1.static.name = 'activitiesEditor';
+        ActivitiesEditorW1.static.title = gadgetMsg[ 'activities-report-header' ];
+        ActivitiesEditorW1.static.actions = [
             {
                 action: 'continue',
                 modes: 'edit',
-                label: gadgetMsg[ 'submit-report' ],
+                label: gadgetMsg[ 'ar-next-button' ],
                 flags: [ 'primary', 'constructive' ]
             },
             {
@@ -383,7 +432,7 @@
          * Use the initialize() method to add content to the dialog's $body,
          * to initialize widgets, and to set up event handlers.
          */
-        ActivitiesEditor.prototype.initialize = function () {
+        ActivitiesEditorW1.prototype.initialize = function () {
             var i,
                 fieldPartnershipInfoSelected,
                 fieldArMultiyear,
@@ -391,7 +440,7 @@
                 fieldCountriesAffiliateOperateInSelected,
                 fieldLanguagesSupportedByAffiliateSelected;
 
-            ActivitiesEditor.super.prototype.initialize.call( this );
+            ActivitiesEditorW1.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
                 padded: true,
                 expanded: false
@@ -405,7 +454,8 @@
                 head: true,
                 id: 'wadp-popup-widget-position'
             } );
-            this.fieldGroupName = new AffiliateLookupTextInputWidget();
+            this.fieldGroupName = new AffiliateLookupTextInputWidget( this.group_name );
+
             tmpReportType = this.fieldReportType = new OO.ui.DropdownInputWidget( {
                 options: [
                     {
@@ -426,6 +476,10 @@
                     }
                 ]
             } );
+            if ( this.report_type ) {
+                this.fieldReportType.setValue( this.report_type );
+            }
+
             fieldArMultiyear = this.fieldMultiyear = new OO.ui.DropdownInputWidget( {
                 options: [
                     {
@@ -446,6 +500,11 @@
                     }
                 ]
             } );
+            if ( this.multiyear_duation ) {
+                this.fieldMultiyear.setValue( this.multiyear_duation );
+                fieldArMultiyear.toggle(true);
+            }
+
             fieldArMultiyear.toggle();
             tmpReportType.on('change', function () {
                 if ( tmpReportType.getValue() === 'Multi-year Activities Report'  ) {
@@ -457,14 +516,14 @@
 
             this.fieldStartDate = new mw.widgets.DateInputWidget( {
                 icon: 'calendar',
-                value: this.start_date,
+                value: this.start_date ? convertDateToYyyyMmDdFormat( this.start_date ) : this.start_date,
                 classes: [ 'full-width' ],
                 placeholderLabel: gadgetMsg[ 'start-date-placeholder' ],
                 required: true
             } );
             this.fieldEndDate = new mw.widgets.DateInputWidget( {
                 icon: 'calendar',
-                value: this.end_date,
+                value: this.end_date ? convertDateToYyyyMmDdFormat( this.end_date ) : this.end_date,
                 classes: [ 'full-width' ],
                 placeholderLabel: gadgetMsg[ 'end-date-placeholder' ],
                 required: true
@@ -479,13 +538,23 @@
 
             this.fieldReportNotInEnglish = new OO.ui.CheckboxInputWidget( {
             } );
+            if ( this.report_link_en ) {
+                this.fieldReportNotInEnglish.setSelected( true );
+                fieldReportLangCode.toggle( true );
+                fieldReportInEnglishLink.toggle( true );
+            }
+
             fieldReportLangCode = this.fieldReportLangCode = new OO.ui.TextInputWidget( {
+                value: this.report_lang_code,
                 placeholder: gadgetMsg[ 'lang-code-for-activity-report' ]
             } );
+
             fieldReportInEnglishLink = this.fieldReportInEnglishLink = new OO.ui.TextInputWidget( {
                 icon: 'link',
+                value: this.report_link_en,
                 placeholder: gadgetMsg[ 'url-for-activity-report-in-english' ]
             } );
+
             fieldReportLangCode.toggle();
             fieldReportInEnglishLink.toggle();
             this.fieldReportNotInEnglish.on( 'change', function ( isSelected ) {
@@ -525,6 +594,10 @@
                     fieldPartnershipOther
                 ]
             } );
+            if ( this.partnership_info ) {
+                this.fieldPartnershipInfo.selectItemsByData( this.partnership_info );
+            }
+
             fieldPartnershipOtherInput = this.fieldPartnershipOtherInput = new OO.ui.TextInputWidget( {
                 placeholder: gadgetMsg[ 'partnership-other-ph' ]
             } );
@@ -604,6 +677,9 @@
                 ],
                 placeholder: gadgetMsg[ 'countries-affiliate-operates-in-placeholder' ]
             } );
+            if ( this.countries_affiliate_operates_in ) {
+                this.fieldCountriesAffiliateOperateIn.setData( this.countries_affiliate_operates_in );
+            }
 
             fieldLanguagesSupportedByAffiliateSelected = [];
             for ( i = 0; i < this.languages_supported_by_affiliate.length; i++ ) {
@@ -921,9 +997,16 @@
                 ],
                 placeholder: gadgetMsg['languages-supported-by-affiliate-placeholder']
             } );
+            if ( this.languages_supported_by_affiliate ) {
+                this.fieldLanguagesSupportedByAffiliate.setData( this.languages_supported_by_affiliate );
+            }
 
             this.fieldSandboxReport = new OO.ui.CheckboxInputWidget( {
             } );
+            if ( EDITMODE === 'sandbox' ) {
+                this.fieldSandboxReport.setSelected( true );
+            }
+
             this.fieldSandboxReport.on( 'change', function ( isSelected ) {
                 if ( isSelected ) {
                     EDITMODE = 'sandbox';
@@ -1074,7 +1157,7 @@
          * Set custom height for the modal window
          *
          */
-        ActivitiesEditor.prototype.getBodyHeight = function () {
+        ActivitiesEditorW1.prototype.getBodyHeight = function () {
             return 550;
         };
 
@@ -1082,7 +1165,7 @@
          * In the event "Select" is pressed
          *
          */
-        ActivitiesEditor.prototype.getActionProcess = function ( action ) {
+        ActivitiesEditorW1.prototype.getActionProcess = function ( action ) {
             var dialog = this, allRequiredFieldsAvailable = false;
 
             if (
@@ -1094,7 +1177,10 @@
                 allRequiredFieldsAvailable = true;
             }
 
-            if ( allRequiredFieldsAvailable && action === 'continue' ) {
+            if ( allRequiredFieldsAvailable &&
+                action === 'continue' &&
+                uniqueIdGlb !== ''
+            ) {
                 return new OO.ui.Process( function () {
                     dialog.saveItem();
                 } );
@@ -1112,7 +1198,7 @@
         /**
          * Save the changes to [[Module:Activities_Reports]] or [[Module:Activities_Reports/Sandbox]] page.
          */
-        ActivitiesEditor.prototype.saveItem = function ( deleteFlag ) {
+        ActivitiesEditorW1.prototype.saveItem = function (deleteFlag ) {
             var dialog = this;
 
             dialog.pushPending();
@@ -1135,6 +1221,8 @@
                     processWorkingEntry = function ( workingEntry ) {
                         if ( dialog.fieldGroupName.getValue() ) {
                             workingEntry.group_name = dialog.fieldGroupName.getValue().split( ' ~ ' )[ 0 ];
+                            // Cache the group name to be used in later screen
+                            groupNameGlb = workingEntry.group_name;
                         } else if ( !dialog.fieldGroupName.getValue() && workingEntry.group_name ) {
                             delete workingEntry.group_name;
                         }
@@ -1238,6 +1326,8 @@
                         workingEntry = {
                             unique_id: Math.random().toString( 36 ).substring( 2 )
                         };
+                        // Cache the unique ID to be used in the later screen.
+                        uniqueIdGlb = workingEntry.unique_id;
                         workingEntry = processWorkingEntry( workingEntry );
                         editSummary = gadgetMsg[ 'added-new-activities-report' ] + ' ' + workingEntry.group_name;
                         manifest.push( workingEntry );
@@ -1366,6 +1456,618 @@
                             ]
                         } );
 
+                        windowManager.closeWindow( messageDialog );
+
+                        // Purge the cache of the page from which the edit was made
+                        new mw.Api().postWithToken(
+                            'csrf',
+                            { action: 'purge', titles: mw.config.values.wgPageName }
+                        ).then( function () {
+                            if ( EDITMODE === 'sandbox' ) {
+                                // Just open second window (empty as nothing has been saved)
+                                openWindow2( {} );
+                            } else {
+                                // no-op
+                            }
+                        } );
+                    } ).catch( function ( error ) {
+                        alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
+                        dialog.close();
+                        console.error( error );
+                    } );
+                } );
+            } );
+        };
+
+        /**
+         * The dialog / window to be displayed as editor.
+         *
+         * @param {Object} config
+         */
+        openWindow1 = function ( config ) {
+            var activitiesEditor;
+            config.size = 'large';
+            activitiesEditor = new ActivitiesEditorW1( config );
+
+            windowManager = new OO.ui.WindowManager();
+            $( 'body' ).append( windowManager.$element );
+            windowManager.addWindows( [ activitiesEditor ] );
+            windowManager.openWindow( activitiesEditor );
+        };
+
+        /********************** Window 1 dialog logic end ***************/
+
+
+        /********************** Window 2 dialog logic start ***************/
+        /**
+         * Subclass ProcessDialog - window 2 for collecting
+         * activities related to Wikimedia affiliates.
+         *
+         * @class ActivitiesEditorW2
+         * @extends OO.ui.ProcessDialog
+         *
+         * @constructor
+         * @param {Object} config
+         */
+        function ActivitiesEditorW2( config ) {
+            this.primary_contact1 = '';
+            this.primary_contact2 = '';
+            this.editors = '';
+            this.non_editors = '';
+            this.event_participants = '';
+            this.event_supporters = '';
+            this.event_leaders = '';
+            this.past_programs = [];
+            this.capacities_to_strengthen = [];
+            this.created_at = '';
+
+            if ( config.unique_id ) {
+                this.uniqueId = config.unique_id;
+            }
+
+            if ( config.primary_contact1 ) {
+                this.primary_contact1 = config.primary_contact1;
+            }
+            if ( config.primary_contact2 ) {
+                this.prmary_contact2 = config.prmary_contact2;
+            }
+            if ( config.editors ) {
+                this.editors = config.editors;
+            }
+            if ( config.non_editors ) {
+                this.non_editors = config.non_editors;
+            }
+            if ( config.event_participants ) {
+                this.event_participants = config.event_participants;
+            }
+            if ( config.event_supporters ) {
+                this.event_supporters = config.event_supporters;
+            }
+            if ( config.event_leaders ) {
+                this.event_leaders = config.event_leaders;
+            }
+            if ( config.past_programs ) {
+                this.past_programs = config.past_programs;
+            }
+            if ( config.capacities_to_strengthen ) {
+                this.capacities_to_strengthen = config.capacities_to_strengthen;
+            }
+            if ( config.created_at ) {
+                this.created_at = config.created_at;
+            }
+            ActivitiesEditorW2.super.call( this, config );
+        }
+        OO.inheritClass( ActivitiesEditorW2, OO.ui.ProcessDialog );
+
+        ActivitiesEditorW2.static.name = 'activitiesEditor2';
+        ActivitiesEditorW2.static.title = gadgetMsg[ 'activities-report-header' ];
+        ActivitiesEditorW2.static.actions = [
+            {
+                action: 'continue',
+                modes: 'edit',
+                label: gadgetMsg[ 'submit-report' ],
+                flags: [ 'primary', 'constructive' ]
+            },
+            {
+                action: 'back',
+                modes: 'edit',
+                label: gadgetMsg[ 'ar-back-button' ],
+                flags: 'safe'
+            },
+            {
+                action: 'cancel',
+                modes: 'edit',
+                label: gadgetMsg[ 'ar-cancel-button' ],
+                flags: 'safe'
+            }
+        ];
+
+        /**
+         * Use the initialize() method to add content to the dialog's $body,
+         * to initialize widgets, and to set up event handlers.
+         */
+        ActivitiesEditorW2.prototype.initialize = function () {
+            var i, fieldPastProgramsSelected;
+
+            ActivitiesEditorW2.super.prototype.initialize.call( this );
+            this.content = new OO.ui.PanelLayout( {
+                padded: true,
+                expanded: false
+            } );
+            // Popup to be used after form validation
+            this.fieldPopup = new OO.ui.PopupWidget( {
+                $content: $( '<p style="color: red; text-align: center;">Error! Some required fields are not filled yet. Check and try submitting again.</p>' ),
+                padded: true,
+                width: 400,
+                height: 90,
+                head: true,
+                id: 'wadp-popup-widget-position'
+            } );
+
+            this.$body.append( '<h3 style="background-color: grey; text-align: center;">' + gadgetMsg[ 'ar-scr2-header' ] + '<br/></h3>' );
+
+            this.$body.append( '<p style="padding: 10px;">' + gadgetMsg[ 'ar-scr2-more-info' ] + '<br/></p>' );
+
+            this.$body.append( '<p style="background-color: lightgrey; text-align: center; padding: 10px;" >' + gadgetMsg[ 'ar-scr2-tip' ] + '<br/></p>' );
+
+            this.fieldPrimaryContact1 = new OO.ui.TextInputWidget( {
+                value: this.primary_contact1,
+                indicator: 'required',
+                required: true,
+                labelPosition: 'before',
+                label: 'User:'
+            } );
+
+            this.fieldPrimaryContact2 = new OO.ui.TextInputWidget( {
+                value: this.primary_contact2,
+                indicator: 'required',
+                required: true,
+                labelPosition: 'before',
+                label: 'User:'
+            } );
+
+            // this.$body.append( '<p><br/>' + gadgetMsg[ 'depth-of-volunteer-support-base' ] + '<br/></p>' );
+
+            this.fieldEditors = new OO.ui.TextInputWidget( {
+                type: 'number',
+                value: this.editors,
+                indicator: 'required',
+                required: true
+            } );
+
+            this.fieldNonEditors = new OO.ui.TextInputWidget( {
+                type: 'number',
+                value: this.non_editors,
+                indicator: 'required',
+                required: true
+            } );
+
+            this.fieldEventParticipants = new OO.ui.TextInputWidget( {
+                type: 'number',
+                value: this.event_participants,
+                indicator: 'required',
+                required: true
+            } );
+
+            this.fieldEventSupporters = new OO.ui.TextInputWidget( {
+                type: 'number',
+                value: this.event_supporters,
+                indicator: 'required',
+                required: true
+            } );
+
+            this.fieldEventLeaders = new OO.ui.TextInputWidget( {
+                type: 'number',
+                value: this.event_leaders,
+                indicator: 'required',
+                required: true
+            } );
+
+            fieldPastProgramsSelected = [];
+            for ( i = 0; i < this.past_programs.length; i++ ) {
+                fieldPastProgramsSelected.push(
+                    { data: this.past_programs[ i ] }
+                );
+            }
+
+            this.fieldPastPrograms = new OO.ui.CheckboxMultiselectWidget( {
+                classes: [ 'checkbox-inline' ],
+                selected: fieldPastProgramsSelected,
+                items: [
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Conference organizing',
+                        label: gadgetMsg[ 'ar-scr2-conference-organizing' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'GLAM partnerships',
+                        label: gadgetMsg[ 'ar-scr2-glam-partnerships' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Education partnerships',
+                        label: gadgetMsg[ 'ar-scr2-education-partnerships' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Policy advocacy',
+                        label: gadgetMsg[ 'ar-scr2-policy-advocacy' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Photo upload activities',
+                        label: gadgetMsg[ 'ar-scr2-photo-upload-activities' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Content editing activities',
+                        label: gadgetMsg[ 'ar-scr2-content-editing-activities' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Meet-ups',
+                        label: gadgetMsg[ 'ar-scr2-meetups' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Technical events',
+                        label: gadgetMsg[ 'ar-scr2-technical-events' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'International campaigns',
+                        label: gadgetMsg[ 'ar-scr2-international-campaigns' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'National campaigns',
+                        label: gadgetMsg[ 'ar-scr2-national-campaigns' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Other partnerships (i.e. Wikimedia Research, Wikipedia Library, STEM, etc)',
+                        label: gadgetMsg[ 'ar-scr2-other' ]
+                    } ),
+                ]
+            } );
+
+            // Append things to fieldSet
+            this.fieldSet = new OO.ui.FieldsetLayout( {
+                items: [
+                    new OO.ui.FieldLayout(
+                        this.fieldPopup, {}
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldPrimaryContact1,
+                        {
+                            label: gadgetMsg[ 'ar-primary-contact1' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldPrimaryContact2,
+                        {
+                            label: gadgetMsg[ 'ar-primary-contact2' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldEditors,
+                        {
+                            label: gadgetMsg[ 'ar-editors' ],
+                            align: 'top',
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldNonEditors,
+                        {
+                            label: gadgetMsg[ 'ar-non-editors' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldEventParticipants,
+                        {
+                            label: gadgetMsg[ 'ar-event-participants' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldEventSupporters,
+                        {
+                            label: gadgetMsg[ 'ar-event-supporters' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldEventLeaders,
+                        {
+                            label: gadgetMsg[ 'ar-event-leaders' ],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldPastPrograms,
+                        {
+                            label: gadgetMsg[ 'ar-past-programs' ],
+                            align: 'top',
+                        }
+                    )
+                ]
+            } );
+
+            // When everything is done
+            this.content.$element.append( this.fieldSet.$element );
+            this.$body.append( this.content.$element );
+        };
+
+        /**
+         * Set custom height for the modal window
+         *
+         */
+        ActivitiesEditorW2.prototype.getBodyHeight = function () {
+            return 550;
+        };
+
+        /**
+         * In the event "Select" is pressed
+         *
+         */
+        ActivitiesEditorW2.prototype.getActionProcess = function (action ) {
+            var dialog = this, allRequiredFieldsAvailable = false;
+
+            if (
+                dialog.fieldPrimaryContact1.getValue() &&
+                dialog.fieldPrimaryContact2.getValue() &&
+                dialog.fieldEditors.getValue() &&
+                dialog.fieldNonEditors.getValue() &&
+                dialog.fieldEventParticipants.getValue() &&
+                dialog.fieldEventSupporters.getValue() &&
+                dialog.fieldEventLeaders.getValue()
+            ) {
+                allRequiredFieldsAvailable = true;
+            }
+
+            if (
+                allRequiredFieldsAvailable &&
+                action === 'continue' &&
+                uniqueIdGlb !== ''
+            ) {
+                return new OO.ui.Process( function () {
+                    dialog.saveItem();
+                } );
+            } else if ( !allRequiredFieldsAvailable && action === 'continue' ) {
+                return new OO.ui.Process( function () {
+                    dialog.fieldPopup.toggle( true );
+                } );
+            } else if ( action === 'back' && uniqueIdGlb !== '' ) {
+                dialog.close();
+                return new OO.ui.Process( function () {
+                    new mw.Api().get( getModuleContent( 'Activities_Reports/Sandbox' ) ).then( function ( data ) {
+                        var entryData;
+
+                        entryData = cleanRawEntry(
+                            getRelevantRawEntry(
+                                parseContentModule( data.query.pages ),
+                                uniqueIdGlb
+                            )
+                        );
+                        openWindow1( entryData );
+                    } );
+                } );
+            } else {
+                return new OO.ui.Process( function () {
+                    dialog.close();
+                } );
+            }
+        };
+
+        /**
+         * Save the changes to [[Module:Activities_Reports/Affiliate_Information]].
+         */
+        ActivitiesEditorW2.prototype.saveItem = function ( deleteFlag ) {
+            var dialog = this;
+
+            dialog.pushPending();
+            apiObj = new mw.Api();
+
+            apiObj.get( getModuleContent( 'Activities_Reports/Affiliate_Information' ) ).then( function ( affiliateInfos ) {
+                apiObj.get( getModuleContent( 'Activities_Reports/Sandbox' ) ).then( function ( data ) {
+                    var i, insertInPlace, processWorkingEntry, editSummary,
+                        manifest = [], workingEntry, entries;
+
+                    /**
+                     * Compares entries against the edit fields and applies changes
+                     * where relevant.
+                     *
+                     * @param {Object} workingEntry the entry being worked on
+                     * @return {Object} The same entry but with modifications
+                     */
+                    processWorkingEntry = function ( workingEntry ) {
+                        workingEntry.group_name = groupNameGlb;
+
+                        if ( dialog.fieldPrimaryContact1.getValue() ) {
+                            workingEntry.primary_contact1 = dialog.fieldPrimaryContact1.getValue();
+                        } else if ( !dialog.fieldPrimaryContact1.getValue() && workingEntry.primary_contact1 ) {
+                            delete workingEntry.primary_contact1;
+                        }
+
+                        if ( dialog.fieldPrimaryContact2.getValue() ) {
+                            workingEntry.primary_contact2 = dialog.fieldPrimaryContact2.getValue();
+                        } else if ( !dialog.fieldPrimaryContact2.getValue() && workingEntry.primary_contact2 ) {
+                            delete workingEntry.primary_contact2;
+                        }
+
+                        if ( dialog.fieldEditors.getValue() ) {
+                            workingEntry.editors = dialog.fieldEditors.getValue();
+                        } else if ( !dialog.fieldEditors.getValue() && workingEntry.editors ) {
+                            delete workingEntry.editors;
+                        }
+
+                        if ( dialog.fieldNonEditors.getValue() ) {
+                            workingEntry.non_editors = dialog.fieldNonEditors.getValue();
+                        } else if ( !dialog.fieldNonEditors.getValue() && workingEntry.non_editors ) {
+                            delete workingEntry.non_editors;
+                        }
+
+                        if ( dialog.fieldEventParticipants.getValue() ) {
+                            workingEntry.event_participants = dialog.fieldEventParticipants.getValue();
+                        } else if ( !dialog.fieldEventParticipants.getValue() && workingEntry.event_participants ) {
+                            delete workingEntry.event_participants;
+                        }
+
+                        if ( dialog.fieldEventSupporters.getValue() ) {
+                            workingEntry.event_supporters = dialog.fieldEventSupporters.getValue();
+                        } else if ( !dialog.fieldEventSupporters.getValue() && workingEntry.event_supporters ) {
+                            delete workingEntry.event_supporters;
+                        }
+
+                        if ( dialog.fieldEventLeaders.getValue() ) {
+                            workingEntry.event_leaders = dialog.fieldEventLeaders.getValue();
+                        } else if ( !dialog.fieldEventLeaders.getValue() && workingEntry.event_leaders ) {
+                            delete workingEntry.event_leaders;
+                        }
+
+                        if ( dialog.fieldPastPrograms.findSelectedItemsData() ) {
+                            workingEntry.past_programs = dialog.fieldPastPrograms.findSelectedItemsData();
+                        } else if ( !dialog.fieldPastPrograms.findSelectedItemsData() && workingEntry.past_programs ) {
+                            delete workingEntry.past_programs;
+                        }
+
+                        workingEntry.created_at = new Date().toISOString();
+
+                        return workingEntry;
+                    };
+
+                    entries = parseContentModule( affiliateInfos.query.pages );
+
+                    for ( i = 0; i < entries.length; i++ ) {
+                        workingEntry = cleanRawEntry( entries[ i ].value.fields );
+                        if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
+                            manifest.push( workingEntry );
+                        } else if ( workingEntry.unique_id === uniqueIdGlb ) {
+                            workingEntry = processWorkingEntry( workingEntry );
+                            editSummary = 'Updating activity report data for: ' + workingEntry.group_name;
+                        }
+                    }
+
+                    // No unique ID means this is a new entry
+                    if ( !dialog.uniqueId ) {
+                        workingEntry = {
+                            unique_id: uniqueIdGlb
+                        };
+                        workingEntry = processWorkingEntry( workingEntry );
+                        editSummary = gadgetMsg[ 'added-new-activities-report' ] + ' ' + workingEntry.group_name;
+                        manifest.push( workingEntry );
+                    }
+
+                    // Re-generate the Lua table based on `manifest`
+                    insertInPlace = 'return {\n';
+                    for ( i = 0; i < manifest.length; i++ ) {
+                        insertInPlace += '\t{\n';
+                        if ( manifest[ i ].unique_id ) {
+                            insertInPlace += generateKeyValuePair(
+                                'unique_id',
+                                manifest[ i ].unique_id
+                            );
+                        }
+                        if ( manifest[ i ].group_name ) {
+                            insertInPlace += generateKeyValuePair(
+                                'group_name',
+                                manifest[ i ].group_name
+                            );
+                        }
+                        if ( manifest[ i ].primary_contact1 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'primary_contact1',
+                                'User:' + manifest[ i ].primary_contact1
+                            );
+                        }
+                        if ( manifest[ i ].primary_contact2 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'primary_contact2',
+                                'User:' + manifest[ i ].primary_contact2
+                            );
+                        }
+                        if ( manifest[ i ].editors ) {
+                            insertInPlace += generateKeyValuePair(
+                                'editors',
+                                manifest[ i ].editors
+                            );
+                        }
+                        if ( manifest[ i ].non_editors ) {
+                            insertInPlace += generateKeyValuePair(
+                                'non_editors',
+                                manifest[ i ].non_editors
+                            );
+                        }
+                        if ( manifest[ i ].event_participants ) {
+                            insertInPlace += generateKeyValuePair(
+                                'event_participants',
+                                manifest[ i ].event_participants
+                            );
+                        }
+                        if ( manifest[ i ].event_supporters ) {
+                            insertInPlace += generateKeyValuePair(
+                                'event_supporters',
+                                manifest[ i ].event_supporters
+                            );
+                        }
+                        if ( manifest[ i ].event_leaders ) {
+                            insertInPlace += generateKeyValuePair(
+                                'event_leaders',
+                                manifest[ i ].event_leaders
+                            );
+                        }
+                        if ( manifest[ i ].past_programs ) {
+                            insertInPlace += generateKeyValuePair(
+                                'past_programs',
+                                manifest[ i ].past_programs
+                            );
+                        }
+                        if ( manifest[ i ].capacities_to_strengthen ) {
+                            insertInPlace += generateKeyValuePair(
+                                'capacities_to_strengthen',
+                                manifest[ i ].capacities_to_strengthen
+                            );
+                        }
+                        if ( manifest[ i ].created_at ) {
+                            insertInPlace += generateKeyValuePair(
+                                'created_at',
+                                manifest[ i ].created_at
+                            );
+                        }
+                        insertInPlace += '\t},\n';
+                    }
+                    insertInPlace += '}';
+
+                    // Add the new Report into the Lua table.
+                    apiObj.postWithToken(
+                        'csrf',
+                        {
+                            action: 'edit',
+                            bot: true,
+                            nocreate: true,
+                            summary: editSummary,
+                            pageid: 11674033, // [[AR/Affiliate_Information]]
+                            text: insertInPlace,
+                            contentmodel: 'Scribunto'
+                        }
+                    ).then( function () {
+
+                        dialog.close();
+
+                        /** After saving, show a message box */
+                        var messageDialog = new OO.ui.MessageDialog();
+                        var windowManager = new OO.ui.WindowManager();
+
+                        $( 'body' ).append( windowManager.$element );
+                        // Add the dialog to the window manager.
+                        windowManager.addWindows( [ messageDialog ] );
+
+                        // Configure the message dialog when it is opened with the window manager's openWindow() method.
+                        windowManager.openWindow( messageDialog, {
+                            title: gadgetMsg[ 'success-message' ],
+                            message: gadgetMsg[ 'activity-report-saved' ],
+                            actions: [
+                                {
+                                    action: 'accept',
+                                    label: 'Dismiss',
+                                    flags: 'primary'
+                                }
+                            ]
+                        } );
+
                         // Purge the cache of the page from which the edit was made
                         new mw.Api().postWithToken(
                             'csrf',
@@ -1387,23 +2089,24 @@
          *
          * @param {Object} config
          */
-        openWindow = function ( config ) {
+        openWindow2 = function ( config ) {
             var activitiesEditor;
             config.size = 'large';
-            activitiesEditor = new ActivitiesEditor( config );
+            activitiesEditor = new ActivitiesEditorW2( config );
 
             windowManager = new OO.ui.WindowManager();
             $( 'body' ).append( windowManager.$element );
             windowManager.addWindows( [ activitiesEditor ] );
             windowManager.openWindow( activitiesEditor );
         };
+        /********************** Window 2 dialog logic end ***************/
 
         $( '.activitiesReport' ).on( 'click', function () {
             // First check if the user is logged in
             if ( mw.config.get ( 'wgUserName' ) === null ) {
                 alert( gadgetMsg[ 'you-need-to-log-in' ] );
             } else {
-                openWindow( {} );
+                openWindow1( {} );
             }
         } );
     }
