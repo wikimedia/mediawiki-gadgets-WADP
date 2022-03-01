@@ -129,7 +129,8 @@
             if ( k === 'partnership_info' ||
                 k === 'countries_affiliate_operates_in' ||
                 k === 'languages_supported_by_affiliate' ||
-                k === 'past_programs'
+                k === 'past_programs' ||
+                k === 'capacities_to_strengthen'
             ) {
                 jsonarray = JSON.stringify( v );
                 // Lua uses { } for "arrays"
@@ -241,6 +242,17 @@
                         j++
                     ) {
                         entryData.past_programs.push(
+                            relevantRawEntry[ i ].value.fields[ j ].value.value
+                        );
+                    }
+                } else if ( relevantRawEntry[ i ].key.name === 'capacities_to_strengthen' ) {
+                    entryData.capacities_to_strengthen = [];
+                    for (
+                        j = 0;
+                        j < relevantRawEntry[ i ].value.fields.length;
+                        j++
+                    ) {
+                        entryData.capacities_to_strengthen.push(
                             relevantRawEntry[ i ].value.fields[ j ].value.value
                         );
                     }
@@ -1463,12 +1475,14 @@
                             'csrf',
                             { action: 'purge', titles: mw.config.values.wgPageName }
                         ).then( function () {
+                            /* TODO: Enable when working on "back" action
                             if ( EDITMODE === 'sandbox' ) {
                                 // Just open second window (empty as nothing has been saved)
                                 openWindow2( {} );
                             } else {
                                 // no-op
-                            }
+                            }*/
+                            openWindow2( {} );
                         } );
                     } ).catch( function ( error ) {
                         alert( gadgetMsg[ 'failed-to-save-to-lua-table' ] );
@@ -1568,12 +1582,13 @@
                 label: gadgetMsg[ 'submit-report' ],
                 flags: [ 'primary', 'constructive' ]
             },
+            /* TODO: Enable when action is resolved.
             {
                 action: 'back',
                 modes: 'edit',
                 label: gadgetMsg[ 'ar-back-button' ],
                 flags: 'safe'
-            },
+            },*/
             {
                 action: 'cancel',
                 modes: 'edit',
@@ -1587,7 +1602,7 @@
          * to initialize widgets, and to set up event handlers.
          */
         ActivitiesEditorW2.prototype.initialize = function () {
-            var i, fieldPastProgramsSelected;
+            var i, fieldPastProgramsSelected, fieldCapacitiesSelected, fieldCapacities;
 
             ActivitiesEditorW2.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
@@ -1721,6 +1736,70 @@
                 ]
             } );
 
+            fieldCapacitiesSelected = [];
+            for ( i = 0; i < this.capacities_to_strengthen.length; i++ ) {
+                fieldCapacitiesSelected.push(
+                    { data: this.capacities_to_strengthen[ i ] }
+                );
+            }
+
+            fieldCapacities = this.fieldCapacitiesToStrengthen = new OO.ui.CheckboxMultiselectWidget( {
+                classes: [ 'checkbox-inline' ],
+                selected: fieldCapacitiesSelected,
+                items: [
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Evaluation',
+                        label: gadgetMsg[ 'ar-scr2-evaluation' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Community governance',
+                        label: gadgetMsg[ 'ar-scr2-community-governance' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Programs & Events',
+                        label: gadgetMsg[ 'ar-scr2-programs-and-events' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Organizational governance & resource policies',
+                        label: gadgetMsg[ 'ar-scr2-org-governance-and-resource-policies' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Conflict management',
+                        label: gadgetMsg[ 'ar-scr2-conflict-management' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Partnerships',
+                        label: gadgetMsg[ 'ar-scr2-partnerships' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Fundraising',
+                        label: gadgetMsg[ 'ar-scr2-fundraising' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Communication & media relations',
+                        label: gadgetMsg[ 'ar-scr2-comms-and-media-relations' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Contributor development',
+                        label: gadgetMsg[ 'ar-scr2-contributor-dev' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'On-wiki technical skills',
+                        label: gadgetMsg[ 'ar-scr2-onwiki-tech-skills' ]
+                    } ),
+                    new OO.ui.CheckboxMultioptionWidget( {
+                        data: 'Policy advocacy',
+                        label: gadgetMsg[ 'ar-scr2-policy-advocacy' ]
+                    } ),
+                ]
+            } );
+
+            this.fieldCapacitiesToStrengthen.on( 'select', function () {
+                if ( fieldCapacities.findSelectedItems().length === 3 ) {
+                    fieldCapacities.setDisabled( true );
+                }
+            } );
+
             // Append things to fieldSet
             this.fieldSet = new OO.ui.FieldsetLayout( {
                 items: [
@@ -1781,6 +1860,13 @@
                         {
                             label: gadgetMsg[ 'ar-past-programs' ],
                             align: 'top',
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldCapacitiesToStrengthen,
+                        {
+                            label: gadgetMsg[ 'ar-scr2-capacities-to-strengthen' ],
+                            align: 'top'
                         }
                     )
                 ]
@@ -1922,6 +2008,12 @@
                             workingEntry.past_programs = dialog.fieldPastPrograms.findSelectedItemsData();
                         } else if ( !dialog.fieldPastPrograms.findSelectedItemsData() && workingEntry.past_programs ) {
                             delete workingEntry.past_programs;
+                        }
+
+                        if ( dialog.fieldCapacitiesToStrengthen.findSelectedItemsData() ) {
+                            workingEntry.capacities_to_strengthen = dialog.fieldCapacitiesToStrengthen.findSelectedItemsData();
+                        } else if ( !dialog.fieldPastPrograms.findSelectedItemsData() && workingEntry.capacities_to_strengthen ) {
+                            delete workingEntry.capacities_to_strengthen;
                         }
 
                         workingEntry.created_at = new Date().toISOString();
