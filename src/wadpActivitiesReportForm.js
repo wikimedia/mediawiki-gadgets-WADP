@@ -1602,7 +1602,8 @@
          * to initialize widgets, and to set up event handlers.
          */
         ActivitiesEditorW2.prototype.initialize = function () {
-            var i, fieldPastProgramsSelected, fieldCapacitiesSelected, fieldCapacities;
+            var i, fieldPastProgramsSelected, fieldCapacitiesSelected,
+                fieldCapacities, multiSelectLimit = 3;
 
             ActivitiesEditorW2.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
@@ -1737,7 +1738,7 @@
             } );
 
             fieldCapacitiesSelected = [];
-            for ( i = 0; i < this.capacities_to_strengthen.length; i++ ) {
+            for ( i = 0; i < multiSelectLimit; i++ ) {
                 fieldCapacitiesSelected.push(
                     { data: this.capacities_to_strengthen[ i ] }
                 );
@@ -1749,54 +1750,67 @@
                 items: [
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Evaluation',
-                        label: gadgetMsg[ 'ar-scr2-evaluation' ]
+                        label: gadgetMsg[ 'ar-scr2-evaluation' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Community governance',
-                        label: gadgetMsg[ 'ar-scr2-community-governance' ]
+                        label: gadgetMsg[ 'ar-scr2-community-governance' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Programs & Events',
-                        label: gadgetMsg[ 'ar-scr2-programs-and-events' ]
+                        label: gadgetMsg[ 'ar-scr2-programs-and-events' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Organizational governance & resource policies',
-                        label: gadgetMsg[ 'ar-scr2-org-governance-and-resource-policies' ]
+                        label: gadgetMsg[ 'ar-scr2-org-governance-and-resource-policies' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Conflict management',
-                        label: gadgetMsg[ 'ar-scr2-conflict-management' ]
+                        label: gadgetMsg[ 'ar-scr2-conflict-management' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Partnerships',
-                        label: gadgetMsg[ 'ar-scr2-partnerships' ]
+                        label: gadgetMsg[ 'ar-scr2-partnerships' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Fundraising',
-                        label: gadgetMsg[ 'ar-scr2-fundraising' ]
+                        label: gadgetMsg[ 'ar-scr2-fundraising' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Communication & media relations',
-                        label: gadgetMsg[ 'ar-scr2-comms-and-media-relations' ]
+                        label: gadgetMsg[ 'ar-scr2-comms-and-media-relations' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Contributor development',
-                        label: gadgetMsg[ 'ar-scr2-contributor-dev' ]
+                        label: gadgetMsg[ 'ar-scr2-contributor-dev' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'On-wiki technical skills',
-                        label: gadgetMsg[ 'ar-scr2-onwiki-tech-skills' ]
+                        label: gadgetMsg[ 'ar-scr2-onwiki-tech-skills' ],
+                        id: 'max-select-options'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'Policy advocacy',
-                        label: gadgetMsg[ 'ar-scr2-policy-advocacy' ]
+                        label: gadgetMsg[ 'ar-scr2-policy-advocacy' ],
+                        id: 'max-select-options'
                     } ),
                 ]
             } );
 
             this.fieldCapacitiesToStrengthen.on( 'select', function () {
-                if ( fieldCapacities.findSelectedItems().length === 3 ) {
-                    fieldCapacities.setDisabled( true );
+                if ( $( "label#max-select-options>span>input:checked" ).length >= multiSelectLimit ) {
+                    $( "label#max-select-options>span>input:not(:checked)" ).attr( 'disabled', 'disabled' );
+                } else {
+                    $( "label#max-select-options>span>input:not(:checked)" ).removeAttr( 'disabled' );
                 }
             } );
 
