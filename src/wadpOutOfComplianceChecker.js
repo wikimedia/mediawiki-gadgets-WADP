@@ -261,12 +261,32 @@
          * @param {string} noticeLevel
          * @param {number} currentYear
          * @param {Date} reportingDueDate
+         * @param {string} groupContact1
+         * @param {string} groupContact2
          *
          * @return {string}
          */
-        oocLevel2MessageGenerator = function ( noticeLevel, currentYear, reportingDueDate ) {
+        oocLevel2MessageGenerator = function (
+            noticeLevel,
+            currentYear,
+            reportingDueDate,
+            groupContact1,
+            groupContact2
+        ) {
+            var groupContactGreetings;
+
+            if ( groupContact1 && groupContact2 ) {
+                groupContactGreetings = "[[" + groupContact1 + "]], [[" + groupContact2 + "]]";
+            } else if ( groupContact1 && !groupContact2 ) {
+                groupContactGreetings = "[[" + groupContact1 + "]]";
+            } else if ( !groupContact1 && groupContact2 ) {
+                groupContactGreetings = "[[" + groupContact2 + "]]";
+            } else {
+                groupContactGreetings = "group contacts";
+            }
+
             return "\n\n== " + noticeLevel + " Notification of Affiliate Expiration - Renewal pending submission of reporting ==\n\n" +
-            "Greetings group contacts,\n\n" +
+            "Greetings " + groupContactGreetings + ",\n\n" +
             "This is a notification to bring to your attention that your organization is currently past due on its required annual reporting. Wikimedia Affiliates are required to submit an annual activity report covering the entirety of the 12-month agreement period in order to prompt review for a renewal.  Reports must be written in English, posted to meta via the  [[Wikimedia Affiliates Data Portal]].\n\n" +
             "This page is used to track how organizations and groups are meeting reporting requirements described in their agreements with the Wikimedia Foundation (e.g. chapter agreements, thematic organization agreements, user group agreements).  It is the central place where affiliates can add reports about their activities, share their plans, and even news or social media channels with the wider movement. When new reports are available, organizations and groups should add them to this page to keep their columns up to date.\n\n" +
             "As noted on the meta [[Wikimedia Affiliates Data Portal/Reports|Reports page]], your organization’s '''" + String( currentYear ) + "''' annual reporting became past due in '''" + reportingDueDate.toISOString().slice( 0, 10 ) + "'''. Please be sure to:\n\n" +
@@ -295,9 +315,25 @@
                 }
                 // NOTE: if the affiliate page is a redirect, use the correct target page
                 apiObj.get( getAffiliateTalkPageWikiText( redirectsTo ) ).then( function ( wikiPageContent ) {
-                    affiliateTalkPageContent = parseAndExtractAffiliateTalkPageContent(
-                        wikiPageContent.query.pages
-                    ) + oocLevel2MessageGenerator( noticeLevel, currentYear, reportingDueDate );
+                    var gc1 = '', gc2 = '';
+
+                    if ( typeof orgInfo.group_contact1 != 'undefined' && orgInfo.group_contact1 ) {
+                        gc1 = orgInfo.group_contact1;
+                    }
+
+                    if ( typeof orgInfo.group_contact2 != 'undefined' && orgInfo.group_contact2 ) {
+                        gc2 = orgInfo.group_contact2;
+                    }
+
+                    affiliateTalkPageContent =
+                        parseAndExtractAffiliateTalkPageContent( wikiPageContent.query.pages ) +
+                        oocLevel2MessageGenerator(
+                            noticeLevel,
+                            currentYear,
+                            reportingDueDate,
+                            gc1,
+                            gc2
+                        );
 
                     // Post notification to talk page of affiliate
                     apiObj.postWithToken(
