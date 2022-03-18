@@ -19,7 +19,8 @@
         sendEmailToMEStaff,
         oocLevelLogGenerator,
         postTalkPageNotification,
-        getModuleContent;
+        getModuleContent,
+        resetReportingDueDate;
 
     function init() {
         /**
@@ -256,6 +257,31 @@
         };
 
         /**
+         * @param {number} reportingYear The year upon report submission
+         * @param {array} fiscalYear Fiscal year array
+         * @return {string} New reporting due date
+         */
+        resetReportingDueDate = function ( reportingYear, fiscalYear ) {
+            var currentYear = new Date().getFullYear(), reportingDueDate;
+
+            if ( reportingYear === currentYear  ) {
+                reportingDueDate = new Date(
+                    currentYear + 1,
+                    parseInt( fiscalYear[1] ) - 1,
+                    parseInt( fiscalYear[0] )
+                );
+            } else if ( reportingYear < currentYear ) {
+                reportingDueDate = new Date(
+                    currentYear,
+                    parseInt( fiscalYear[1] ) - 1,
+                    parseInt( fiscalYear[0] )
+                );
+            }
+
+            return reportingDueDate;
+        };
+
+        /**
          * OOC level 2 talk page message generator
          *
          * @param {string} noticeLevel
@@ -467,7 +493,7 @@
                                     );
                                 }
                                 todayDate = new Date();
-                                reportingDueDateYear = parseInt( reportingDueDate.toISOString().substring(0, 4) );
+                                reportingDueDateYear = parseInt( reportingDueDate.toISOString().substring( 0, 4 ) );
 
                                 /** Special case: all chaps/thorgs with no financial reports should be
                                  *  marked as non-compliant and with message "No financial report" */
@@ -511,7 +537,7 @@
                                     orgInfo.out_of_compliance_level === '0'
                                 ) {
                                     orgInfo.out_of_compliance_level = '1';
-                                    orgInfo.reporting_due_date = reportingDueDate;
+                                    orgInfo.reporting_due_date = reportingDueDate.toISOString();
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
 
@@ -526,6 +552,7 @@
                                         orgInfo.out_of_compliance_level === '0'
                                     ) {
                                         orgInfo.out_of_compliance_level = '1';
+                                        orgInfo.reporting_due_date = reportingDueDate.toISOString();
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
@@ -540,6 +567,7 @@
                                             orgInfo.uptodate_reporting = 'Tick';
                                         }
                                         orgInfo.out_of_compliance_level = '0';
+                                        orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
 
@@ -648,7 +676,7 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
-                                    orgInfo.reporting_due_date = '';
+                                    orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
@@ -666,7 +694,7 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
-                                    orgInfo.reporting_due_date = '';
+                                    orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
@@ -793,7 +821,7 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
-                                    orgInfo.reporting_due_date = '';
+                                    orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
@@ -940,7 +968,7 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
-                                    orgInfo.reporting_due_date = '';
+                                    orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
