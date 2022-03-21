@@ -192,6 +192,7 @@
          */
         generateKeyValuePair = function ( k, v ) {
             var res, jsonarray;
+
             res = '\t\t'.concat( k, ' = ' );
             if ( k === 'dm_structure' ) {
                 jsonarray = JSON.stringify( v );
@@ -221,9 +222,15 @@
          * @return {string}
          */
         sanitizeInput = function ( s ) {
-            return s
-                .replace( /\\/g, '\\\\' )
-                .replace( /\n/g, '<br />' );
+            try {
+                return s
+                    .replace( /\\/g, '\\\\' )
+                    .replace( /\n/g, '<br />' );
+            }
+            catch ( e ) {
+                console.error(e);
+                return '';
+            }
         };
 
         /**
@@ -545,7 +552,7 @@
                                     systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 0 -> 1.";
                                 }
                                 /**== OOC: Level 0 to Level 1 and back algorithm for all affiliates ==*/
-                                if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
+                                else if ( todayDate.valueOf() > reportingDueDate.valueOf() &&
                                     latestActivityReportYear !== 'nlr'
                                 ) {
                                     if ( latestActivityReportYear < currentYear &&
@@ -576,7 +583,7 @@
                                     }
                                 }
                                 /**== Level 1 - 2: For UG, Chaps & ThOrgs ==*/
-                                if ( latestActivityReportYear < currentYear &&
+                                else if ( latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Tick" &&
                                     orgInfo.out_of_compliance_level === '1'
@@ -635,7 +642,7 @@
                                     }
                                 }
                                 /**== Level 1 - 2: For new UGs, Chaps & ThOrgs, handle them differently ==*/
-                                if ( orgInfo.uptodate_reporting === "Tick-N" &&
+                                else if ( orgInfo.uptodate_reporting === "Tick-N" &&
                                     orgInfo.out_of_compliance_level === '1'
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
@@ -668,7 +675,7 @@
                                     }
                                 }
                                 /**== Level 2 back to Level 0 algorithm for all affiliates ==*/
-                                if ( latestActivityReportYear === currentYear &&
+                                else if ( latestActivityReportYear === currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     // Also check for new chaps or thorgs and catch them too - 'Cross-N'.
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
@@ -684,7 +691,7 @@
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
                                 }
-                                if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
+                                else if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
                                     ( orgInfo.org_type === 'Chapter' && ( reportingDueDateYear - parseInt( latestFinancialReportYear ) ) <= 2 ) &&
                                     orgInfo.reporting_due_date &&
                                     latestActivityReportYear !== 'nlr' &&
@@ -703,7 +710,7 @@
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 2 -> 0.";
                                 }
                                 /**== Level 2 to 3 OOC algorithm for UGs, Chaps & ThOrgs ==*/
-                                if ( orgInfo.out_of_compliance_level === '2' &&
+                                else if ( orgInfo.out_of_compliance_level === '2' &&
                                     latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Cross"
@@ -762,7 +769,7 @@
                                     }
                                 }
                                 /**== Level 2 - 3 for new affiliates (UGs, Chaps & ThOrgs) ==*/
-                                if ( orgInfo.out_of_compliance_level === '2' &&
+                                else if ( orgInfo.out_of_compliance_level === '2' &&
                                     orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
@@ -814,7 +821,7 @@
                                     }
                                 }
                                 /**== Level 3 - 0: Backward logic for all affiliates: UGs, Chaps & ThOrgs ==*/
-                                if ( latestActivityReportYear === currentYear &&
+                                else if ( latestActivityReportYear === currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
                                     orgInfo.out_of_compliance_level === '3'
@@ -829,7 +836,7 @@
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                                 }
-                                if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
+                                else if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
                                     ( orgInfo.org_type === 'Chapter' && ( reportingDueDateYear - parseInt( latestFinancialReportYear ) ) <= 2 ) &&
                                     orgInfo.reporting_due_date &&
                                     latestActivityReportYear !== 'nlr' &&
@@ -841,7 +848,7 @@
                                     // the new year.
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
-                                    orgInfo.reporting_due_date = '';
+                                    orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
@@ -850,7 +857,7 @@
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 0.";
                                 }
                                 /**== Level 3 to 4 OOC algorithm for all affiliates (UGs, Chaps, ThOrgs) ==*/
-                                if ( orgInfo.out_of_compliance_level === '3' &&
+                                else if ( orgInfo.out_of_compliance_level === '3' &&
                                     latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Cross"
@@ -918,7 +925,7 @@
                                     }
                                 }
                                 /**== Level 3 - 4 for all **new** affiliates (UGs, Chaps & ThOrgs) */
-                                if ( orgInfo.out_of_compliance_level === '3' &&
+                                else if ( orgInfo.out_of_compliance_level === '3' &&
                                     orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
@@ -960,7 +967,7 @@
                                     }
                                 }
                                 /**== Level 4 - 0: backward logic for all affiliates ==*/
-                                if ( latestActivityReportYear === currentYear &&
+                                else if ( latestActivityReportYear === currentYear &&
                                     orgInfo.reporting_due_date &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
@@ -976,7 +983,7 @@
                                     emailDispatcherCount["l050"]++;
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
                                 }
-                                if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
+                                else if ( ( orgInfo.org_type === 'User Group' && latestActivityReportYear === reportingDueDateYear ) ||
                                     ( orgInfo.org_type === 'Chapter' && ( reportingDueDateYear - parseInt( latestFinancialReportYear ) ) <= 2 ) &&
                                     latestActivityReportYear !== 'nlr' &&
                                     ( orgInfo.uptodate_reporting === "Cross" || orgInfo.uptodate_reporting === "Cross-N" ) &&
@@ -984,7 +991,7 @@
                                 ) {
                                     orgInfo.uptodate_reporting = "Tick";
                                     orgInfo.out_of_compliance_level = '0';
-                                    orgInfo.reporting_due_date = '';
+                                    orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
 
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
@@ -993,7 +1000,7 @@
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 4 -> 0.";
                                 }
                                 /**== Level 4 to 5 OOC algorithm for UGs, Chaps & ThOrgs ==*/
-                                if ( orgInfo.out_of_compliance_level === '4' &&
+                                else if ( orgInfo.out_of_compliance_level === '4' &&
                                     latestActivityReportYear < currentYear &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Cross"
@@ -1067,7 +1074,7 @@
                                     }
                                 }
                                 /**== Level 4 - 5: For all new affiliates ==*/
-                                if ( orgInfo.out_of_compliance_level === '4' &&
+                                else if ( orgInfo.out_of_compliance_level === '4' &&
                                     orgInfo.uptodate_reporting === "Cross-N"
                                 ) {
                                     if ( orgInfo.org_type === 'User Group' &&
@@ -1381,13 +1388,17 @@
                                     manifest[i].recognition_status
                                 );
                             }
-                            if ( manifest[i].me_bypass_ooc_autochecks ) {
+                            if ( manifest[i].me_bypass_ooc_autochecks != undefined &&
+                                manifest[i].me_bypass_ooc_autochecks
+                            ) {
                                 insertInPlaceOocData += generateKeyValuePair(
                                     'me_bypass_ooc_autochecks',
                                     manifest[i].me_bypass_ooc_autochecks
                                 );
                             }
-                            if ( manifest[i].out_of_compliance_level ) {
+                            if ( manifest[i].out_of_compliance_level != undefined &&
+                                manifest[i].out_of_compliance_level
+                            ) {
                                 insertInPlaceOocData += generateKeyValuePair(
                                     'out_of_compliance_level',
                                     manifest[i].out_of_compliance_level
