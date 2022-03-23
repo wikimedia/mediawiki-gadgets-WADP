@@ -487,17 +487,12 @@
                                     }
                                 }
 
-                                // generate due date for affiliate to submit report.
-                                // Log this date into the DB until we reset OOC level of
-                                // affiliate back to 0 and reset the date as well.
                                 if ( orgInfo.reporting_due_date ) {
                                     reportingDueDate = new Date( orgInfo.reporting_due_date );
                                 } else {
-                                    reportingDueDate = new Date(
-                                        currentYear,
-                                        parseInt( fiscalYear[1] ) - 1,
-                                        parseInt( fiscalYear[0] )
-                                    );
+                                    // Let us know via the console that affiliate is missing
+                                    // a reporting due date for computation.
+                                    console.error( "Missing reporting due date: ", orgInfo.group_name );
                                 }
                                 todayDate = new Date();
                                 reportingDueDateYear = parseInt( reportingDueDate.toISOString().substring( 0, 4 ) );
