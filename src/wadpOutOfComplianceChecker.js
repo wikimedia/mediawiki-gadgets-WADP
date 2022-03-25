@@ -276,13 +276,13 @@
                     currentYear + 1,
                     parseInt( fiscalYear[1] ) - 1,
                     parseInt( fiscalYear[0] )
-                );
+                ).toISOString();
             } else if ( reportingYear < currentYear ) {
                 reportingDueDate = new Date(
                     currentYear,
                     parseInt( fiscalYear[1] ) - 1,
                     parseInt( fiscalYear[0] )
-                );
+                ).toISOString();
             }
 
             return reportingDueDate;
