@@ -309,11 +309,14 @@
             var groupContactGreetings;
 
             if ( groupContact1 && groupContact2 ) {
-                groupContactGreetings = "[[" + groupContact1 + "]], [[" + groupContact2 + "]]";
+                groupContactGreetings = "[[" +
+                    groupContact1 + "|" + groupContact1.substring(5) +
+                    "]], [[" + groupContact2 + "|" + groupContact2.substring(5) +
+                    "]]";
             } else if ( groupContact1 && !groupContact2 ) {
-                groupContactGreetings = "[[" + groupContact1 + "]]";
+                groupContactGreetings = "[[" + groupContact1 + "|" + groupContact1.substring(5) + "]]";
             } else if ( !groupContact1 && groupContact2 ) {
-                groupContactGreetings = "[[" + groupContact2 + "]]";
+                groupContactGreetings = "[[" + groupContact2 + "|" + groupContact2.substring(5) + "]]";
             } else {
                 groupContactGreetings = "group contacts";
             }
