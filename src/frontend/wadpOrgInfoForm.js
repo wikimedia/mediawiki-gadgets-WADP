@@ -29,7 +29,8 @@
         fieldDerecognitionDate,
         fieldDerecognitionNote,
         getModuleContent,
-        getWikiPageContent;
+        getWikiPageContent,
+        reportingDueDateCache;
 
     userLang = mw.config.get( 'wgUserLanguage' );
 
@@ -528,7 +529,13 @@
          * to initialize widgets, and to set up event handlers.
          */
         OrgInfoEditor.prototype.initialize = function () {
-            var i, fieldDMStructureSelected, dm_structure = [], fieldMEByPass, fieldMEByPassReason;
+            var i,
+                fieldDMStructureSelected,
+                dm_structure = [],
+                fieldMEByPassClone,
+                fieldMEByPassReasonClone,
+                fieldUpToDateReportingClone,
+                fieldOutOfComplianceLevelClone;
 
             OrgInfoEditor.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
@@ -790,7 +797,7 @@
                 placeholder: gadgetMsg[ 'fiscal-year-end' ]
             } );
 
-            this.fieldUpToDateReporting = new OO.ui.DropdownInputWidget( {
+            fieldUpToDateReportingClone = this.fieldUpToDateReporting = new OO.ui.DropdownInputWidget( {
                 options: [
                     {
                         data: 'Tick',
@@ -834,7 +841,7 @@
                 this.fieldRecognitionStatus.setValue( this.recognition_status );
             }
 
-            fieldMEByPass = this.fieldMEByPassOOCAutoChecks = new OO.ui.DropdownInputWidget( {
+            fieldMEByPassClone = this.fieldMEByPassOOCAutoChecks = new OO.ui.DropdownInputWidget( {
                 options: [
                     { data: 'No', },
                     { data: 'Yes', }
@@ -844,7 +851,7 @@
                 this.fieldMEByPassOOCAutoChecks.setValue( this.me_bypass_ooc_autochecks );
             }
 
-            fieldMEByPassReason = this.fieldMEByPassReason = new OO.ui.DropdownInputWidget( {
+            fieldMEByPassReasonClone = this.fieldMEByPassReason = new OO.ui.DropdownInputWidget( {
                 options: [
                     { data: 'Report past due' },
                     { data: 'Old report submitted' },
@@ -852,20 +859,14 @@
                     { data: 'Incomplete report submitted' }
                 ]
             } );
-            fieldMEByPassReason.toggle();
-            fieldMEByPass.on('change', function () {
-                if ( fieldMEByPass.getValue() === 'Yes'  ) {
-                    fieldMEByPassReason.toggle(true);
-                } else {
-                    fieldMEByPassReason.toggle(false);
-                }
-            } );
+            fieldMEByPassReasonClone.toggle();
+
             if ( this.notes_on_reporting ) {
                 this.fieldMEByPassReason.setValue( this.notes_on_reporting );
-                fieldMEByPassReason.toggle(true);
+                fieldMEByPassReasonClone.toggle(true);
             }
 
-            this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
+            fieldOutOfComplianceLevelClone = this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
                 options: [
                     { data: '0' },
                     { data: '1' },
@@ -881,6 +882,27 @@
                     this.out_of_compliance_level ? this.out_of_compliance_level : 'N/A'
                 );
             }
+
+            // Cache the reporting due date year for event usage.
+            reportingDueDateCache = this.reporting_due_date;
+
+            fieldMEByPassClone.on('change', function () {
+                if ( fieldMEByPassClone.getValue() === 'Yes'  ) {
+                    fieldMEByPassReasonClone.toggle(true);
+                } else {
+                    // Also reset the reporting due date if compliance status
+                    // is marked as compliant and OOC level moves to 0
+                    if ( fieldUpToDateReportingClone.getValue() === "Tick" &&
+                        fieldOutOfComplianceLevelClone.getValue() === '0'
+                    ) {
+                        var yearPlusOne;
+                        yearPlusOne = new Date( reportingDueDateCache );
+                        reportingDueDateCache = ( new Date( yearPlusOne.setFullYear( yearPlusOne.getFullYear() + 1 ) ) )
+                            .toISOString();
+                    }
+                    fieldMEByPassReasonClone.toggle(false);
+                }
+            } );
 
             fieldDerecognitionDate = this.fieldDerecognitionDate = new mw.widgets.DateInputWidget( {
                 value: this.derecognition_date ? convertDateToYyyyMmDdFormat( this.derecognition_date ) : this.derecognition_date,
@@ -1380,6 +1402,12 @@
                             delete workingEntry.out_of_compliance_level;
                         }
 
+                        if ( reportingDueDateCache ) {
+                            workingEntry.reporting_due_date = reportingDueDateCache;
+                        }
+                        // Invalidate cache to avoid data corruption
+                        reportingDueDateCache = null;
+
                         if ( dialog.fieldDerecognitionDate.getValue() ) {
                             workingEntry.derecognition_date = convertDateToDdMmYyyyFormat( dialog.fieldDerecognitionDate.getValue() );
                         } else if ( !dialog.fieldDerecognitionDate.getValue() && workingEntry.derecognition_date ) {
@@ -1694,6 +1722,11 @@
                                 'group_contact1',
                                 'User:' + manifest[ i ].group_contact1
                             );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'group_contact1',
+                                ''
+                            );
                         }
                         if ( typeof manifest[ i ].group_contact2 !== 'undefined' && manifest[ i ].group_contact2.indexOf( "User:" ) !== -1 ) {
                             insertInPlace += generateKeyValuePair(
@@ -1704,6 +1737,11 @@
                             insertInPlace += generateKeyValuePair(
                                 'group_contact2',
                                 'User:' + manifest[ i ].group_contact2
+                            );
+                        } else {
+                            insertInPlace += generateKeyValuePair(
+                                'group_contact2',
+                                ''
                             );
                         }
                         if ( manifest[ i ].board_contacts ) {
