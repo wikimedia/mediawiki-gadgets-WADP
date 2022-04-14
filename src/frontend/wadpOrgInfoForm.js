@@ -30,7 +30,8 @@
         fieldDerecognitionNote,
         getModuleContent,
         getWikiPageContent,
-        reportingDueDateCache;
+        reportingDueDateCache,
+        notesOnReportingStatusCache = false;
 
     userLang = mw.config.get( 'wgUserLanguage' );
 
@@ -899,6 +900,7 @@
                         yearPlusOne = new Date( reportingDueDateCache );
                         reportingDueDateCache = ( new Date( yearPlusOne.setFullYear( yearPlusOne.getFullYear() + 1 ) ) )
                             .toISOString();
+                        notesOnReportingStatusCache = true;
                     }
                     fieldMEByPassReasonClone.toggle(false);
                 }
@@ -1404,9 +1406,13 @@
 
                         if ( reportingDueDateCache ) {
                             workingEntry.reporting_due_date = reportingDueDateCache;
+                            if ( notesOnReportingStatusCache ) {
+                                workingEntry.notes_on_reporting = '';
+                            }
                         }
                         // Invalidate cache to avoid data corruption
                         reportingDueDateCache = null;
+                        notesOnReportingStatusCache = false;
 
                         if ( dialog.fieldDerecognitionDate.getValue() ) {
                             workingEntry.derecognition_date = convertDateToDdMmYyyyFormat( dialog.fieldDerecognitionDate.getValue() );
