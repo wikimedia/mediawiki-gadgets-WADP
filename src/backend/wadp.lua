@@ -1273,7 +1273,7 @@ function p.render_affiliates_in_final_notice()
     --
     -- Return string: wikitext
 
-    affiliates_in_final_notice = ''
+    local affiliates_in_final_notice = ''
     for _, org_info in ipairs( org_infos ) do
         if ( org_info.uptodate_reporting == 'Cross' or
                 org_info.uptodate_reporting == 'Cross-N' ) and
