@@ -961,11 +961,8 @@ function p.render_derecognized_affiliates( frame )
     return derecogTable
 end
 
-function p.render_affiliates_up_to_date( frame )
+function p.render_affiliates_up_to_date()
     -- Function for displaying affiliates up to date reporting
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -979,11 +976,8 @@ function p.render_affiliates_up_to_date( frame )
     return affiliates_uptodate
 end
 
-function p.count_affiliates_uptodate( frame )
+function p.count_affiliates_uptodate()
     -- Function for count and display affiliates up to date reporting
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates up to date
 
@@ -997,11 +991,8 @@ function p.count_affiliates_uptodate( frame )
     return affiliates_uptodate
 end
 
-function p.render_affiliates_not_yet_due( frame )
+function p.render_affiliates_not_yet_due()
     -- Function for displaying affiliates up to date reporting
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -1015,11 +1006,8 @@ function p.render_affiliates_not_yet_due( frame )
     return affiliates_not_yet_due
 end
 
-function p.count_affiliates_not_yet_due( frame )
+function p.count_affiliates_not_yet_due()
     -- Function for count and display affiliates not yet due reporting
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates not yet due
 
@@ -1033,11 +1021,8 @@ function p.count_affiliates_not_yet_due( frame )
     return affiliates_not_yet_due
 end
 
-function p.count_affiliates_in_good_standing( frame )
+function p.count_affiliates_in_good_standing()
     -- Function for counting affiliates in good standing
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in good standing
 
@@ -1051,11 +1036,8 @@ function p.count_affiliates_in_good_standing( frame )
     return affiliates_in_good_standing
 end
 
-function p.count_affiliates_out_of_compliance( frame )
+function p.count_affiliates_out_of_compliance()
     -- Function for counting affiliates that are out of compliance
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates out of compliance
 
@@ -1069,11 +1051,8 @@ function p.count_affiliates_out_of_compliance( frame )
     return affiliates_out_of_compliance
 end
 
-function p.count_affiliates_in_derecognition( frame )
+function p.count_affiliates_in_derecognition()
     -- Function for counting affiliates in a derecognized state
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in a derecognized state
 
@@ -1087,11 +1066,8 @@ function p.count_affiliates_in_derecognition( frame )
     return affiliates_in_derecognition
 end
 
-function p.render_affiliates_in_suspension( frame )
+function p.render_affiliates_in_suspension()
     -- Function for displaying affiliates that have been suspended
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -1109,11 +1085,8 @@ function p.render_affiliates_in_suspension( frame )
     return affiliates_in_suspension
 end
 
-function p.count_affiliates_in_suspension( frame )
+function p.count_affiliates_in_suspension()
     -- Function for counting affiliates in a suspension state
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in a suspension state
 
@@ -1127,11 +1100,8 @@ function p.count_affiliates_in_suspension( frame )
     return affiliates_in_suspension
 end
 
-function p.render_affiliates_in_initial_review( frame )
+function p.render_affiliates_in_initial_review()
     -- Function for displaying affiliates out of compliance in initial review
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -1153,11 +1123,8 @@ function p.render_affiliates_in_initial_review( frame )
     return affiliates_in_review
 end
 
-function p.count_affiliates_in_initial_review( frame )
+function p.count_affiliates_in_initial_review()
     -- Function for counting affiliates out of compliance in initial review
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in review
 
@@ -1175,11 +1142,8 @@ function p.count_affiliates_in_initial_review( frame )
     return affiliates_in_review
 end
 
-function p.render_affiliates_in_first_notice( frame )
+function p.render_affiliates_in_first_notice()
     -- Function for displaying affiliates out of compliance in first notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -1201,11 +1165,8 @@ function p.render_affiliates_in_first_notice( frame )
     return affiliates_in_first_notice
 end
 
-function p.count_affiliates_in_first_notice( frame )
+function p.count_affiliates_in_first_notice()
     -- Function for counting affiliates out of compliance in first notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in first notice of OOC
 
@@ -1223,11 +1184,8 @@ function p.count_affiliates_in_first_notice( frame )
     return affiliates_in_first_notice
 end
 
-function p.render_affiliates_in_second_notice( frame )
+function p.render_affiliates_in_second_notice()
     -- Function for displaying affiliates out of compliance in second notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -1249,11 +1207,8 @@ function p.render_affiliates_in_second_notice( frame )
     return affiliates_in_second_notice
 end
 
-function p.count_affiliates_in_second_notice( frame )
+function p.count_affiliates_in_second_notice()
     -- Function for counting affiliates out of compliance in second notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in second notice of OOC
 
@@ -1271,11 +1226,8 @@ function p.count_affiliates_in_second_notice( frame )
     return affiliates_in_second_notice
 end
 
-function p.render_affiliates_in_third_notice( frame )
+function p.render_affiliates_in_third_notice()
     -- Function for displaying affiliates out of compliance in third notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -1297,11 +1249,8 @@ function p.render_affiliates_in_third_notice( frame )
     return affiliates_in_third_notice
 end
 
-function p.count_affiliates_in_third_notice( frame )
+function p.count_affiliates_in_third_notice()
     -- Function for counting affiliates out of compliance in third notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in third notice of OOC
 
@@ -1319,11 +1268,8 @@ function p.count_affiliates_in_third_notice( frame )
     return affiliates_in_third_notice
 end
 
-function p.render_affiliates_in_final_notice( frame )
+function p.render_affiliates_in_final_notice()
     -- Function for displaying affiliates out of compliance in final notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return string: wikitext
 
@@ -1345,11 +1291,8 @@ function p.render_affiliates_in_final_notice( frame )
     return affiliates_in_final_notice
 end
 
-function p.count_affiliates_in_final_notice( frame )
+function p.count_affiliates_in_final_notice()
     -- Function for counting affiliates out of compliance in final notice
-    --
-    -- Usage:
-    --   frame: The frame object
     --
     -- Return integer: number of affiliates in final notice of OOC
 
