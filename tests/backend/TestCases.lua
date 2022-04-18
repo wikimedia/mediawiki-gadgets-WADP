@@ -23,8 +23,38 @@ end
 -- ------------------------------------------------------------ --
 
 --[[ A simple test to see that this works. ]]
-function suite:testSum()
+function suite:testExampleSumTestCase()
     self:assertEquals(2, 1 + 1, "Expected value didn't match actual.")
+end
+
+--[[ Test `render_affiliates_in_third_notice` ]]
+function suite:testRenderAffiliatesInThirdNotice()
+    local results = suite:processFrame('render_affiliates_in_third_notice')
+
+    -- Return value should be a string
+    self:assertEquals('string', type(results))
+    -- If the string has affiliates, the length should
+    -- should be greater than zero and contain some specific
+    -- strings that we can use to assert.
+    if #results > 0 then
+        self:assertStringContains('User Group', results)
+        self:assertStringContains('Wikimedia', results)
+    else
+        self:assertEquals(
+                'No affiliates are in third notice at the moment.',
+                results
+        )
+    end
+end
+
+--[[ Test `count_affiliates_in_third_notice` ]]
+function suite:testCountAffiliatesInThirdNotice()
+    local results = suite:processFrame('count_affiliates_in_third_notice')
+
+    self:assertTrue(
+            tonumber(results) >= 0,
+            "Number of affiliates in third notice is not a valid count."
+    )
 end
 
 --[[ Test `render_affiliates_in_final_notice()` ]]

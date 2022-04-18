@@ -1231,7 +1231,7 @@ function p.render_affiliates_in_third_notice()
     --
     -- Return string: wikitext
 
-    affiliates_in_third_notice = ''
+    local affiliates_in_third_notice = ''
     for _, org_info in ipairs( org_infos ) do
         if ( org_info.uptodate_reporting == 'Cross' or
                 org_info.uptodate_reporting == 'Cross-N' ) and
@@ -1254,18 +1254,18 @@ function p.count_affiliates_in_third_notice()
     --
     -- Return integer: number of affiliates in third notice of OOC
 
-    affiliates_in_third_notice = 0
+    local affiliates_in_third_notice_count = 0
     for _, org_info in ipairs( org_infos ) do
         if ( org_info.uptodate_reporting == 'Cross' or
                 org_info.uptodate_reporting == 'Cross-N' ) and
                 org_info.out_of_compliance_level == '5' and
                 org_info.recognition_status == 'recognised'
         then
-            affiliates_in_third_notice = affiliates_in_third_notice + 1
+            affiliates_in_third_notice_count = affiliates_in_third_notice_count + 1
         end
     end
 
-    return affiliates_in_third_notice
+    return affiliates_in_third_notice_count
 end
 
 function p.render_affiliates_in_final_notice()
