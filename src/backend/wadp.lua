@@ -1296,18 +1296,18 @@ function p.count_affiliates_in_final_notice()
     --
     -- Return integer: number of affiliates in final notice of OOC
 
-    affiliates_in_final_notice = 0
+    local affiliates_in_final_notice_count = 0
     for _, org_info in ipairs( org_infos ) do
         if ( org_info.uptodate_reporting == 'Cross' or
                 org_info.uptodate_reporting == 'Cross-N' ) and
                 org_info.out_of_compliance_level == '6' and
                 org_info.recognition_status == 'recognised'
         then
-            affiliates_in_final_notice = affiliates_in_final_notice + 1
+            affiliates_in_final_notice_count = affiliates_in_final_notice_count + 1
         end
     end
 
-    return affiliates_in_final_notice
+    return affiliates_in_final_notice_count
 end
 
 return p
