@@ -101,10 +101,13 @@ function format_date( old_date, format )
     --   format: format specified
     --
     -- Return string: In the format specified
+    local date_splitted, new_date
 
     if format == 'YYYY-MM-DD' then
         date_splitted = mw.text.split( old_date, '/' )
         new_date = date_splitted[1] .. '-' .. date_splitted[2] .. '-' .. date_splitted[3]
+    elseif format == 'TS-TO-YYYY-MM-DD' then
+        new_date = string.sub( old_date, 1, 10 )
     end
 
     return new_date
@@ -445,10 +448,20 @@ function build_org_infos_template( frame, entry )
     --
     -- Return string: wikitext
 
+    local social_media = ''
+    local type
+    local template_args = {}
     entry = get_translation(entry)
-    social_media = ''
 
-    template_args = { type = entry.org_type, }
+    if entry.org_type == 'User Group' then
+        type = 'UG'
+    elseif entry.org_type == 'Chapter' then
+        type = 'Chap'
+    elseif entry.org_type == 'Thematic Organization' then
+        type = 'ThOrg'
+    else
+        type = 'AO'
+    end
 
     if entry.unique_id ~= nil then
         template_args.unique_id = entry.unique_id
@@ -459,11 +472,11 @@ function build_org_infos_template( frame, entry )
     end
 
     if entry.group_name ~= nil then
-        template_args.name = '[[' .. entry.group_name .. ']]'
+        template_args.name = '[[' .. entry.group_name .. "]] ('''" .. type .. "''')"
     end
 
     if entry.other ~= nil then
-        template_args.blog_or_news = '[' .. entry.other	.. ' ' .. entry.affiliate_code .. "'s news or blog]"
+        template_args.blog_or_news = '[' .. entry.other	.. ' ' .. entry.affiliate_code .. "'s news 🔗]"
     end
 
     if entry.agreement_date ~= nil then
@@ -483,6 +496,12 @@ function build_org_infos_template( frame, entry )
     end
 
     template_args.social_media = social_media
+
+    if entry.reporting_due_date ~= nil then
+        template_args.reporting_due_date = format_date(
+                entry.reporting_due_date, 'TS-TO-YYYY-MM-DD'
+        )
+    end
 
     if entry.dos_stamp ~= nil then
         template_args.last_updated_on = format_date( entry.dos_stamp, 'YYYY-MM-DD' )
