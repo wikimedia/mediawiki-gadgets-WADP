@@ -3,10 +3,11 @@
 local p = {}
 
 -- Constants: Note that, these constants are not used during if()
---  conditions, they're only used duing assignment of a value to
+--  conditions, they're only used during assignment of a value to
 --  a variable.
 COMPLIANT_NOR_TEXT = "''Compliant''"
 CROSS = 'Cross'
+CROSS_NEW = 'Cross-N'
 DERECONISED_STATUS = 'derecognised'
 DERECONIZED_STATUS = 'derecognized'
 NEW_AFFILIATE_NOR_TEXT = "<span style='color: blue'>''New affiliate''</span>"
@@ -14,6 +15,7 @@ NON_COMPLIANT_NOR_TEXT = "<span style='color: red'>''Report past due''</span>"
 NOT_APPLICABLE_TEXT = 'Not applicable'
 NOT_REQUIRED = "''Not Required''"
 TICK = 'Tick'
+TICK_NEW = 'Tick-N'
 
 
 -- [DB Storage]: Lua tables for Org Infos and Reports data.
@@ -81,8 +83,9 @@ function is_current_report( ts )
     --   ts: time stamp of the report
     --
     -- Return boolean: If report is current (true) or not (false)
+    local c_year, ts_year
 
-    c_year = os.date( '%Y' );
+    c_year = os.date( '%Y' )
     ts_year = mw.text.split( ts, '-' )[1]
 
     if ts_year == c_year then
@@ -152,6 +155,7 @@ function add_days_to_date( reporting_date, days )
     --   days: Number of days to add
     --
     -- Return date: with number of days added
+    local r_date, current_time, date
 
     if reporting_date ~= nil then
         r_date = mw.text.split( reporting_date, "/" );
@@ -180,6 +184,8 @@ function get_affiliate_latest_reports( org_info, activities_reports, financial_r
     --
     --
     -- Return table: entry for the latest activities_report, financial_report, grant report
+
+    local tmp_ar, tmp_fr, tmp_gr
 
     tmp_ar = { dos_stamp = '1800-01-01:T00:00:00Z' }
     tmp_fr = { dos_stamp = '1800-01-01T00:00:00Z' }
@@ -221,6 +227,7 @@ function get_affiliate_latest_report( org_info, reports )
     --
     --
     -- Return table: entry for the latest report
+    local tmp
 
     tmp = { dos_stamp = '1800-01-01:T00:00:00Z' }
 
@@ -247,8 +254,12 @@ function build_arp_template( frame, org_info, activities_report, financial_repor
     --
     -- Return string: wikitext
 
+    local template_args = {}
+    local reporting_year, sd_month_number, ed_month_number, end_year, temp, end_year_sub
+    local translatable_report_link, fy_start_month, fy_end_month, agreement_date
+    local agreement_date_month, reporting_date, reporting_month, start_year, affiliate_record
+
     org_info = get_translation( org_info )
-    template_args = {}
 
     if org_info.affiliate_code ~= nil then
         template_args.affiliate_code = org_info.affiliate_code
@@ -279,7 +290,7 @@ function build_arp_template( frame, org_info, activities_report, financial_repor
         -- Compute AAR identifiers
         end_year = tonumber( mw.text.split( activities_report.end_date, '/' )[3] )
         if end_year ~= nil then
-            temp = end_year - 1 -- To be used to contruct the year identifier
+            temp = end_year - 1 -- To be used to construct the year identifier
             end_year_sub = mw.ustring.sub( tostring( end_year ), -2 )
         end
 
@@ -294,7 +305,7 @@ function build_arp_template( frame, org_info, activities_report, financial_repor
             translatable_report_link = ' (en)'
         end
 
-        if activities_report.report_type ~= nil then
+        if activities_report.report_type ~= nil and end_year_sub ~= nil then
             if mw.ustring.find( activities_report.report_link, "https://" ) then
                 template_args.activities_report = '[' ..
                         activities_report.report_link .. ' ' .. temp .. '-'.. end_year_sub ..
@@ -420,13 +431,13 @@ function build_arp_template( frame, org_info, activities_report, financial_repor
     end
 
     -- M&E staff priority override
-    if org_info.uptodate_reporting == 'Tick' then
+    if org_info.uptodate_reporting == TICK then
         template_args.uptodate_reporting = frame:expandTemplate{ title = TICK }
         template_args.notes_on_reporting = COMPLIANT_NOR_TEXT
-    elseif org_info.uptodate_reporting == 'Cross' and org_info.notes_on_reporting ~= '' then
+    elseif org_info.uptodate_reporting == CROSS and org_info.notes_on_reporting ~= '' then
         template_args.uptodate_reporting = frame:expandTemplate{ title = CROSS }
         template_args.notes_on_reporting = "<span style='color: red'>''" .. org_info.notes_on_reporting .. "''</span>"
-    elseif org_info.uptodate_reporting == 'Cross' then
+    elseif org_info.uptodate_reporting == CROSS then
         template_args.uptodate_reporting = frame:expandTemplate{ title = CROSS }
         template_args.notes_on_reporting = NON_COMPLIANT_NOR_TEXT
     end
@@ -449,7 +460,7 @@ function build_org_infos_template( frame, entry )
     -- Return string: wikitext
 
     local social_media = ''
-    local type
+    local type, entrycontent
     local template_args = {}
     entry = get_translation(entry)
 
@@ -524,8 +535,11 @@ function build_derecog_template( frame, entry )
     --
     -- Return string: wikitext
 
+    local template_args = { type = entry.org_type, }
+    local latest_ar, latest_fr, latest_gr, reporting_year, end_year, temp, end_year_sub
+    local entrycontent
+
     entry = get_translation( entry )
-    template_args = { type = entry.org_type, }
 
     if entry.affiliate_code ~= nil then
         template_args.affiliate_code = entry.affiliate_code
@@ -546,7 +560,7 @@ function build_derecog_template( frame, entry )
 
                 -- Compute AAR identifiers
                 end_year = tonumber( mw.text.split( latest_ar.end_date, '/' )[3] )
-                temp = end_year - 1 -- To be used to contruct the year identifier
+                temp = end_year - 1 -- To be used to construct the year identifier
                 end_year_sub = mw.ustring.sub( tostring( end_year ), -2 )
 
                 template_args.activities_report = '[' .. latest_ar.report_link .. ' ' .. temp .. '-'.. end_year_sub .. ']'
@@ -584,8 +598,9 @@ function p.render_arp_table( frame )
     --
     -- Return string: wikitext
 
-    reports = ''
-    template_args = {}
+    local reports = ''
+    local template_args = {}
+    local latest_ar, latest_fr, affiliate_record
 
     for _, org_info in ipairs( org_infos ) do
         -- TODO: Decide whether to hide the reports for derecognized groups as well.
@@ -664,7 +679,7 @@ function p.render_arp_table( frame )
                 end
 
                 template_args.fiscal_year = '-'
-                template_args.uptodate_reporting = frame:expandTemplate{ title = 'Tick' }
+                template_args.uptodate_reporting = frame:expandTemplate{ title = TICK }
                 template_args.notes_on_reporting = NEW_AFFILIATE_NOR_TEXT
 
                 affiliate_record = frame:expandTemplate{
@@ -674,7 +689,7 @@ function p.render_arp_table( frame )
 
                 reports = reports .. "\n" .. affiliate_record
                 break
-            elseif org_info.uptodate_reporting == 'Cross-N' then
+            elseif org_info.uptodate_reporting == CROSS_NEW then
                 template_args.affiliate_code = org_info.affiliate_code
                 template_args.affiliate_name = '[[' .. org_info.group_name .. ']]'
                 if org_info.org_type ~= nil then
@@ -765,8 +780,9 @@ function p.render_arp_sandbox_table( frame )
     --
     -- Return string: wikitext
 
-    reports = ''
-    template_args = {}
+    local reports = ''
+    local template_args = {}
+    local latest_sb_ar, latest_sb_fr, affiliate_record
 
     for _, org_info in ipairs( org_infos ) do
         -- TODO: Decide whether to hide the reports for derecognized groups as well.
@@ -789,7 +805,7 @@ function p.render_arp_sandbox_table( frame )
 
             -- Special Cases: M&E Staff override for new affiliates: "Tick-N"
             -- and "Cross-N"
-            if org_info.uptodate_reporting == 'Tick-N' then
+            if org_info.uptodate_reporting == TICK_NEW then
                 if org_info.affiliate_code ~= nil then
                     template_args.affiliate_code = org_info.affiliate_code
                 end
@@ -947,7 +963,7 @@ function p.render_org_infos_table( frame )
     --
     -- Return string: wikitext
 
-    orgInfoTable = ''
+    local orgInfoTable = ''
 
     for _, org_info in ipairs( org_infos ) do
         if org_info.recognition_status == DERECONIZED_STATUS or org_info.recognition_status == DERECONISED_STATUS then
@@ -968,8 +984,7 @@ function p.render_derecognized_affiliates( frame )
     --
     -- Return string: wikitext
 
-    derecogTable = ''
-    aa_report = ''
+    local derecogTable = ''
 
     for _, org_info in ipairs( org_infos ) do
         if org_info.recognition_status == DERECONIZED_STATUS or org_info.recognition_status == DERECONISED_STATUS then
@@ -985,9 +1000,10 @@ function p.render_affiliates_up_to_date()
     --
     -- Return string: wikitext
 
-    affiliates_uptodate = ''
+    local affiliates_uptodate = ''
+
     for _, org_info in ipairs( org_infos ) do
-        if org_info.uptodate_reporting == 'Tick' and org_info.recognition_status == 'recognised' then
+        if org_info.uptodate_reporting == TICK and org_info.recognition_status == 'recognised' then
             affiliates_uptodate = affiliates_uptodate .. "* [[" .. org_info.group_name .. "]]\n\n"
         end
     end
@@ -1000,9 +1016,10 @@ function p.count_affiliates_uptodate()
     --
     -- Return integer: number of affiliates up to date
 
-    affiliates_uptodate = 0
+    local affiliates_uptodate = 0
+
     for _, org_info in ipairs( org_infos ) do
-        if org_info.uptodate_reporting == 'Tick' and org_info.recognition_status == 'recognised' then
+        if org_info.uptodate_reporting == TICK and org_info.recognition_status == 'recognised' then
             affiliates_uptodate = affiliates_uptodate + 1
         end
     end
@@ -1015,9 +1032,10 @@ function p.render_affiliates_not_yet_due()
     --
     -- Return string: wikitext
 
-    affiliates_not_yet_due = ''
+    local affiliates_not_yet_due = ''
+
     for _, org_info in ipairs( org_infos ) do
-        if org_info.uptodate_reporting == 'Tick-N' and org_info.recognition_status == 'recognised' then
+        if org_info.uptodate_reporting == TICK_NEW and org_info.recognition_status == 'recognised' then
             affiliates_not_yet_due = affiliates_not_yet_due .. "* [[" .. org_info.group_name .. "]]\n\n"
         end
     end
@@ -1030,9 +1048,10 @@ function p.count_affiliates_not_yet_due()
     --
     -- Return integer: number of affiliates not yet due
 
-    affiliates_not_yet_due = 0
+    local affiliates_not_yet_due = 0
+
     for _, org_info in ipairs( org_infos ) do
-        if org_info.uptodate_reporting == 'Tick-N' and org_info.recognition_status == 'recognised' then
+        if org_info.uptodate_reporting == TICK_NEW and org_info.recognition_status == 'recognised' then
             affiliates_not_yet_due = affiliates_not_yet_due + 1
         end
     end
@@ -1045,9 +1064,10 @@ function p.count_affiliates_in_good_standing()
     --
     -- Return integer: number of affiliates in good standing
 
-    affiliates_in_good_standing = 0
+    local affiliates_in_good_standing = 0
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Tick' or org_info.uptodate_reporting == 'Tick-N' ) and org_info.recognition_status == 'recognised' then
+        if ( org_info.uptodate_reporting == TICK or org_info.uptodate_reporting == TICK_NEW ) and org_info.recognition_status == 'recognised' then
             affiliates_in_good_standing = affiliates_in_good_standing + 1
         end
     end
@@ -1060,9 +1080,10 @@ function p.count_affiliates_out_of_compliance()
     --
     -- Return integer: number of affiliates out of compliance
 
-    affiliates_out_of_compliance = 0
+    local affiliates_out_of_compliance = 0
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or org_info.uptodate_reporting == 'Cross-N' ) and org_info.recognition_status == 'recognised' then
+        if ( org_info.uptodate_reporting == CROSS or org_info.uptodate_reporting == CROSS_NEW ) and org_info.recognition_status == 'recognised' then
             affiliates_out_of_compliance = affiliates_out_of_compliance + 1
         end
     end
@@ -1075,7 +1096,8 @@ function p.count_affiliates_in_derecognition()
     --
     -- Return integer: number of affiliates in a derecognized state
 
-    affiliates_in_derecognition = 0
+    local affiliates_in_derecognition = 0
+
     for _, org_info in ipairs( org_infos ) do
         if org_info.recognition_status == 'derecognised' then
             affiliates_in_derecognition = affiliates_in_derecognition + 1
@@ -1090,7 +1112,8 @@ function p.render_affiliates_in_suspension()
     --
     -- Return string: wikitext
 
-    affiliates_in_suspension = ''
+    local affiliates_in_suspension = ''
+
     for _, org_info in ipairs( org_infos ) do
         if org_info.recognition_status == 'suspended' then
             affiliates_in_suspension = affiliates_in_suspension .. "* [[" .. org_info.group_name .. "]]\n\n"
@@ -1109,7 +1132,8 @@ function p.count_affiliates_in_suspension()
     --
     -- Return integer: number of affiliates in a suspension state
 
-    affiliates_in_suspension = 0
+    local affiliates_in_suspension = 0
+
     for _, org_info in ipairs( org_infos ) do
         if org_info.recognition_status == 'suspended' then
             affiliates_in_suspension = affiliates_in_suspension + 1
@@ -1124,10 +1148,11 @@ function p.render_affiliates_in_initial_review()
     --
     -- Return string: wikitext
 
-    affiliates_in_review = ''
+    local affiliates_in_review = ''
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '2' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1147,10 +1172,11 @@ function p.count_affiliates_in_initial_review()
     --
     -- Return integer: number of affiliates in review
 
-    affiliates_in_review = 0
+    local affiliates_in_review = 0
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '2' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1166,10 +1192,11 @@ function p.render_affiliates_in_first_notice()
     --
     -- Return string: wikitext
 
-    affiliates_in_first_notice = ''
+    local affiliates_in_first_notice = ''
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '3' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1189,10 +1216,11 @@ function p.count_affiliates_in_first_notice()
     --
     -- Return integer: number of affiliates in first notice of OOC
 
-    affiliates_in_first_notice = 0
+    local affiliates_in_first_notice = 0
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '3' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1208,10 +1236,11 @@ function p.render_affiliates_in_second_notice()
     --
     -- Return string: wikitext
 
-    affiliates_in_second_notice = ''
+    local affiliates_in_second_notice = ''
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '4' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1231,10 +1260,11 @@ function p.count_affiliates_in_second_notice()
     --
     -- Return integer: number of affiliates in second notice of OOC
 
-    affiliates_in_second_notice = 0
+    local affiliates_in_second_notice = 0
+
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '4' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1252,8 +1282,8 @@ function p.render_affiliates_in_third_notice()
 
     local affiliates_in_third_notice = ''
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '5' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1275,8 +1305,8 @@ function p.count_affiliates_in_third_notice()
 
     local affiliates_in_third_notice_count = 0
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '5' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1294,8 +1324,8 @@ function p.render_affiliates_in_final_notice()
 
     local affiliates_in_final_notice = ''
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '6' and
                 org_info.recognition_status == 'recognised'
         then
@@ -1317,8 +1347,8 @@ function p.count_affiliates_in_final_notice()
 
     local affiliates_in_final_notice_count = 0
     for _, org_info in ipairs( org_infos ) do
-        if ( org_info.uptodate_reporting == 'Cross' or
-                org_info.uptodate_reporting == 'Cross-N' ) and
+        if ( org_info.uptodate_reporting == CROSS or
+                org_info.uptodate_reporting == CROSS_NEW ) and
                 org_info.out_of_compliance_level == '6' and
                 org_info.recognition_status == 'recognised'
         then
