@@ -310,6 +310,8 @@ function build_arp_template( frame, org_info, activities_report, financial_repor
                 template_args.activities_report = '[' ..
                         activities_report.report_link .. ' ' .. temp .. '-'.. end_year_sub ..
                         '] ' .. translatable_report_link
+                -- TODO: When the link is in the [[link]] format, decide how to render it
+                -- with the aliased reporting year marker.
             else
                 template_args.activities_report = '[[' ..
                         activities_report.report_link .. '|' .. temp .. '-'.. end_year_sub ..
@@ -389,6 +391,8 @@ function build_arp_template( frame, org_info, activities_report, financial_repor
                 template_args.financial_report = '[' ..
                         financial_report.report_link .. ' ' .. start_year .. '-'.. end_year ..
                         '] '  .. translatable_report_link
+            -- TODO: When the link is in the [[link]] format, decide how to render it
+            -- with the aliased reporting year marker.
             else
                 template_args.financial_report = '[[' ..
                         financial_report.report_link .. '|' .. start_year .. '-'.. end_year ..
