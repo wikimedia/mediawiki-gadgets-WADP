@@ -1610,7 +1610,10 @@
                     insertInPlace = 'return {\n';
                     for ( i = 0; i < manifest.length; i++ ) {
                         // Keep a list copy of the affiliate name
-                        mrl_affiliates += manifest[ i ].group_name + ',\n';
+                        // Make sure the list is only for recognized affiliates
+                        if ( manifest[ i ].recognition_status === 'recognised' ) {
+                            mrl_affiliates += manifest[ i ].group_name + ',\n';
+                        }
                         insertInPlace += '\t{\n';
                         if ( manifest[ i ].unique_id ) {
                             insertInPlace += generateKeyValuePair(
