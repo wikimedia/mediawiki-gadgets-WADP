@@ -502,8 +502,10 @@
                             specialAffiliatesToEmailL34 = "",
                             emailDispatcherCount = { "l050": 0, "l34": 0, "l45": 0 },
                             isFiscalYear = false,
-                            // These are the number of days before or after an affiliate's reporting due date.
-                            daysToOrAfterDueDate;
+                            // No. of days before an affiliate's reporting due date.
+                            daysToDueDate,
+                            // No. of days after an affiliate's reporting due date.
+                            daysAfterDueDate;
 
                         activitiesReports = parseModuleContent( activitiesReportsData.query.pages );
                         financialReports = parseModuleContent( financialReportsData.query.pages );
@@ -611,12 +613,13 @@
                                     }
                                 }
 
-                                daysToOrAfterDueDate = ( reportingDueDate.valueOf() - todayDate.valueOf() ) / ( 1000 * 60 * 60 * 24 );
+                                daysToDueDate = ( reportingDueDate.valueOf() - todayDate.valueOf() ) / ( 1000 * 60 * 60 * 24 );
+                                daysAfterDueDate = ( todayDate.valueOf() - reportingDueDate.valueOf() ) / ( 1000 * 60 * 60 * 24 );
                                 // Parse the number of days to an integer because the above computation will result to a float
-                                daysToOrAfterDueDate = parseInt( daysToOrAfterDueDate );
+                                daysToDueDate = parseInt( daysToDueDate );
 
                                 /**== Level 0 - 1: For new affiliates, handle them differently ==*/
-                                if ( daysToOrAfterDueDate >= 0 && daysToOrAfterDueDate <= 30 ) {
+                                if ( daysToDueDate >= 0 && daysToDueDate <= 30 ) {
                                     if ( orgInfo.org_type === 'User Group' ) {
                                         if ( orgInfo.uptodate_reporting === 'Tick-N' &&
                                             orgInfo.out_of_compliance_level === '0'
@@ -626,7 +629,7 @@
                                             oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                             ooc_manifest.push( oocLevel );
 
-                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToOrAfterDueDate );
+                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToDueDate );
 
                                             emailDispatcherCount["l050"]++;
                                             systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 0 -> 1.";
@@ -642,13 +645,13 @@
                                             oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                             ooc_manifest.push( oocLevel );
 
-                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToOrAfterDueDate );
+                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToDueDate );
 
                                             emailDispatcherCount["l050"]++;
                                             systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 0 -> 1.";
                                         }
                                     }
-                                } else if ( daysToOrAfterDueDate >= 0 && daysToOrAfterDueDate <= 120 ) {
+                                } else if ( daysToDueDate >= 0 && daysToDueDate <= 120 ) {
                                     if ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) {
                                         if ( orgInfo.uptodate_reporting === 'Tick-N' &&
                                             orgInfo.out_of_compliance_level === '0'
@@ -658,7 +661,7 @@
                                             oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                             ooc_manifest.push( oocLevel );
 
-                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToOrAfterDueDate );
+                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToDueDate );
 
                                             emailDispatcherCount["l050"]++;
                                             systemActivityLogsToEmail += "\n✦ [New Affiliate] " + orgInfo.group_name + " - OOC level 0 -> 1.";
@@ -674,7 +677,7 @@
                                             oocLevel = oocLevelLogGenerator( orgInfo.group_name, '1', reportingDueDateYear );
                                             ooc_manifest.push( oocLevel );
 
-                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToOrAfterDueDate );
+                                            postTalkPageNotification( orgInfo, reportingDueDateYear, reportingDueDate, '', 1, daysToDueDate );
 
                                             emailDispatcherCount["l050"]++;
                                             systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 0 -> 1.";
@@ -813,7 +816,7 @@
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 30 days after reporting due date
-                                        daysToOrAfterDueDate > 30
+                                        daysAfterDueDate > 30
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
@@ -828,7 +831,7 @@
                                     } else if ( orgInfo.org_type === 'User Group' &&
                                         orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 30 days after reporting due date
-                                        daysToOrAfterDueDate > 30
+                                        daysAfterDueDate > 30
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
@@ -846,7 +849,7 @@
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 30 days after reporting due date
-                                        daysToOrAfterDueDate > 30
+                                        daysAfterDueDate > 30
                                     ) {
                                         orgInfo.out_of_compliance_level = '3';
 
@@ -917,7 +920,7 @@
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 60 days after reporting due date
-                                        daysToOrAfterDueDate > 60
+                                        daysAfterDueDate > 60
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
@@ -936,7 +939,7 @@
                                     } else if ( orgInfo.org_type === 'User Group' &&
                                         orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 60 days after reporting due date
-                                        daysToOrAfterDueDate > 60
+                                        daysAfterDueDate > 60
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
@@ -956,7 +959,7 @@
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 60 days after reporting due date
-                                        daysToOrAfterDueDate > 60
+                                        daysAfterDueDate > 60
                                     ) {
                                         orgInfo.out_of_compliance_level = '4';
 
@@ -1036,7 +1039,7 @@
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
                                         // check if days difference is greater than 90 days after reporting due date
-                                        daysToOrAfterDueDate > 90
+                                        daysAfterDueDate > 90
                                     ) {
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
@@ -1056,7 +1059,7 @@
                                     } else if ( orgInfo.org_type === 'User Group' &&
                                         orgInfo.legal_entity === 'No' &&
                                         // check if days difference is greater than 90 days after reporting due date
-                                        daysToOrAfterDueDate > 90
+                                        daysAfterDueDate > 90
                                     ) {
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
@@ -1079,7 +1082,7 @@
                                         // Financial report year can be 1 year off from activity report year.
                                         ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
                                         // check if days difference is greater than 90 days after reporting due date
-                                        daysToOrAfterDueDate > 90
+                                        daysAfterDueDate > 90
                                     ) {
                                         orgInfo.out_of_compliance_level = '5';
                                         orgInfo.me_bypass_ooc_autochecks = 'Yes';
