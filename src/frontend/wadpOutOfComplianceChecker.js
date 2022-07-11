@@ -21,7 +21,11 @@
         oocLevelLogGenerator,
         postTalkPageNotification,
         getModuleContent,
-        resetReportingDueDate;
+        resetReportingDueDate,
+        // If an affiliate's distance between its activity and financial report year
+        // is less than the offset below, then the affiliate is considered compliant
+        // provided that the activity report is the latest.
+        AR_FR_YEAR_OFFSET = 2;
 
     function init() {
         /**
@@ -697,9 +701,6 @@
                                     systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 0.";
                                 }
                                 /**== Level 1 - 2: For UG, Chaps & ThOrgs ==*/
-                                // TODO: The current reporting due dates for UGs in the DB doesn't carter for
-                                // the extra 30 days grace period. Do this in code and update the reporting
-                                // due dates in the DB in the near future and remove the in the code.
                                 else if ( latestActivityReportYear < currentYear &&
                                     ( latestActivityReportYear - currentYear ) < 2 &&
                                     latestActivityReportYear !== 'nlr' &&
@@ -709,7 +710,7 @@
                                     if ( orgInfo.org_type === 'User Group' &&
                                         orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
-                                        ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         todayDate.valueOf() > reportingDueDate.valueOf()
                                     ) {
                                         orgInfo.out_of_compliance_level = '2';
@@ -740,7 +741,7 @@
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 1 -> 2.";
                                     } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
                                         // Financial report year can be 1 year off from activity report year.
-                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         todayDate.valueOf() > reportingDueDate.valueOf()
                                     ) {
                                         orgInfo.out_of_compliance_level = '2';
@@ -777,7 +778,7 @@
                                 ) {
                                     if ( ( ( orgInfo.org_type === 'User Group' && orgInfo.legal_entity === 'Yes' ) ||
                                             orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                        latestActivityReportYear - latestFinancialReportYear < 2
+                                        latestActivityReportYear - latestFinancialReportYear < AR_FR_YEAR_OFFSET
                                     ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
@@ -810,7 +811,7 @@
                                     if ( orgInfo.org_type === 'User Group' &&
                                         orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
-                                        ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 30 days after reporting due date
                                         daysToOrAfterDueDate > 30
                                     ) {
@@ -843,7 +844,7 @@
                                     // forward logic: 2 - 3 for chaps & thorgs
                                     else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
                                         // Financial report year can be 1 year off from activity report year.
-                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 30 days after reporting due date
                                         daysToOrAfterDueDate > 30
                                     ) {
@@ -882,7 +883,7 @@
                                 ) {
                                     if ( ( ( orgInfo.org_type === 'User Group' && orgInfo.legal_entity === 'Yes' ) ||
                                             orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                        latestActivityReportYear - latestFinancialReportYear < 2
+                                        latestActivityReportYear - latestFinancialReportYear < AR_FR_YEAR_OFFSET
                                     ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
@@ -914,7 +915,7 @@
                                     if ( orgInfo.org_type === 'User Group' &&
                                         orgInfo.legal_entity === 'Yes' &&
                                         // Financial report year can be 1 year off from activity report year.
-                                        ( latestActivityReportYear - latestFinancialReportYear ) > 1 &&
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 60 days after reporting due date
                                         daysToOrAfterDueDate > 60
                                     ) {
@@ -953,7 +954,7 @@
                                         systemActivityLogsToEmail += "\n✦ " + orgInfo.group_name + " - OOC level 3 -> 4.";
                                     } else if ( ( orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
                                         // Financial report year can be 1 year off from activity report year.
-                                        ( latestActivityReportYear - latestFinancialReportYear ) < 2 &&
+                                        ( latestActivityReportYear - latestFinancialReportYear ) < AR_FR_YEAR_OFFSET &&
                                         // check if days difference is greater than 60 days after reporting due date
                                         daysToOrAfterDueDate > 60
                                     ) {
@@ -1000,7 +1001,7 @@
                                 ) {
                                     if ( ( ( orgInfo.org_type === 'User Group' && orgInfo.legal_entity === 'Yes' ) ||
                                             orgInfo.org_type === 'Chapter' || orgInfo.org_type === 'Thematic Organization' ) &&
-                                        latestActivityReportYear - latestFinancialReportYear < 2
+                                        latestActivityReportYear - latestFinancialReportYear < AR_FR_YEAR_OFFSET
                                     ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
