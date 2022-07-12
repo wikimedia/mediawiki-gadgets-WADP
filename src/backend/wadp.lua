@@ -487,7 +487,11 @@ function build_org_infos_template( frame, entry )
     end
 
     if entry.group_name ~= nil then
-        template_args.name = '[[' .. entry.group_name .. "]] ('''" .. type .. "''')"
+        if entry.me_bypass_ooc_autochecks == "Yes" then
+            template_args.name = '[[' .. entry.group_name .. "]] ('''" .. type .. "''') <sup>bp</sup>"
+        else
+            template_args.name = '[[' .. entry.group_name .. "]] ('''" .. type .. "''')"
+        end
     end
 
     if entry.other ~= nil then
