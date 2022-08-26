@@ -269,28 +269,32 @@
         };
 
         /**
-         * @param {number} reportingYear The year upon report submission
-         * @param {array} fiscalYear Fiscal year array
+         * @param {string} currentReportingDueDate The current reporting due date of the affiliate
+         *
          * @return {string} New reporting due date
          */
-        resetReportingDueDate = function ( reportingYear, fiscalYear ) {
-            var currentYear = new Date().getFullYear(), reportingDueDate;
+        resetReportingDueDate = function ( currentReportingDueDate ) {
+            var currentYear = new Date().getFullYear(), nextReportingDueDate,
+                curReportingDueDate, curReportingDueDateYear;
 
-            if ( reportingYear === currentYear  ) {
-                reportingDueDate = new Date(
+            curReportingDueDate = currentReportingDueDate.substring( 0, 10 ).split( "-" );
+            curReportingDueDateYear = parseInt( curReportingDueDate[0] );
+
+            if ( curReportingDueDateYear === currentYear  ) {
+                nextReportingDueDate = new Date(
                     currentYear + 1,
-                    parseInt( fiscalYear[1] ) - 1,
-                    parseInt( fiscalYear[0] )
+                    parseInt( curReportingDueDate[1] ) - 1,
+                    parseInt( curReportingDueDate[2] )
                 ).toISOString();
-            } else if ( reportingYear < currentYear ) {
-                reportingDueDate = new Date(
+            } else if ( curReportingDueDateYear < currentYear ) {
+                nextReportingDueDate = new Date(
                     currentYear,
-                    parseInt( fiscalYear[1] ) - 1,
-                    parseInt( fiscalYear[0] )
+                    parseInt( curReportingDueDate[1] ) - 1,
+                    parseInt( curReportingDueDate[2] )
                 ).toISOString();
             }
 
-            return reportingDueDate;
+            return nextReportingDueDate;
         };
 
         /**
@@ -555,7 +559,7 @@
                                     fiscalYear = orgInfo.agreement_date.split( "/" );
                                     if ( parseInt( fiscalYear[2] ) === currentYear ) {
                                         // Ignore this affiliate and not check it at all because
-                                        // it was just recognized and should be check only the following year.
+                                        // it was just recognized and should be checked only the following year.
                                         //
                                         // NOTE: Just push the affiliate into the manifest before ignoring.
                                         // Silently ignoring without pushing to manifest caused a regression
@@ -696,7 +700,7 @@
                                         orgInfo.uptodate_reporting = 'Tick';
                                     }
                                     orgInfo.out_of_compliance_level = '0';
-                                    orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
+                                    orgInfo.reporting_due_date = resetReportingDueDate( orgInfo.reporting_due_date );
                                     oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                     ooc_manifest.push( oocLevel );
 
@@ -705,7 +709,6 @@
                                 }
                                 /**== Level 1 - 2: For UG, Chaps & ThOrgs ==*/
                                 else if ( latestActivityReportYear < currentYear &&
-                                    ( latestActivityReportYear - currentYear ) < 2 &&
                                     latestActivityReportYear !== 'nlr' &&
                                     orgInfo.uptodate_reporting === "Tick" &&
                                     orgInfo.out_of_compliance_level === '1'
@@ -785,7 +788,7 @@
                                     ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
-                                        orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
+                                        orgInfo.reporting_due_date = resetReportingDueDate( orgInfo.reporting_due_date );
 
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
@@ -795,7 +798,7 @@
                                     } else if ( orgInfo.org_type === 'User Group' && orgInfo.legal_entity === 'No' ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
-                                        orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
+                                        orgInfo.reporting_due_date = resetReportingDueDate( orgInfo.reporting_due_date );
 
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
@@ -890,7 +893,7 @@
                                     ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
-                                        orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
+                                        orgInfo.reporting_due_date = resetReportingDueDate( orgInfo.reporting_due_date );
 
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
@@ -900,7 +903,7 @@
                                     } else if ( orgInfo.org_type === 'User Group' && orgInfo.legal_entity === 'No' ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
-                                        orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
+                                        orgInfo.reporting_due_date = resetReportingDueDate( orgInfo.reporting_due_date );
 
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
@@ -1008,7 +1011,7 @@
                                     ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
-                                        orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
+                                        orgInfo.reporting_due_date = resetReportingDueDate( orgInfo.reporting_due_date );
 
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
@@ -1018,7 +1021,7 @@
                                     } else if ( orgInfo.org_type === 'User Group' && orgInfo.legal_entity === 'No' ) {
                                         orgInfo.uptodate_reporting = "Tick";
                                         orgInfo.out_of_compliance_level = '0';
-                                        orgInfo.reporting_due_date = resetReportingDueDate( reportingDueDateYear, fiscalYear );
+                                        orgInfo.reporting_due_date = resetReportingDueDate( orgInfo.reporting_due_date );
 
                                         oocLevel = oocLevelLogGenerator( orgInfo.group_name, '0', reportingDueDateYear );
                                         ooc_manifest.push( oocLevel );
