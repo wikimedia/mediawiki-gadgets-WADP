@@ -275,23 +275,17 @@
          */
         resetReportingDueDate = function ( currentReportingDueDate ) {
             var currentYear = new Date().getFullYear(), nextReportingDueDate,
-                curReportingDueDate, curReportingDueDateYear;
+                curReportingDueDate, curReportingDueDateYear, newDate;
 
             curReportingDueDate = currentReportingDueDate.substring( 0, 10 ).split( "-" );
             curReportingDueDateYear = parseInt( curReportingDueDate[0] );
 
             if ( curReportingDueDateYear === currentYear  ) {
-                nextReportingDueDate = new Date(
-                    currentYear + 1,
-                    parseInt( curReportingDueDate[1] ) - 1,
-                    parseInt( curReportingDueDate[2] )
-                ).toISOString();
+                newDate = String(currentYear + 1) + '-' + curReportingDueDate[1] + '-' + curReportingDueDate[2];
+                nextReportingDueDate = new Date( newDate ).toISOString();
             } else if ( curReportingDueDateYear < currentYear ) {
-                nextReportingDueDate = new Date(
-                    currentYear,
-                    parseInt( curReportingDueDate[1] ) - 1,
-                    parseInt( curReportingDueDate[2] )
-                ).toISOString();
+                newDate = String( currentYear ) + '-' + curReportingDueDate[1] + '-' + curReportingDueDate[2];
+                nextReportingDueDate = new Date( newDate ).toISOString();
             }
 
             return nextReportingDueDate;
