@@ -14,7 +14,12 @@
     if ( pageName.startsWith( 'Wikimedia_Affiliates_Data_Portal' ) ) {
         /** TODO: During maintenance mode, lock app from writing to lua tables */
 
-        var me_staff = [ 'DAlangi (WMF)', 'DNdubane (WMF)', 'MKaur (WMF)' ];
+        var me_staff = [
+            'DAlangi (WMF)',
+            'DNdubane (WMF)',
+            'MKaur (WMF)',
+            'AChina (WMF)'
+        ];
 
         if ( me_staff.indexOf( mw.config.values.wgUserName ) > -1 ) {
             /* Load OrgInfo Form: should load first before OOC checker */

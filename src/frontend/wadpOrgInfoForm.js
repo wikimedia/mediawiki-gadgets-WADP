@@ -9,7 +9,8 @@
     var users = [
         'DAlangi (WMF)',
         'DNdubane (WMF)',
-        'MKaur (WMF)'
+        'MKaur (WMF)',
+        'AChina (WMF)'
     ];
 
     var gadgetMsg = {},
