@@ -10,7 +10,7 @@
         'DAlangi (WMF)',
         'DNdubane (WMF)',
         'MKaur (WMF)',
-        'AChina (WMF)'
+        'AChina-WMF'
     ];
 
     var gadgetMsg = {},

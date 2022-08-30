@@ -18,7 +18,7 @@
             'DAlangi (WMF)',
             'DNdubane (WMF)',
             'MKaur (WMF)',
-            'AChina (WMF)'
+            'AChina-WMF'
         ];
 
         if ( me_staff.indexOf( mw.config.values.wgUserName ) > -1 ) {
