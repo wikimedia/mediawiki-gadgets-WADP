@@ -858,7 +858,8 @@
                     { data: 'Report past due' },
                     { data: 'Old report submitted' },
                     { data: 'Empty report submitted' },
-                    { data: 'Incomplete report submitted' }
+                    { data: 'Incomplete report submitted' },
+                    { data: 'Other - Specify custom notes below' }
                 ]
             } );
             fieldMEByPassReasonClone.toggle();
@@ -867,6 +868,11 @@
                 this.fieldMEByPassReason.setValue( this.notes_on_reporting );
                 fieldMEByPassReasonClone.toggle(true);
             }
+
+            this.fieldNotesOnReporting = new OO.ui.TextInputWidget( {
+                maxLength: 60,
+                placeholder: gadgetMsg[ 'org-info-notes-on-reporting-placeholder' ]
+            } );
 
             fieldOutOfComplianceLevelClone = this.fieldOutOfComplianceLevel = new OO.ui.DropdownInputWidget( {
                 options: [
@@ -1151,6 +1157,13 @@
                         }
                     ),
                     new OO.ui.FieldLayout(
+                        this.fieldNotesOnReporting,
+                        {
+                            label: gadgetMsg[ 'org-info-notes-on-reporting' ],
+                            align: 'top',
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
                         this.fieldDerecognitionDate,
                         {
                             align: 'top',
@@ -1392,7 +1405,11 @@
 
                         if ( dialog.fieldMEByPassOOCAutoChecks.getValue() === "Yes" ) {
                             workingEntry.me_bypass_ooc_autochecks = dialog.fieldMEByPassOOCAutoChecks.getValue();
-                            workingEntry.notes_on_reporting = dialog.fieldMEByPassReason.getValue();
+                            if ( dialog.fieldNotesOnReporting.getValue() ) {
+                                workingEntry.notes_on_reporting = dialog.fieldNotesOnReporting.getValue();
+                            } else {
+                                workingEntry.notes_on_reporting = dialog.fieldMEByPassReason.getValue();
+                            }
                         } else if ( dialog.fieldMEByPassOOCAutoChecks.getValue() === "No" ) {
                             workingEntry.me_bypass_ooc_autochecks = dialog.fieldMEByPassOOCAutoChecks.getValue();
                         } else if ( !dialog.fieldMEByPassOOCAutoChecks.getValue() && workingEntry.me_bypass_ooc_autochecks ) {
