@@ -10,6 +10,8 @@ CROSS = 'Cross'
 CROSS_NEW = 'Cross-N'
 DERECONISED_STATUS = 'derecognised'
 DERECONIZED_STATUS = 'derecognized'
+DEFERRED_STATUS = 'deferred'
+DEFER = "<span style='color: #ffc800'>''Deferred''</span>"
 NEW_AFFILIATE_NOR_TEXT = "<span style='color: blue'>''New affiliate''</span>"
 NON_COMPLIANT_NOR_TEXT = "<span style='color: red'>''Report past due''</span>"
 NOT_APPLICABLE_TEXT = 'Not applicable'
@@ -435,7 +437,12 @@ function build_arp_template( frame, org_info, activities_report, financial_repor
     end
 
     -- M&E staff priority override
-    if org_info.uptodate_reporting == TICK then
+    -- @note: We want to check this first as it takes precedence over
+    -- recognition_status and compliance_status
+     if org_info.recognition_status == DEFERRED_STATUS then
+        template_args.uptodate_reporting = '⚠️'
+        template_args.notes_on_reporting = DEFER
+    elseif org_info.uptodate_reporting == TICK then
         template_args.uptodate_reporting = frame:expandTemplate{ title = TICK }
         template_args.notes_on_reporting = COMPLIANT_NOR_TEXT
     elseif org_info.uptodate_reporting == CROSS and org_info.notes_on_reporting ~= '' then
