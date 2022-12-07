@@ -834,6 +834,10 @@
                         label: gadgetMsg[ 'affiliate-derecognised' ]
                     },
                     {
+                        data: 'deferred',
+                        label: gadgetMsg[ 'org-info-deferred-state' ]
+                    },
+                    {
                         data: 'suspended',
                         label: gadgetMsg[ 'affiliate-suspended' ]
                     }
