@@ -181,8 +181,8 @@
                 // Loop through the individual key-value pairs within each entry
                 for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
                     if (
-                        entries[ i ].value.fields[ j ].key.name === 'unique_id'
-                        && entries[ i ].value.fields[ j ].value.value === uniqueId
+                        entries[ i ].value.fields[ j ].key.name === 'unique_id' &&
+                        entries[ i ].value.fields[ j ].value.value === uniqueId
                     ) {
                         return entries[ i ].value.fields;
                     }
@@ -360,7 +360,7 @@
         function ActivitiesEditorW1( config ) {
             this.group_name = '';
             this.report_type = '';
-            this.multiyear_duation = ''
+            this.multiyear_duation = '';
             this.start_date = '';
             this.end_date = '';
             this.report_link = '';
