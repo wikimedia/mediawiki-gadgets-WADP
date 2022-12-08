@@ -2073,13 +2073,23 @@
                                 manifest[ i ].group_name
                             );
                         }
-                        if ( manifest[ i ].primary_contact1 ) {
+                        if ( manifest[ i ].primary_contact1 && manifest[ i ].primary_contact1.indexOf( "User:" ) !== -1 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'primary_contact1',
+                                manifest[ i ].primary_contact1
+                            );
+                        } else {
                             insertInPlace += generateKeyValuePair(
                                 'primary_contact1',
                                 'User:' + manifest[ i ].primary_contact1
                             );
                         }
-                        if ( manifest[ i ].primary_contact2 ) {
+                        if ( manifest[ i ].primary_contact2 && manifest[ i ].primary_contact2.indexOf( "User:" ) !== -1 ) {
+                            insertInPlace += generateKeyValuePair(
+                                'primary_contact2',
+                                manifest[ i ].primary_contact2
+                            );
+                        } else {
                             insertInPlace += generateKeyValuePair(
                                 'primary_contact2',
                                 'User:' + manifest[ i ].primary_contact2
