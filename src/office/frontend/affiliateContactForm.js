@@ -512,11 +512,13 @@
             this.primary_contact_1_username = '';
             this.primary_contact_1_email_address = '';
             this.primary_contact_1_designation = '';
+            this.primary_contact_1_other_input = '';
             this.primary_contact_2_firstname = '';
             this.primary_contact_2_surname = '';
             this.primary_contact_2_username = '';
             this.primary_contact_2_email_address = '';
             this.primary_contact_2_designation = '';
+            this.primary_contact_2_other_input = '';
             this.dos_stamp = '';
 
             if (config.unique_id) {
@@ -540,6 +542,9 @@
             if (config.primary_contact_1_designation) {
                 this.primary_contact_1_designation = config.primary_contact_1_designation;
             }
+            if (config.primary_contact_1_other_input) {
+                this.primary_contact_1_other_input = config.primary_contact_1_other_input;
+            }
             if (config.primary_contact_2_firstname) {
                 this.primary_contact_1_firstname = config.primary_contact_1_firstname;
             }
@@ -554,6 +559,9 @@
             }
             if (config.primary_contact_2_designation) {
                 this.primary_contact_1_designation = config.primary_contact_1_designation;
+            }
+            if (config.primary_contact_2_other_input) {
+                this.primary_contact_2_other_input = config.primary_contact_2_other_input;
             }
             if (config.dos_stamp) {
                 this.dos_stamp = config.dos_stamp;
@@ -662,6 +670,13 @@
                 indicator: 'required',
                 required: true
             });
+            this.field_primary_contact_1_other_input = new OO.ui.TextInputWidget({
+                labelPosition: 'before',
+                icon: 'logoWikimedia',
+                value: this.field_primary_contact_1_other_input,
+                // placeholder: 'Email Address' //gadgetMsg['group-membership-page-link']
+                classes: ['full-width']
+            });
             this.field_primary_contact_2_label = new OO.ui.LabelWidget({
                 label: 'Second Primary Contact'
             });
@@ -701,6 +716,13 @@
                 indicator: 'required',
                 required: true
             });
+            this.field_primary_contact_2_other_input = new OO.ui.TextInputWidget({
+                labelPosition: 'before',
+                icon: 'logoWikimedia',
+                value: this.field_primary_contact_2_other_input,
+                // placeholder: 'Email Address' //gadgetMsg['group-membership-page-link']
+                classes: ['full-width']
+            });
 
             /* Get today's date in YYYY/MM/DD format. dos stands for "date of submission" */
             this.dos_stamp = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
@@ -721,20 +743,52 @@
                 menu: {
                     items: [
                         new OO.ui.MenuOptionWidget({
-                            data: 'Founder',
-                            label: 'Founder'
+                            data: 'Board Chair/President',
+                            label: 'Board Chair/President'
                         }),
                         new OO.ui.MenuOptionWidget({
-                            data: 'Co-Founder',
-                            label: 'Co-Founder'
+                            data: 'Board Member',
+                            label: 'Board Member'
                         }),
                         new OO.ui.MenuOptionWidget({
-                            data: 'Member',
-                            label: 'Member'
+                            data: 'Board Secretary',
+                            label: 'Board Secretary'
                         }),
                         new OO.ui.MenuOptionWidget({
-                            data: 'Secretary',
-                            label: 'Secretary'
+                            data: 'Board Vice Chair/President',
+                            label: 'Board Vice Chair/President'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Community Liaison',
+                            label: 'Community Liaison'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Executive/Managing Director',
+                            label: 'Executive/Managing Directo'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Office Manager',
+                            label: 'Office Manager'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Operations Manager',
+                            label: 'Operations Manager'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Primary Contact',
+                            label: 'Primary Contact'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Program/Project Manager',
+                            label: 'Program/Project Manager'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Secondary contact',
+                            label: 'Secondary contact'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Other',
+                            label: 'Other...'
                         })
                     ]
                 }
@@ -751,20 +805,52 @@
                 menu: {
                     items: [
                         new OO.ui.MenuOptionWidget({
-                            data: 'Founder',
-                            label: 'Founder'
+                            data: 'Board Chair/President',
+                            label: 'Board Chair/President'
                         }),
                         new OO.ui.MenuOptionWidget({
-                            data: 'Co-Founder',
-                            label: 'Co-Founder'
+                            data: 'Board Member',
+                            label: 'Board Member'
                         }),
                         new OO.ui.MenuOptionWidget({
-                            data: 'Member',
-                            label: 'Member'
+                            data: 'Board Secretary',
+                            label: 'Board Secretary'
                         }),
                         new OO.ui.MenuOptionWidget({
-                            data: 'Secretary',
-                            label: 'Secretary'
+                            data: 'Board Vice Chair/President',
+                            label: 'Board Vice Chair/President'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Community Liaison',
+                            label: 'Community Liaison'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Executive/Managing Director',
+                            label: 'Executive/Managing Directo'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Office Manager',
+                            label: 'Office Manager'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Operations Manager',
+                            label: 'Operations Manager'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Primary Contact',
+                            label: 'Primary Contact'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Program/Project Manager',
+                            label: 'Program/Project Manager'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Secondary contact',
+                            label: 'Secondary contact'
+                        }),
+                        new OO.ui.MenuOptionWidget({
+                            data: 'Other',
+                            label: 'Other...'
                         })
                     ]
                 }
@@ -830,6 +916,13 @@
                         }
                     ),
                     new OO.ui.FieldLayout(
+                        this.field_primary_contact_1_other_input,
+                        {
+                            label: 'If Other, provide contact 1 designation', //gadgetMsg['group-membership-page'],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
                         this.field_primary_contact_2_label,
                         {}
                     ),
@@ -865,6 +958,13 @@
                         this.field_primary_contact_2_designation,
                         {
                             label: 'Designation', //gadgetMsg['group-membership-page'],
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.field_primary_contact_2_other_input,
+                        {
+                            label: 'If Other, provide contact 2 designation', //gadgetMsg['group-membership-page'],
                             align: 'top'
                         }
                     ),
@@ -960,6 +1060,7 @@
         ContactInfoEditor.prototype.getActionProcess = function (action) {
             var dialog = this,
                 allRequiredFieldsAvailable = false,
+                otherContactDesignationSelected = false,
                 isValidEmail = false;
 
 
@@ -979,6 +1080,15 @@
                 dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData()
             ) {
                 allRequiredFieldsAvailable = true;
+            }
+
+            if (dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ||
+                dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other'){
+                otherContactDesignationSelected = true;
+            }
+            if (otherContactDesignationSelected && (!dialog.field_primary_contact_1_other_input.getValue() ||
+                !dialog.field_primary_contact_2_other_input.getValue())){
+                allRequiredFieldsAvailable = false;
             }
 
             if (validateEmail(dialog.field_primary_contact_1_email_address.getValue()) &&
@@ -1052,7 +1162,11 @@
                         workingEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
                     }
                     if (dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData()) {
-                        workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
+                        if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_other_input.getValue();
+                        } else {
+                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
+                        }
                     }
                     // Primary Contact 2
                     if (dialog.field_primary_contact_2_firstname.getValue()) {
@@ -1068,7 +1182,11 @@
                         workingEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
                     }
                     if (dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData()) {
-                        workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
+                        if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_other_input.getValue();
+                        } else {
+                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
+                        }
                     }
                     return workingEntry;
                 };
