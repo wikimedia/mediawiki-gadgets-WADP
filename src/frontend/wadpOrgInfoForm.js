@@ -1864,7 +1864,7 @@
                                 'reporting_due_date',
                                 manifest[i].reporting_due_date
                             );
-                        } else { // Just use an empty string if the affiliate is compliant.
+                        } else { // Fallback to the same day a year ahead for new affiliates.
                             insertInPlace += generateKeyValuePair(
                                 'reporting_due_date',
                                 getNextReportingDate()
