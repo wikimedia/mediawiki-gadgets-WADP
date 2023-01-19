@@ -36,6 +36,21 @@
 
     userLang = mw.config.get( 'wgUserLanguage' );
 
+    /**
+     * When an affiliate is newly created, the affiliate reporting
+     * due date should be computed for same day a year ahead.
+     *
+     * @returns {string}
+     */
+    function getNextReportingDate() {
+        var date = new Date();
+        var nextYear = date.getFullYear() + 1;
+        var month = date.getMonth();
+        var day = date.getDay();
+
+        return new Date( nextYear, month, day ).toISOString();
+    }
+
     // This is called after translation messages are ready
     function initAfterMessages() {
         /**
@@ -1852,7 +1867,7 @@
                         } else { // Just use an empty string if the affiliate is compliant.
                             insertInPlace += generateKeyValuePair(
                                 'reporting_due_date',
-                                ''
+                                getNextReportingDate()
                             );
                         }
                         if ( manifest[ i ].derecognition_date ){
