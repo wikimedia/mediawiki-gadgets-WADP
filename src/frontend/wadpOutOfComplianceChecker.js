@@ -342,8 +342,7 @@
                 "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
                 "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
                 "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
-                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''', <br />''[[User:DNdubane_(WMF)|Dumisani Ndubane]]''\n\n" +
-                "<br />''Wikimedia Affiliates Data Portal''\n\n" + new Date().toLocaleDateString("en-US", dateFormatOptions) + "\n\n";
+                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]] ~~~~~";
         };
 
         /**
@@ -387,8 +386,7 @@
             "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
             "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
             "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
-            "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''', <br />''[[User:DNdubane_(WMF)|Dumisani Ndubane]]''\n\n" +
-            "<br />''Wikimedia Affiliates Data Portal''\n\n" + new Date().toLocaleDateString("en-US", dateFormatOptions) + "\n\n";
+            "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]] ~~~~~";
         };
 
         /**
