@@ -22,14 +22,22 @@
         postTalkPageNotification,
         getModuleContent,
         resetReportingDueDate,
-        getTimeSignature,
+        renderWikitextTimestampSignature,
         // If an affiliate's distance between its activity and financial report year
         // is less than the offset below, then the affiliate is considered compliant
         // provided that the activity report is the latest.
         AR_FR_YEAR_OFFSET = 2,
         UTC_TIMEZONE = 'UTC';
 
-    getTimeSignature = function () {
+    /**
+     * This function is supposed to do exactly what wikitext: ~~~~~
+     * does, which prints a formatted timestamp signature on a wiki.
+     *
+     * See: https://www.mediawiki.org/wiki/Help:Signatures#Default_signature_options
+     *
+     * @returns {string}
+     */
+    renderWikitextTimestampSignature = function () {
         var timeFormatOptions = {
             hour: '2-digit',
             minute: '2-digit',
@@ -355,7 +363,7 @@
                 "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
                 "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
                 "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
-                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]]" + getTimeSignature();
+                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]] " + renderWikitextTimestampSignature();
         };
 
         /**
@@ -399,7 +407,7 @@
             "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
             "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
             "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
-            "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]]" + getTimeSignature();
+            "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]] " + renderWikitextTimestampSignature();
         };
 
         /**
