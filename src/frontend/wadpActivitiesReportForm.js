@@ -29,7 +29,8 @@
         getModuleContent,
         getWikiPageContent,
         groupNameGlb,
-        uniqueIdGlb;
+        uniqueIdGlb,
+        updateGroupContactsOrgInfo;
 
     var PAGEID = 10624730, // Live mode page ID
         EDITMODE = '';
@@ -37,7 +38,7 @@
     userLang = mw.config.get( 'wgUserLanguage' );
 
     // This is called after translation messages are ready
-    function initAfterMessages() {
+    function initAfterMessages () {
         /**
          * Provides API parameters for getting module content
          * specified by `moduleName`.
@@ -81,7 +82,7 @@
         convertDateToDdMmYyyyFormat = function ( date ) {
             // Put in a format our lua script will feed on, in DD/MM/YYYY format
             date = date.split( '-' );
-            date = date[2] + "/" + date[1] + "/" + date[0];
+            date = date[ 2 ] + '/' + date[ 1 ] + '/' + date[ 0 ];
 
             return date;
         };
@@ -95,8 +96,8 @@
         convertDateToYyyyMmDdFormat = function ( date ) {
             var splitted_date;
             // Put in a format our calendar OOUI will feed on, in YYYY-MM-DD format
-            splitted_date = date.split('/');
-            date = splitted_date[2] + "-" + splitted_date[1] + "-" + splitted_date[0];
+            splitted_date = date.split( '/' );
+            date = splitted_date[ 2 ] + '-' + splitted_date[ 1 ] + '-' + splitted_date[ 0 ];
 
             return date;
         };
@@ -281,7 +282,7 @@
          * Method to Lookup Affiliate names from [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
          * and to be used as autocomplete form element in the forms
          */
-        AffiliateLookupTextInputWidget = function AffiliatesLookupTextInputWidget( config ) {
+        AffiliateLookupTextInputWidget = function AffiliatesLookupTextInputWidget ( config ) {
             // Parent constructor
             OO.ui.TextInputWidget.call( this, $.extend(
                 {
@@ -357,7 +358,7 @@
          * @constructor
          * @param {Object} config
          */
-        function ActivitiesEditorW1( config ) {
+        function ActivitiesEditorW1 ( config ) {
             this.group_name = '';
             this.report_type = '';
             this.multiyear_duation = '';
@@ -421,6 +422,7 @@
             }
             ActivitiesEditorW1.super.call( this, config );
         }
+
         OO.inheritClass( ActivitiesEditorW1, OO.ui.ProcessDialog );
 
         ActivitiesEditorW1.static.name = 'activitiesEditor';
@@ -514,15 +516,15 @@
             } );
             if ( this.multiyear_duation ) {
                 this.fieldMultiyear.setValue( this.multiyear_duation );
-                fieldArMultiyear.toggle(true);
+                fieldArMultiyear.toggle( true );
             }
 
             fieldArMultiyear.toggle();
-            tmpReportType.on('change', function () {
-                if ( tmpReportType.getValue() === 'Multi-year Activities Report'  ) {
-                    fieldArMultiyear.toggle(true);
+            tmpReportType.on( 'change', function () {
+                if ( tmpReportType.getValue() === 'Multi-year Activities Report' ) {
+                    fieldArMultiyear.toggle( true );
                 } else {
-                    fieldArMultiyear.toggle(false);
+                    fieldArMultiyear.toggle( false );
                 }
             } );
 
@@ -548,8 +550,7 @@
                 placeholder: gadgetMsg[ 'report-link-placeholder' ]
             } );
 
-            this.fieldReportNotInEnglish = new OO.ui.CheckboxInputWidget( {
-            } );
+            this.fieldReportNotInEnglish = new OO.ui.CheckboxInputWidget( {} );
             if ( this.report_link_en ) {
                 this.fieldReportNotInEnglish.setSelected( true );
                 fieldReportLangCode.toggle( true );
@@ -1007,14 +1008,13 @@
                     { data: 'Cantonese~zh-yue', label: 'Cantonese' },
                     { data: 'Zulu~zu', label: 'Zulu' }
                 ],
-                placeholder: gadgetMsg['languages-supported-by-affiliate-placeholder']
+                placeholder: gadgetMsg[ 'languages-supported-by-affiliate-placeholder' ]
             } );
             if ( this.languages_supported_by_affiliate ) {
                 this.fieldLanguagesSupportedByAffiliate.setData( this.languages_supported_by_affiliate );
             }
 
-            this.fieldSandboxReport = new OO.ui.CheckboxInputWidget( {
-            } );
+            this.fieldSandboxReport = new OO.ui.CheckboxInputWidget( {} );
             if ( EDITMODE === 'sandbox' ) {
                 this.fieldSandboxReport.setSelected( true );
             }
@@ -1027,8 +1027,7 @@
                 }
             } );
 
-            this.fieldImportedReportCB = new OO.ui.CheckboxInputWidget( {
-            } );
+            this.fieldImportedReportCB = new OO.ui.CheckboxInputWidget( {} );
             fieldImportedReportDate = this.fieldImportedReportDate = new mw.widgets.DateInputWidget( {
                 classes: [ 'full-width' ],
                 value: this.imported_report_date,
@@ -1210,7 +1209,7 @@
         /**
          * Save the changes to [[Module:Activities_Reports]] or [[Module:Activities_Reports/Sandbox]] page.
          */
-        ActivitiesEditorW1.prototype.saveItem = function (deleteFlag ) {
+        ActivitiesEditorW1.prototype.saveItem = function ( deleteFlag ) {
             var dialog = this;
 
             dialog.pushPending();
@@ -1280,7 +1279,7 @@
 
                         if ( dialog.fieldPartnershipInfo.findSelectedItemsData() ) {
                             workingEntry.partnership_info = dialog.fieldPartnershipInfo.findSelectedItemsData();
-                            for ( i=0; i < workingEntry.partnership_info.length; i++ ) {
+                            for ( i = 0; i < workingEntry.partnership_info.length; i++ ) {
                                 if ( workingEntry.partnership_info[ i ] === 'Other' ) {
                                     workingEntry.partnership_info[ i ] = dialog.fieldPartnershipOtherInput.getValue();
                                 }
@@ -1511,7 +1510,6 @@
 
         /********************** Window 1 dialog logic end ***************/
 
-
         /********************** Window 2 dialog logic start ***************/
         /**
          * Subclass ProcessDialog - window 2 for collecting
@@ -1523,7 +1521,7 @@
          * @constructor
          * @param {Object} config
          */
-        function ActivitiesEditorW2( config ) {
+        function ActivitiesEditorW2 ( config ) {
             this.primary_contact1 = '';
             this.primary_contact2 = '';
             this.editors = '';
@@ -1571,6 +1569,7 @@
             }
             ActivitiesEditorW2.super.call( this, config );
         }
+
         OO.inheritClass( ActivitiesEditorW2, OO.ui.ProcessDialog );
 
         ActivitiesEditorW2.static.name = 'activitiesEditor2';
@@ -1903,7 +1902,7 @@
          * In the event "Select" is pressed
          *
          */
-        ActivitiesEditorW2.prototype.getActionProcess = function (action ) {
+        ActivitiesEditorW2.prototype.getActionProcess = function ( action ) {
             var dialog = this, allRequiredFieldsAvailable = false;
 
             if (
@@ -1950,6 +1949,176 @@
                     dialog.close();
                 } );
             }
+        };
+
+        /**
+         * Updates the [Organization_Informations] table  with the new group contacts
+         * provided when submitting or editing Activity Reports
+         *
+         * @param {string} affiliate_name - Affiliate identifier
+         * @param {string} groupContact1 - Primary contact 1
+         * @param {string} groupContact2 - Primary contact 2
+         * @return {null}
+         */
+        updateGroupContactsOrgInfo = function ( affiliate_name, groupContact1, groupContact2 ) {
+            var apiObj = mw.Api();
+            apiObj.get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
+                var i,
+                    insertInPlace,
+                    processWorkingEntry,
+                    editSummary,
+                    manifest = [],
+                    workingEntry,
+                    entries;
+
+                processWorkingEntry = function ( entry ) {
+                    entry.group_contact1 = groupContact1;
+                    entry.group_contact2 = groupContact2;
+
+                    return entry;
+                };
+
+                entries = parseContentModule( data.query.pages );
+                // Re-generate the Lua table based on 'manifest'
+                for ( i = 0; i < entries.length; i++ ) {
+                    workingEntry = cleanRawEntry( entries[ i ].value.fields );
+                    workingEntry = processWorkingEntry( workingEntry );
+                    manifest.push( workingEntry );
+                }
+
+                insertInPlace = 'return {\n';
+                // Re-generate the Lua table based on `manifest`
+                for ( i = 0; i < manifest.length; i++ ) {
+                    insertInPlace += '\t{\n';
+                    if ( manifest[ i ].unique_id ) {
+                        insertInPlace += generateKeyValuePair( 'unique_id', manifest[ i ].unique_id );
+                    }
+                    if ( manifest[ i ].affiliate_code ) {
+                        insertInPlace += generateKeyValuePair( 'affiliate_code', manifest[ i ].affiliate_code );
+                    }
+                    if ( manifest[ i ].group_name ) {
+                        insertInPlace += generateKeyValuePair( 'group_name', manifest[ i ].group_name );
+                    }
+                    if ( manifest[ i ].org_type ) {
+                        insertInPlace += generateKeyValuePair( 'org_type', manifest[ i ].org_type );
+                    }
+                    if ( manifest[ i ].region ) {
+                        insertInPlace += generateKeyValuePair( 'region', manifest[ i ].region );
+                    }
+                    if ( manifest[ i ].group_country ) {
+                        insertInPlace += generateKeyValuePair( 'group_country', manifest[ i ].group_country );
+                    }
+                    if ( !manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
+                        insertInPlace += generateKeyValuePair( 'legal_entity', 'No' );
+                    } else if ( manifest[ i ].legal_entity && manifest[ i ].org_type === 'User Group' ) {
+                        insertInPlace += generateKeyValuePair( 'legal_entity', manifest[ i ].legal_entity );
+                    } else {
+                        insertInPlace += generateKeyValuePair( 'legal_entity', 'Yes' );
+                    }
+                    if ( manifest[ i ].mission_changed ) {
+                        insertInPlace += generateKeyValuePair( 'mission_changed', manifest[ i ].mission_changed );
+                    }
+                    if ( manifest[ i ].explanation ) {
+                        insertInPlace += generateKeyValuePair( 'explanation', manifest[ i ].explanation );
+                    }
+                    if ( manifest[ i ].group_page ) {
+                        insertInPlace += generateKeyValuePair( 'group_page', manifest[ i ].group_page.trim() );
+                    }
+                    if ( manifest[ i ].member_count ) {
+                        insertInPlace += generateKeyValuePair( 'member_count', manifest[ i ].member_count );
+                    }
+                    if ( manifest[ i ].non_editors_count ) {
+                        insertInPlace += generateKeyValuePair( 'non_editors_count', manifest[ i ].non_editors_count );
+                    }
+                    if ( manifest[ i ].facebook ) {
+                        insertInPlace += generateKeyValuePair( 'facebook', manifest[ i ].facebook.trim() );
+                    }
+                    if ( manifest[ i ].twitter ) {
+                        insertInPlace += generateKeyValuePair( 'twitter', manifest[ i ].twitter.trim() );
+                    }
+                    if ( manifest[ i ].other ) {
+                        insertInPlace += generateKeyValuePair( 'other', manifest[ i ].other.trim() );
+                    }
+                    if ( manifest[ i ].dm_structure ) {
+                        insertInPlace += generateKeyValuePair( 'dm_structure', manifest[ i ].dm_structure );
+                    }
+                    if ( typeof manifest[ i ].group_contact1 !== 'undefined' && manifest[ i ].group_contact1.indexOf( 'User:' ) !== -1 ) {
+                        insertInPlace += generateKeyValuePair( 'group_contact1', manifest[ i ].group_contact1 );
+                    } else if ( manifest[ i ].group_contact1 ) {
+                        insertInPlace += generateKeyValuePair( 'group_contact1', 'User:' + manifest[ i ].group_contact1 );
+                    } else {
+                        insertInPlace += generateKeyValuePair( 'group_contact1', '' );
+                    }
+                    if ( typeof manifest[ i ].group_contact2 !== 'undefined' && manifest[ i ].group_contact2.indexOf( 'User:' ) !== -1 ) {
+                        insertInPlace += generateKeyValuePair( 'group_contact2', manifest[ i ].group_contact2 );
+                    } else if ( manifest[ i ].group_contact2 ) {
+                        insertInPlace += generateKeyValuePair( 'group_contact2', 'User:' + manifest[ i ].group_contact2 );
+                    } else {
+                        insertInPlace += generateKeyValuePair( 'group_contact2', '' );
+                    }
+                    if ( manifest[ i ].board_contacts ) {
+                        insertInPlace += generateKeyValuePair( 'board_contacts', manifest[ i ].board_contacts );
+                    }
+                    if ( manifest[ i ].agreement_date ) {
+                        insertInPlace += generateKeyValuePair( 'agreement_date', manifest[ i ].agreement_date );
+                    }
+                    if ( manifest[ i ].fiscal_year_start ) {
+                        insertInPlace += generateKeyValuePair( 'fiscal_year_start', manifest[ i ].fiscal_year_start );
+                    } else {
+                        insertInPlace += generateKeyValuePair( 'fiscal_year_start', '' );
+                    }
+                    if ( manifest[ i ].fiscal_year_end ) {
+                        insertInPlace += generateKeyValuePair( 'fiscal_year_end', manifest[ i ].fiscal_year_end );
+                    } else {
+                        insertInPlace += generateKeyValuePair( 'fiscal_year_end', '' );
+                    }
+                    if ( manifest[ i ].uptodate_reporting ) {
+                        insertInPlace += generateKeyValuePair( 'uptodate_reporting', manifest[ i ].uptodate_reporting );
+                    }
+                    if ( manifest[ i ].notes_on_reporting ) {
+                        insertInPlace += generateKeyValuePair( 'notes_on_reporting', manifest[ i ].notes_on_reporting );
+                    } else {
+                        insertInPlace += generateKeyValuePair( 'notes_on_reporting', '' );
+                    }
+                    if ( manifest[ i ].recognition_status ) {
+                        insertInPlace += generateKeyValuePair( 'recognition_status', manifest[ i ].recognition_status );
+                    }
+                    if ( manifest[ i ].me_bypass_ooc_autochecks ) {
+                        insertInPlace += generateKeyValuePair( 'me_bypass_ooc_autochecks', manifest[ i ].me_bypass_ooc_autochecks );
+                    }
+                    if ( manifest[ i ].out_of_compliance_level ) {
+                        insertInPlace += generateKeyValuePair( 'out_of_compliance_level', manifest[ i ].out_of_compliance_level );
+                    }
+                    if ( manifest[ i ].reporting_due_date ) {
+                        insertInPlace += generateKeyValuePair( 'reporting_due_date', manifest[ i ].reporting_due_date );
+                    } else { // Fallback to the same day a year ahead for new affiliates.
+                        insertInPlace += generateKeyValuePair( 'reporting_due_date', getNextReportingDate() );
+                    }
+                    if ( manifest[ i ].derecognition_date ) {
+                        insertInPlace += generateKeyValuePair( 'derecognition_date', manifest[ i ].derecognition_date );
+                    }
+                    if ( manifest[ i ].derecognition_note ) {
+                        insertInPlace += generateKeyValuePair( 'derecognition_note', manifest[ i ].derecognition_note );
+                    }
+                    if ( manifest[ i ].dos_stamp ) {
+                        insertInPlace += generateKeyValuePair( 'dos_stamp', manifest[ i ].dos_stamp );
+                    }
+                    insertInPlace += '\t},\n';
+                }
+                insertInPlace += '}';
+                new mw.Api().postWithToken(
+                    'csrf',
+                    {
+                        action: 'edit',
+                        bot: true,
+                        nocreate: true,
+                        summary: editSummary,
+                        pageid: 10603224,  // [[Module:Organizational_Informations]]
+                        text: insertInPlace,
+                        contentmodel: 'Scribunto'
+                    }
+                );
+            } );
         };
 
         /**
@@ -2057,9 +2226,12 @@
                         manifest.push( workingEntry );
                     }
 
-                    // Re-generate the Lua table based on `manifest`
+                    // Re-generate the Lua table based on `manifest
                     insertInPlace = 'return {\n';
                     for ( i = 0; i < manifest.length; i++ ) {
+                        if ( groupNameGlb == manifest[ i ].group_name ) {
+                            updateGroupContactsOrgInfo( groupNameGlb, manifest[ i ].primary_contact1, manifest[ i ].primary_contact2 );
+                        }
                         insertInPlace += '\t{\n';
                         if ( manifest[ i ].unique_id ) {
                             insertInPlace += generateKeyValuePair(
@@ -2219,7 +2391,7 @@
 
         $( '.activitiesReport' ).on( 'click', function () {
             // First check if the user is logged in
-            if ( mw.config.get ( 'wgUserName' ) === null ) {
+            if ( mw.config.get( 'wgUserName' ) === null ) {
                 alert( gadgetMsg[ 'you-need-to-log-in' ] );
             } else {
                 openWindow1( {} );
@@ -2228,7 +2400,7 @@
     }
 
     // This is called after the module dependencies are ready
-    function initAfterModules() {
+    function initAfterModules () {
         new mw.Api().get( {
             action: 'query',
             list: 'messagecollection',
