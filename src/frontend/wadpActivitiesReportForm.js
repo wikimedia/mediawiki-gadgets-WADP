@@ -128,6 +128,7 @@
             var res, jsonarray;
             res = '\t\t'.concat( k, ' = ' );
             if ( k === 'partnership_info' ||
+                k === 'dm_structure' ||
                 k === 'countries_affiliate_operates_in' ||
                 k === 'languages_supported_by_affiliate' ||
                 k === 'past_programs' ||
