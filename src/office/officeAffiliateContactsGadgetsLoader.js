@@ -11,7 +11,7 @@
 
     var pageName = mw.config.values.wgPageName;
 
-    if ( pageName.startsWith( 'Wikimedia_Affiliates_Contact_Form' ) ) {
+    if ( pageName.startsWith( 'Wikimedia_Affiliates_Contacts_Portal' ) ) {
         /* Submit Affiliate Contact Information Form */
         mw.loader.load( 'ext.gadget.affiliateContactForm' );
     }
