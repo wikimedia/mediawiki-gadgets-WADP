@@ -1,7 +1,8 @@
 (function () {
     'use strict';
 
-    var AffiliateLookupTextInputWidget,
+    var affiliateEmailsFileName = "affiliate_contacts_email_addresses",
+        AffiliateLookupTextInputWidget,
         archiveExistingContacts,
         archiveContactOne,
         archiveContactTwo,
@@ -12,8 +13,12 @@
         ContactsExistsException,
         convertDateToDdMmYyyyFormat,
         convertDateToYyyyMmDdFormat,
+        downloadEmailAddressesCSV,
+        downloadEmailAddressesTXT,
+        emailAddresses = [],
         gadgetMsg = {},
         generateKeyValuePair,
+        getEmailAddressesOnRecord,
         getModuleContent,
         getWikiPageContent,
         getAffiliatesList,
@@ -29,6 +34,12 @@
         windowManager;
     var foreignWiki = 'https://meta.wikimedia.org/w/api.php';
     var pageName = mw.config.values.wgPageName;
+    var user = mw.config.values.wgUserName;
+    var me_staff = [
+        'DAlangi (WMF)',
+        'DNdubane (WMF)',
+        'AChina-WMF'
+    ];
 
     function renderAffiliateContactInfoForm() {
         /**
@@ -201,6 +212,88 @@
             var result = regex.test(email.toLowerCase());
             return result;
         };
+
+        /**
+         * Function that downloads a CSV file containing all affiliate contact
+         * email addresses
+         */
+        function downloadEmailAddressesCSV () {
+            getEmailAddressesOnRecord();
+
+            // Add a header row to the CSV
+            var csvContent = 'Affiliate Email Addresses\n';
+
+            // Add each email address as a row to the CSV
+            for ( var i = 0; i < emailAddresses.length; i++ ) {
+                csvContent += emailAddresses[ i ] + '\n';
+            }
+
+            var blob = new Blob( [ csvContent ], { type: 'text/csv;charset=utf-8' } );
+            var url = URL.createObjectURL( blob );
+
+            var link = document.createElement( 'a' );
+            link.setAttribute( 'href', url );
+            link.setAttribute( 'download', affiliateEmailsFileName + '.csv' );
+            document.body.appendChild( link );
+            link.click();
+
+            URL.revokeObjectURL( url );
+        }
+
+        /**
+         * Function that downloads a Text file containing all affiliate contact
+         * email addresses
+         */
+        function downloadEmailAddressesTXT () {
+            getEmailAddressesOnRecord();
+
+            var csvContent = emailAddresses.join( ',' );
+            var blob = new Blob( [ csvContent ], { type: 'text/plain;charset=utf-8' } );
+            var url = URL.createObjectURL( blob );
+
+            var link = document.createElement( 'a' );
+            link.setAttribute( 'href', url );
+            link.setAttribute( 'download', affiliateEmailsFileName + '.txt' );
+            document.body.appendChild( link );
+            link.click();
+
+            URL.revokeObjectURL( url );
+        }
+
+        /**
+         * Function that goes through the [[Module:Affiliate_Contact_Information] and
+         * populates an array with all the affiliate contact email addresses
+         */
+        function getEmailAddressesOnRecord () {
+            var apiObj = new mw.Api();
+            apiObj.get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( data ) {
+                var i,
+                    manifest = [],
+                    workingEntry,
+                    entries;
+
+                entries = parseContentModule( data.query.pages );
+                // Cycle through existing entries. If we are editing an existing
+                // entry, that entry will be modified in place.
+                for ( i = 0; i < entries.length; i++ ) {
+                    workingEntry = cleanRawEntry( entries[ i ].value.fields );
+                    manifest.push( workingEntry );
+                }
+                console.log("Manifest: ", manifest);
+
+                for ( i = 0; i < manifest.length; i++ ) {
+                    if ( manifest[ i ].primary_contact_1_email_address) {
+                        console.log(manifest[ i ].primary_contact_1_email_address);
+                        emailAddresses.push( manifest[ i ].primary_contact_1_email_address );
+                    }
+                    if ( manifest[ i ].primary_contact_2_email_address ) {
+                        console.log(manifest[ i ].primary_contact_2_email_address);
+                        emailAddresses.push( manifest[ i ].primary_contact_2_email_address );
+                    }
+                }
+            } );
+            console.log("Emails from lua table", emailAddresses);
+        }
 
         /**
          * Rebuild an existing entry to interchange the first and second
@@ -546,19 +639,19 @@
                 this.primary_contact_1_other_input = config.primary_contact_1_other_input;
             }
             if (config.primary_contact_2_firstname) {
-                this.primary_contact_1_firstname = config.primary_contact_1_firstname;
+                this.primary_contact_2_firstname = config.primary_contact_2_firstname;
             }
             if (config.primary_contact_2_surname) {
-                this.primary_contact_1_surname = config.primary_contact_1_surname;
+                this.primary_contact_2_surname = config.primary_contact_2_surname;
             }
             if (config.primary_contact_2_username) {
                 this.primary_contact_2_username = config.primary_contact_2_username;
             }
             if (config.primary_contact_2_email_address) {
-                this.primary_contact_1_email_address = config.primary_contact_1_email_address;
+                this.primary_contact_2_email_address = config.primary_contact_2_email_address;
             }
             if (config.primary_contact_2_designation) {
-                this.primary_contact_1_designation = config.primary_contact_1_designation;
+                this.primary_contact_2_designation = config.primary_contact_2_designation;
             }
             if (config.primary_contact_2_other_input) {
                 this.primary_contact_2_other_input = config.primary_contact_2_other_input;
@@ -629,7 +722,16 @@
                 id: 'wadp-popup-widget-position'
             });
 
-            this.field_affiliate_name = new AffiliateLookupTextInputWidget(this.affiliate_name);
+            // this.field_affiliate_name = new AffiliateLookupTextInputWidget(this.affiliate_name);
+
+            this.field_affiliate_name = new OO.ui.TextInputWidget({
+                labelPosition: 'before',
+                icon: 'userGroup',
+                value: this.affiliate_name,
+                classes: ['full-width'],
+                indicator: 'required',
+                required: true
+            });
 
             this.field_primary_contact_1_label = new OO.ui.LabelWidget({
                 label: 'First Primary Contact'
@@ -639,27 +741,21 @@
                 icon: 'userAvatar',
                 value: this.primary_contact_1_firstname,
                 // placeholder: 'First name' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
-                indicator: 'required',
-                required: true
+                classes: ['full-width']
             });
             this.field_primary_contact_1_surname = new OO.ui.TextInputWidget({
                 labelPosition: 'before',
                 icon: 'userAvatar',
                 value: this.primary_contact_1_surname,
                 // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
-                indicator: 'required',
-                required: true
+                classes: ['full-width']
             });
             this.field_primary_contact_1_username = new OO.ui.TextInputWidget({
                 labelPosition: 'before',
                 icon: 'userAvatar',
                 value: this.primary_contact_1_username,
                 // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
-                indicator: 'required',
-                required: true
+                classes: ['full-width']
             });
             this.field_primary_contact_1_email_address = new OO.ui.TextInputWidget({
                 labelPosition: 'before',
@@ -685,27 +781,21 @@
                 icon: 'userAvatar',
                 value: this.primary_contact_2_firstname,
                 // placeholder: 'First name' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
-                indicator: 'required',
-                required: true
+                classes: ['full-width']
             });
             this.field_primary_contact_2_surname = new OO.ui.TextInputWidget({
                 labelPosition: 'before',
                 icon: 'userAvatar',
                 value: this.primary_contact_2_surname,
                 // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
-                indicator: 'required',
-                required: true
+                classes: ['full-width']
             });
             this.field_primary_contact_2_username = new OO.ui.TextInputWidget({
                 labelPosition: 'before',
                 icon: 'userAvatar',
                 value: this.primary_contact_2_username,
                 // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
-                indicator: 'required',
-                required: true
+                classes: ['full-width']
             });
             this.field_primary_contact_2_email_address = new OO.ui.TextInputWidget({
                 labelPosition: 'before',
@@ -738,8 +828,6 @@
                 icon: 'logoWikimedia',
                 value: this.field_primary_contact_1_designation,
                 classes: ['full-width'],
-                indicator: 'required',
-                required: true,
                 menu: {
                     items: [
                         new OO.ui.MenuOptionWidget({
@@ -800,8 +888,6 @@
                 icon: 'logoWikimedia',
                 value: this.field_primary_contact_2_designation,
                 classes: ['full-width'],
-                indicator: 'required',
-                required: true,
                 menu: {
                     items: [
                         new OO.ui.MenuOptionWidget({
@@ -872,7 +958,7 @@
                     new OO.ui.FieldLayout(
                         this.field_affiliate_name,
                         {
-                            label: 'Choose group name', //gadgetMsg['has-group-mission-changed'],
+                            label: 'Group Name', //gadgetMsg['has-group-mission-changed'],
                             align: 'top'
                         }
                     ),
@@ -1072,22 +1158,27 @@
                 dialog.field_primary_contact_1_surname.getValue() &&
                 dialog.field_primary_contact_1_username.getValue() &&
                 dialog.field_primary_contact_1_email_address.getValue() &&
-                dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() &&
                 dialog.field_primary_contact_2_firstname.getValue() &&
                 dialog.field_primary_contact_2_surname.getValue() &&
                 dialog.field_primary_contact_2_username.getValue() &&
-                dialog.field_primary_contact_2_email_address.getValue() &&
-                dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData()
+                dialog.field_primary_contact_2_email_address.getValue()
+
             ) {
                 allRequiredFieldsAvailable = true;
             }
 
-            if (dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ||
-                dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other'){
-                otherContactDesignationSelected = true;
+            if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem() == null ||
+                dialog.field_primary_contact_2_designation.getMenu().findSelectedItem() == null ) {
+                allRequiredFieldsAvailable = false;
+            } else {
+                if (dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ||
+                    dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other') {
+                    otherContactDesignationSelected = true;
+                }
             }
+
             if (otherContactDesignationSelected && (!dialog.field_primary_contact_1_other_input.getValue() ||
-                !dialog.field_primary_contact_2_other_input.getValue())){
+                !dialog.field_primary_contact_2_other_input.getValue())) {
                 allRequiredFieldsAvailable = false;
             }
 
@@ -1128,231 +1219,327 @@
             dialog.pushPending();
 
             apiObj.get(getModuleContent('Affiliate_Contacts_Information')).then(function (data) {
-                var i,
-                    insertToTable,
-                    processWorkingEntry,
-                    editSummary,
-                    manifest = [],
-                    workingEntry,
-                    entries,
-                    updatedWorkingEntry;
+                apiObj.get(getModuleContent('Organization_Information')).then(function (orgInfo) {
+                    var i,
+                        j,
+                        insertToTable,
+                        processWorkingEntry,
+                        editSummary,
+                        manifest = [],
+                        workingEntry,
+                        orgInfoData,
+                        entries,
+                        updatedWorkingEntry,
+                        orgInfoEntries,
+                        assignRegionandCode;
 
-                /**
-                 * Compares a given [[Module:Affiliate_Contacts_Information]] entry against the edit fields
-                 * and applies changes where relevant.
-                 *
-                 * @param {Object} workingEntry the entry being worked on
-                 * @return {Object} The same entry but with modifications
-                 */
-                processWorkingEntry = function (workingEntry) {
-                    if (dialog.field_affiliate_name.getValue()) {
-                        workingEntry.affiliate_name = dialog.field_affiliate_name.getValue();
-                    }
-                    // Primary Contact 1
-                    if (dialog.field_primary_contact_1_firstname.getValue()) {
-                        workingEntry.primary_contact_1_firstname = dialog.field_primary_contact_1_firstname.getValue();
-                    }
-                    if (dialog.field_primary_contact_1_surname.getValue()) {
-                        workingEntry.primary_contact_1_surname = dialog.field_primary_contact_1_surname.getValue();
-                    }
-                    if (dialog.field_primary_contact_1_username.getValue()) {
-                        workingEntry.primary_contact_1_username = dialog.field_primary_contact_1_username.getValue();
-                    }
-                    if (dialog.field_primary_contact_1_email_address.getValue()) {
-                        workingEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
-                    }
-                    if (dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData()) {
-                        if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
-                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_other_input.getValue();
+                    /**
+                     * Compares a given [[Module:Affiliate_Contacts_Information]] entry against a
+                     * [[Module:Organization_Information]] entry and updates the affiliate code and region
+                     * in the affiliate contact information record.
+                     *
+                     * @param {Object} contactInfo affiliate contacts information living on office
+                     * @param {Object} orgInfo organization information pulled in from meta using the bridge
+                     * @return {Object} updated affiliate contacts information entry but with modifications
+                     */
+                    assignRegionandCode = function ( contactInfo, orgInfo) {
+                        if(orgInfo.affiliate_code){
+                            contactInfo.affiliate_code = orgInfo.affiliate_code;
                         } else {
-                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
+                            contactInfo.affiliate_code = "-";
                         }
-                    }
-                    // Primary Contact 2
-                    if (dialog.field_primary_contact_2_firstname.getValue()) {
-                        workingEntry.primary_contact_2_firstname = dialog.field_primary_contact_2_firstname.getValue();
-                    }
-                    if (dialog.field_primary_contact_2_surname.getValue()) {
-                        workingEntry.primary_contact_2_surname = dialog.field_primary_contact_2_surname.getValue();
-                    }
-                    if (dialog.field_primary_contact_2_username.getValue()) {
-                        workingEntry.primary_contact_2_username = dialog.field_primary_contact_2_username.getValue();
-                    }
-                    if (dialog.field_primary_contact_2_email_address.getValue()) {
-                        workingEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
-                    }
-                    if (dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData()) {
-                        if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
-                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_other_input.getValue();
-                        } else {
-                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
-                        }
-                    }
-                    return workingEntry;
-                };
 
-                entries = parseContentModule(data.query.pages);
-                // Cycle through existing entries. If we are editing an existing
-                // entry, that entry will be modified in place.
-                try {
-                    for (i = 0; i < entries.length; i++) {
-                        workingEntry = cleanRawEntry(entries[i].value.fields);
-                        /**
-                         * Handling affiliates with already existing group contacts i.e. Updating
-                         * Case 1: If supplying the same group contacts again, in the same order, reject and notify user.
-                         * Case 2: If changing the order i.e contact 1 is now contact 2 and vice versa, update and notify Dumisani
-                         * If one or more has changed..make edit, populate archive table and notify Dumisani
-                         */
-                        if (workingEntry.unique_id !== dialog.uniqueId || !deleteFlag) {
-                            if (workingEntry.affiliate_name === dialog.field_affiliate_name.getValue()) {
-                                //Case 1
-                                if (workingEntry.primary_contact_1_username === dialog.field_primary_contact_1_username.getValue() &&
-                                    workingEntry.primary_contact_2_username === dialog.field_primary_contact_2_username.getValue()) {
-                                    contactsExists = true;
-                                    throw new ContactsExistsException();
-                                } //Case 2
-                                else if (workingEntry.primary_contact_1_username === dialog.field_primary_contact_2_username.getValue() &&
-                                    workingEntry.primary_contact_2_username === dialog.field_primary_contact_1_username.getValue()) {
-                                    contactsSwitched = true;
-                                    updatedWorkingEntry = switchGroupContacts(workingEntry);
-                                    manifest.push(updatedWorkingEntry);
-                                } //Case 3
-                                else if (workingEntry.primary_contact_1_username !== dialog.field_primary_contact_1_username.getValue() &&
-                                    workingEntry.primary_contact_2_username === dialog.field_primary_contact_2_username.getValue()) {
-                                    contactsUpdated = true;
-                                    updatedWorkingEntry = updateGroupContacts(workingEntry, dialog, "contact1Updated");
-                                    manifest.push(updatedWorkingEntry);
-                                } else if (workingEntry.primary_contact_1_username === dialog.field_primary_contact_1_username.getValue() &&
-                                    workingEntry.primary_contact_2_username !== dialog.field_primary_contact_2_username.getValue()) {
-                                    contactsUpdated = true;
-                                    updatedWorkingEntry = updateGroupContacts(workingEntry, dialog, "contact2Updated");
-                                    manifest.push(updatedWorkingEntry);
-                                } else if (workingEntry.primary_contact_1_username !== dialog.field_primary_contact_1_username.getValue() &&
-                                    workingEntry.primary_contact_2_username !== dialog.field_primary_contact_2_username.getValue()) {
-                                    contactsUpdated = true;
-                                    updatedWorkingEntry = updateGroupContacts(workingEntry, dialog, "bothUpdated");
-                                    manifest.push(updatedWorkingEntry);
-                                }
+                        if(orgInfo.region){
+                            contactInfo.affiliate_region = orgInfo.region;
+                        } else {
+                            contactInfo.affiliate_region = "-";
+                        }
+                        return contactInfo;
+                    };
+
+                    /**
+                     * Compares a given [[Module:Affiliate_Contacts_Information]] entry against the edit fields
+                     * and applies changes where relevant.
+                     *
+                     * @param {Object} workingEntry the entry being worked on
+                     * @return {Object} The same entry but with modifications
+                     */
+                    processWorkingEntry = function (workingEntry) {
+                        //Affiliate name
+                        if (dialog.field_affiliate_name.getValue()) {
+                            workingEntry.affiliate_name = dialog.field_affiliate_name.getValue();
+                        }
+                        // Primary Contact 1
+                        if (dialog.field_primary_contact_1_firstname.getValue()) {
+                            workingEntry.primary_contact_1_firstname = dialog.field_primary_contact_1_firstname.getValue();
+                        }
+                        if (dialog.field_primary_contact_1_surname.getValue()) {
+                            workingEntry.primary_contact_1_surname = dialog.field_primary_contact_1_surname.getValue();
+                        }
+                        if (dialog.field_primary_contact_1_username.getValue()) {
+                            workingEntry.primary_contact_1_username = dialog.field_primary_contact_1_username.getValue();
+                        }
+                        if (dialog.field_primary_contact_1_email_address.getValue()) {
+                            workingEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
+                        }
+                        if (dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData()) {
+                            if (dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other') {
+                                workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_other_input.getValue();
                             } else {
-                                manifest.push(workingEntry);
+                                workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
                             }
                         }
+                        // Primary Contact 2
+                        if (dialog.field_primary_contact_2_firstname.getValue()) {
+                            workingEntry.primary_contact_2_firstname = dialog.field_primary_contact_2_firstname.getValue();
+                        }
+                        if (dialog.field_primary_contact_2_surname.getValue()) {
+                            workingEntry.primary_contact_2_surname = dialog.field_primary_contact_2_surname.getValue();
+                        }
+                        if (dialog.field_primary_contact_2_username.getValue()) {
+                            workingEntry.primary_contact_2_username = dialog.field_primary_contact_2_username.getValue();
+                        }
+                        if (dialog.field_primary_contact_2_email_address.getValue()) {
+                            workingEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
+                        }
+                        if (dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData()) {
+                            if (dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other') {
+                                workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_other_input.getValue();
+                            } else {
+                                workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
+                            }
+                        }
+                        return workingEntry;
+                    };
+
+                    entries = parseContentModule(data.query.pages);
+                    orgInfoEntries = parseContentModule(orgInfo.query.pages);
+                    // Cycle through existing entries. If we are editing an existing
+                    // entry, that entry will be modified in place.
+                    try {
+                        for (i = 0; i < entries.length; i++) {
+                            workingEntry = cleanRawEntry(entries[i].value.fields);
+                            /**
+                             * This code freshly populates the existing Affiliate Contacts Lua table
+                             * by adding their corresponding affiliate code and region. Commented
+                             * out because the scipt needs only to run ones. Kept here in case it is
+                             * needed in the future.
+                             */
+
+                            // for ( j = 0; j < orgInfoEntries.length; j++ ) {
+                            //     orgInfoData = cleanRawEntry( orgInfoEntries[ j ].value.fields );
+                            //     if(orgInfoData.affiliate_name == workingEntry.affiliate_name) {
+                            //         workingEntry = assignRegionandCode( workingEntry, orgInfoData );
+                            //     }
+                            // }
+                            //manifest.push(workingEntry)
+
+                            /**
+                             * Handling affiliates with already existing group contacts i.e. Updating
+                             * Case 1: If supplying the same group contacts again, in the same order, reject and notify user.
+                             * Case 2: If changing the order i.e contact 1 is now contact 2 and vice versa, update and notify Dumisani
+                             * If one or more has changed..make edit, populate archive table and notify Dumisani
+                             */
+                            if (workingEntry.unique_id !== dialog.uniqueId || !deleteFlag) {
+                                if (workingEntry.affiliate_name === dialog.field_affiliate_name.getValue()) {
+                                    //Case 1
+                                    if (workingEntry.primary_contact_1_username === dialog.field_primary_contact_1_username.getValue() &&
+                                        workingEntry.primary_contact_2_username === dialog.field_primary_contact_2_username.getValue()) {
+                                        contactsExists = true;
+                                        throw new ContactsExistsException();
+                                    } //Case 2
+                                    else if (workingEntry.primary_contact_1_username === dialog.field_primary_contact_2_username.getValue() &&
+                                        workingEntry.primary_contact_2_username === dialog.field_primary_contact_1_username.getValue()) {
+                                        contactsSwitched = true;
+                                        updatedWorkingEntry = switchGroupContacts(workingEntry);
+                                        manifest.push(updatedWorkingEntry);
+                                    } //Case 3
+                                    else if (workingEntry.primary_contact_1_username !== dialog.field_primary_contact_1_username.getValue() &&
+                                        workingEntry.primary_contact_2_username === dialog.field_primary_contact_2_username.getValue()) {
+                                        contactsUpdated = true;
+                                        updatedWorkingEntry = updateGroupContacts(workingEntry, dialog, "contact1Updated");
+                                        manifest.push(updatedWorkingEntry);
+                                    } else if (workingEntry.primary_contact_1_username === dialog.field_primary_contact_1_username.getValue() &&
+                                        workingEntry.primary_contact_2_username !== dialog.field_primary_contact_2_username.getValue()) {
+                                        contactsUpdated = true;
+                                        updatedWorkingEntry = updateGroupContacts(workingEntry, dialog, "contact2Updated");
+                                        manifest.push(updatedWorkingEntry);
+                                    } else if (workingEntry.primary_contact_1_username !== dialog.field_primary_contact_1_username.getValue() &&
+                                        workingEntry.primary_contact_2_username !== dialog.field_primary_contact_2_username.getValue()) {
+                                        contactsUpdated = true;
+                                        updatedWorkingEntry = updateGroupContacts(workingEntry, dialog, "bothUpdated");
+                                        manifest.push(updatedWorkingEntry);
+                                    }
+                                } else {
+                                    manifest.push(workingEntry);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        if (error.name === 'ContactsExistsException') {
+                            console.error(error.name, error.message);
+                            alert(error.message);
+                            dialog.close();
+                        } else {
+                            alert('Failed');
+                            dialog.close();
+                            console.error(error);
+                        }
                     }
-                } catch (error){
-                    if (error.name === 'ContactsExistsException'){
-                        console.error(error.name, error.message);
-                        alert(error.message);
+
+                    // No unique ID means this is a new entry
+                    if (!dialog.uniqueId && !contactsSwitched && !contactsUpdated) {
+                        workingEntry = {
+                            unique_id: Math.random().toString(36).substring(2)
+                        };
+                        workingEntry = processWorkingEntry(workingEntry);
+                        for ( j = 0; j < orgInfoEntries.length; j++ ) {
+                            orgInfoData = cleanRawEntry( orgInfoEntries[ j ].value.fields );
+                            if ( orgInfoData.affiliate_name == workingEntry.affiliate_name ) {
+                                workingEntry = assignRegionandCode( workingEntry, orgInfoData );
+                            }
+                        }
+                        editSummary = 'Adding Group Contact for :  ' + workingEntry.affiliate_name;
+                        console.log(editSummary);
+                        manifest.push(workingEntry);
+                    }
+
+                    // Re-generate the Lua table based on `manifest`
+                    insertToTable = 'return {\n';
+                    for (i = 0; i < manifest.length; i++) {
+                        insertToTable += '\t{\n';
+                        if (manifest[i].affiliate_name) {
+                            insertToTable += generateKeyValuePair('affiliate_name', manifest[i].affiliate_name);
+                        }
+                        if (manifest[i].affiliate_code) {
+                            insertToTable += generateKeyValuePair('affiliate_code', manifest[i].affiliate_code);
+                        }
+                        if (manifest[i].affiliate_region) {
+                            insertToTable += generateKeyValuePair('affiliate_region', manifest[i].affiliate_region);
+                        }
+                        if (manifest[i].primary_contact_1_firstname) {
+                            insertToTable += generateKeyValuePair('primary_contact_1_firstname', manifest[i].primary_contact_1_firstname);
+                        }
+                        if (manifest[i].primary_contact_1_surname) {
+                            insertToTable += generateKeyValuePair('primary_contact_1_surname', manifest[i].primary_contact_1_surname);
+                        }
+                        if (manifest[i].primary_contact_1_username) {
+                            insertToTable += generateKeyValuePair('primary_contact_1_username', manifest[i].primary_contact_1_username);
+                        }
+                        if (manifest[i].primary_contact_1_email_address) {
+                            insertToTable += generateKeyValuePair('primary_contact_1_email_address', manifest[i].primary_contact_1_email_address);
+                        }
+                        if (manifest[i].primary_contact_1_designation) {
+                            insertToTable += generateKeyValuePair('primary_contact_1_designation', manifest[i].primary_contact_1_designation);
+                        }
+                        if (manifest[i].primary_contact_2_firstname) {
+                            insertToTable += generateKeyValuePair('primary_contact_2_firstname', manifest[i].primary_contact_2_firstname);
+                        }
+                        if (manifest[i].primary_contact_2_surname) {
+                            insertToTable += generateKeyValuePair('primary_contact_2_surname', manifest[i].primary_contact_2_surname);
+                        }
+                        if (manifest[i].primary_contact_2_username) {
+                            insertToTable += generateKeyValuePair('primary_contact_2_username', manifest[i].primary_contact_2_username);
+                        }
+                        if (manifest[i].primary_contact_2_email_address) {
+                            insertToTable += generateKeyValuePair('primary_contact_2_email_address', manifest[i].primary_contact_2_email_address);
+                        }
+                        if (manifest[i].primary_contact_2_designation) {
+                            insertToTable += generateKeyValuePair('primary_contact_2_designation', manifest[i].primary_contact_2_designation);
+                        }
+                        if (manifest[i].unique_id) {
+                            insertToTable += generateKeyValuePair('unique_id', manifest[i].unique_id);
+                        }
+                        if (manifest[i].dos_stamp) {
+                            insertToTable += generateKeyValuePair('created_at', manifest[i].dos_stamp);
+                        }
+                        insertToTable += '\t},\n';
+                    }
+                    insertToTable += '}';
+                    // console.log(insertToTable);
+
+                    // Add the new Report into the Lua table.
+                    apiObj.postWithToken(
+                        'csrf',
+                        {
+                            action: 'edit',
+                            bot: true,
+                            nocreate: true,
+                            summary: editSummary,
+                            pageid: 39952, //[[Module:Affiliate_Contacts_Information]]
+                            text: insertToTable,
+                            contentmodel: 'Scribunto'
+                        }
+                    ).then(function () {
+
                         dialog.close();
-                    } else {
+
+                        /** After saving, show a message box */
+                        var messageDialog = new OO.ui.MessageDialog();
+                        var windowManager = new OO.ui.WindowManager();
+
+                        $('body').append(windowManager.$element);
+                        // Add the dialog to the window manager.
+                        windowManager.addWindows([messageDialog]);
+
+                        // Configure the message dialog when it is opened with the window manager's openWindow() method.
+                        windowManager.openWindow(messageDialog, {
+                            title: 'Saved',
+                            message: 'Affiliate Contact Saved',
+                            actions: [
+                                {
+                                    action: 'accept',
+                                    label: 'Dismiss',
+                                    flags: 'primary'
+                                }
+                            ]
+                        });
+
+                        windowManager.closeWindow(messageDialog);
+                    }).catch(function (error) {
                         alert('Failed');
                         dialog.close();
                         console.error(error);
-                    }
-                }
-
-                // No unique ID means this is a new entry
-                if (!dialog.uniqueId && !contactsSwitched && !contactsUpdated) {
-                    workingEntry = {
-                        unique_id: Math.random().toString(36).substring(2)
-                    };
-                    workingEntry = processWorkingEntry(workingEntry);
-                    editSummary = 'Adding Group Contact for :  ' + workingEntry.affiliate_name;
-                    console.log(editSummary);
-                    manifest.push(workingEntry);
-                }
-
-                // Re-generate the Lua table based on `manifest`
-                insertToTable = 'return {\n';
-                for ( i = 0; i < manifest.length; i++ ) {
-                    insertToTable += '\t{\n';
-                    if (manifest[i].affiliate_name) {
-                        insertToTable += generateKeyValuePair('affiliate_name', manifest[i].affiliate_name);
-                    }
-                    if (manifest[i].primary_contact_1_firstname) {
-                        insertToTable += generateKeyValuePair('primary_contact_1_firstname', manifest[i].primary_contact_1_firstname);
-                    }
-                    if (manifest[i].primary_contact_1_surname) {
-                        insertToTable += generateKeyValuePair('primary_contact_1_surname', manifest[i].primary_contact_1_surname);
-                    }
-                    if (manifest[i].primary_contact_1_username) {
-                        insertToTable += generateKeyValuePair('primary_contact_1_username', manifest[i].primary_contact_1_username);
-                    }
-                    if (manifest[i].primary_contact_1_email_address) {
-                        insertToTable += generateKeyValuePair('primary_contact_1_email_address', manifest[i].primary_contact_1_email_address);
-                    }
-                    if (manifest[i].primary_contact_1_designation) {
-                        insertToTable += generateKeyValuePair('primary_contact_1_designation', manifest[i].primary_contact_1_designation);
-                    }
-                    if (manifest[i].primary_contact_2_firstname) {
-                        insertToTable += generateKeyValuePair('primary_contact_2_firstname', manifest[i].primary_contact_2_firstname);
-                    }
-                    if (manifest[i].primary_contact_2_surname) {
-                        insertToTable += generateKeyValuePair('primary_contact_2_surname', manifest[i].primary_contact_2_surname);
-                    }
-                    if (manifest[i].primary_contact_2_username) {
-                        insertToTable += generateKeyValuePair('primary_contact_2_username', manifest[i].primary_contact_2_username);
-                    }
-                    if (manifest[i].primary_contact_2_email_address) {
-                        insertToTable += generateKeyValuePair('primary_contact_2_email_address', manifest[i].primary_contact_2_email_address);
-                    }
-                    if (manifest[i].primary_contact_2_designation) {
-                        insertToTable += generateKeyValuePair('primary_contact_2_designation', manifest[i].primary_contact_2_designation);
-                    }
-                    if (manifest[i].unique_id) {
-                        insertToTable += generateKeyValuePair('unique_id', manifest[i].unique_id);
-                    }
-                    if (manifest[i].dos_stamp) {
-                        insertToTable += generateKeyValuePair('created_at', manifest[i].dos_stamp);
-                    }
-                    insertToTable += '\t},\n';
-                }
-                insertToTable += '}';
-
-                // Add the new Report into the Lua table.
-                apiObj.postWithToken(
-                    'csrf',
-                    {
-                        action: 'edit',
-                        bot: true,
-                        nocreate: true,
-                        summary: editSummary,
-                        pageid: 39952, //[[Module:Affiliate_Contacts_Information]]
-                        text: insertToTable,
-                        contentmodel: 'Scribunto'
-                    }
-                ).then(function () {
-
-                    dialog.close();
-
-                    /** After saving, show a message box */
-                    var messageDialog = new OO.ui.MessageDialog();
-                    var windowManager = new OO.ui.WindowManager();
-
-                    $('body').append(windowManager.$element);
-                    // Add the dialog to the window manager.
-                    windowManager.addWindows([messageDialog]);
-
-                    // Configure the message dialog when it is opened with the window manager's openWindow() method.
-                    windowManager.openWindow(messageDialog, {
-                        title: 'Saved',
-                        message: 'Affiliate Contact Saved',
-                        actions: [
-                            {
-                                action: 'accept',
-                                label: 'Dismiss',
-                                flags: 'primary'
-                            }
-                        ]
                     });
-
-                    windowManager.closeWindow(messageDialog);
-                }).catch(function (error) {
-                    alert('Failed');
-                    dialog.close();
-                    console.error(error);
                 });
             });
         };
+
+        // Edit content via the form
+        $( '.contact_record_id' ).each( function () {
+            var $icon = $( this ),
+                editButton;
+            editButton = new OO.ui.ButtonWidget( {
+                framed: false,
+                label: 'Update',
+                icon: 'edit',
+                flags: [ 'progressive' ]
+            } ).on( 'click', function () {
+                // First check if the user is logged in
+                if ( mw.config.get ( 'wgUserName' ) === null ) {
+                    alert( "User not logged in." );
+                } else if ( me_staff.indexOf( user ) > -1) {
+                    alert( "Only M&E staff are allowed to Update contact records." );
+                } else {
+                    new mw.Api().get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( contact_data ) {
+                        var entryData, record;
+
+                        record = editButton.$element
+                            .closest( '.contact_record' )
+                            .data( 'contact-unique-id' );
+
+                        entryData = cleanRawEntry(
+                            getRelevantRawEntry(
+                                parseContentModule( contact_data.query.pages ),
+                                record
+                            )
+                        );
+                        openContactWindow( entryData );
+                    } );
+                }
+            } );
+            $icon.append( editButton.$element );
+        });
 
         $('.submitAffiliateContact').on('click', function () {
             // First check if the user is logged in
@@ -1368,6 +1555,24 @@
                 alert("You need to log in");
             } else {
                 openMessageWindow({});
+            }
+        });
+        // $('.downloadAffiliateEmailsTXT').on('click', function () {
+        //     // First check if the user is logged in
+        //     if (mw.config.get('wgUserName') === null) {
+        //         alert("You need to log in");
+        //     } else {
+        //         downloadEmailAddressesTXT();
+        //     }
+        // });
+        $('.downloadAffiliateEmailsCSV').on('click', function () {
+            // First check if the user is logged in
+            if ( mw.config.get ( 'wgUserName' ) === null ) {
+                alert( "User not logged in." );
+            } else if ( me_staff.indexOf( user ) > -1) {
+                alert( "Only M&E staff are allowed to Download Affiliate Contacts Data." );
+            } else {
+                downloadEmailAddressesCSV();
             }
         });
 
