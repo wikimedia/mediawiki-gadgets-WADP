@@ -14,5 +14,13 @@
     if ( pageName.startsWith( 'Wikimedia_Affiliates_Contacts_Portal' ) ) {
         /* Submit Affiliate Contact Information Form */
         mw.loader.load( 'ext.gadget.affiliateContactForm' );
+        /* Form to select download data */
+        mw.loader.load( 'ext.gadget.affiliateDataDownloadForm' );
+        /* Bridge to pull in orginfo data from Meta */
+        mw.loader.load( 'ext.gadget.wadpCopyOrgInfoData' );
+        /* [WIP] Helper functions for formatting */
+        // mw.loader.load( 'ext.gadget.affiliateContactsHelpers' );
+        /* [DISABLED] Email Affiliate Contacts Form */
+        // mw.loader.load( 'ext.gadget.emailAffiliateContactsForm' );
     }
 }() );

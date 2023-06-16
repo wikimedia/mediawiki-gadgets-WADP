@@ -1,4 +1,4 @@
-(function () {
+( function () {
     'use strict';
 
     var affiliateEmailAddresses = [],
@@ -21,7 +21,7 @@
         validateEmail,
         windowManager;
 
-    function renderMessageAffiliatesGroupContactsForm() {
+    function renderMessageAffiliatesGroupContactsForm () {
         /**
          * Provides API parameters for getting module content
          * specified by `moduleName`.
@@ -29,7 +29,7 @@
          * @param {string} moduleName
          * @return {Object}
          */
-        getModuleContent = function (moduleName) {
+        getModuleContent = function ( moduleName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
@@ -46,7 +46,7 @@
          * @param {string} pageName
          * @return {Object}
          */
-        getWikiPageContent = function (pageName) {
+        getWikiPageContent = function ( pageName ) {
             return {
                 action: 'query',
                 prop: 'revisions',
@@ -62,10 +62,10 @@
          *
          * @return {string} date
          */
-        convertDateToDdMmYyyyFormat = function (date) {
+        convertDateToDdMmYyyyFormat = function ( date ) {
             // Put in a format our lua script will feed on, in DD/MM/YYYY format
-            date = date.split('-');
-            date = date[2] + "/" + date[1] + "/" + date[0];
+            date = date.split( '-' );
+            date = date[ 2 ] + '/' + date[ 1 ] + '/' + date[ 0 ];
 
             return date;
         };
@@ -76,11 +76,11 @@
          *
          * @return {string} date
          */
-        convertDateToYyyyMmDdFormat = function (date) {
+        convertDateToYyyyMmDdFormat = function ( date ) {
             var splitted_date;
             // Put in a format our calendar OOUI will feed on, in YYYY-MM-DD format
-            splitted_date = date.split('/');
-            date = splitted_date[2] + "-" + splitted_date[1] + "-" + splitted_date[0];
+            splitted_date = date.split( '/' );
+            date = splitted_date[ 2 ] + '-' + splitted_date[ 1 ] + '-' + splitted_date[ 0 ];
 
             return date;
         };
@@ -92,10 +92,10 @@
          *
          * @return {string}
          */
-        sanitizeInput = function (s) {
+        sanitizeInput = function ( s ) {
             return s
-                .replace(/\\/g, '\\\\')
-                .replace(/\n/g, '<br />');
+                .replace( /\\/g, '\\\\' )
+                .replace( /\n/g, '<br />' );
         };
 
         /**
@@ -107,9 +107,9 @@
          *
          * @return {string}
          */
-        generateKeyValuePair = function (k, v) {
+        generateKeyValuePair = function ( k, v ) {
             var res;
-            res = '\t\t'.concat(k, ' = \'', v, '\'');
+            res = '\t\t'.concat( k, ' = \'', v, '\'' );
             res += ',\n';
             return res;
         };
@@ -121,12 +121,12 @@
          * @param {Object} sourceblob The original API return
          * @return {Object} Abstract syntax tree
          */
-        parseContentModule = function (sourceblob) {
+        parseContentModule = function ( sourceblob ) {
             var ast, i, raw;
-            for (i in sourceblob) {  // should only be one result
-                raw = sourceblob[i].revisions[0]['*'];
-                ast = luaparse.parse(raw);
-                return ast.body[0].arguments[0].fields;
+            for ( i in sourceblob ) {  // should only be one result
+                raw = sourceblob[ i ].revisions[ 0 ][ '*' ];
+                ast = luaparse.parse( raw );
+                return ast.body[ 0 ].arguments[ 0 ].fields;
             }
         };
 
@@ -137,17 +137,17 @@
          * @param {Object} entries The abstract syntax tree
          * @param {string} uniqueId the entry we want to pick out.
          */
-        getRelevantRawEntry = function (entries, uniqueId) {
+        getRelevantRawEntry = function ( entries, uniqueId ) {
             var i, j;
             // Look through the entries
-            for (i = 0; i < entries.length; i++) {
+            for ( i = 0; i < entries.length; i++ ) {
                 // Loop through the individual key-value pairs within each entry
-                for (j = 0; j < entries[i].value.fields.length; j++) {
+                for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
                     if (
-                        entries[i].value.fields[j].key.name === 'unique_id'
-                        && entries[i].value.fields[j].value.value === uniqueId
+                        entries[ i ].value.fields[ j ].key.name === 'unique_id'
+                        && entries[ i ].value.fields[ j ].value.value === uniqueId
                     ) {
-                        return entries[i].value.fields;
+                        return entries[ i ].value.fields;
                     }
                 }
             }
@@ -175,10 +175,10 @@
          * @param {Object} sourceblob The original API return
          * @return {Object} raw Entire page content (wikitext)
          */
-        getAffiliatesList = function (sourceblob) {
+        getAffiliatesList = function ( sourceblob ) {
             var i, raw;
-            for (i in sourceblob) {  // should only be one result
-                raw = sourceblob[i].revisions[0]['*'];
+            for ( i in sourceblob ) {  // should only be one result
+                raw = sourceblob[ i ].revisions[ 0 ][ '*' ];
                 return raw;
             }
         };
@@ -187,9 +187,9 @@
          * Validate that the provided email address is a valid email address
          * @param email
          */
-        validateEmail = function (email) {
+        validateEmail = function ( email ) {
             var regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            var result = regex.test(email.toLowerCase());
+            var result = regex.test( email.toLowerCase() );
             return result;
         };
 
@@ -197,12 +197,12 @@
          * @param {string} subject The email subject
          * @param {string} body The email content/body.
          */
-        sendEmailToAllAffiliates = function ( subject, body) {
+        sendEmailToAllAffiliates = function ( subject, body ) {
             var params, i, username;
 
             for ( i = 0; i < affiliateUsernames.length; i++ ) {
-                username = affiliateUsernames[i];
-                sendEmail(subject, body, username);
+                username = affiliateUsernames[ i ];
+                sendEmail( subject, body, username );
             }
         };
 
@@ -235,20 +235,20 @@
          * @constructor
          * @param {Object} config
          */
-        function EmailEditor(config) {
+        function EmailEditor ( config ) {
             this.email_title = '';
             this.email_body = '';
 
-            if (config.email_title) {
+            if ( config.email_title ) {
                 this.email_title = config.email_title;
             }
-            if (config.email_body) {
+            if ( config.email_body ) {
                 this.email_body = config.email_body;
             }
-            EmailEditor.super.call(this, config);
+            EmailEditor.super.call( this, config );
         }
 
-        OO.inheritClass(EmailEditor, OO.ui.ProcessDialog);
+        OO.inheritClass( EmailEditor, OO.ui.ProcessDialog );
 
         EmailEditor.static.name = 'contactInfoEditor';
         EmailEditor.static.title = 'Affiliate Contact Messaging Form'; // gadgetMsg['org-info-header'];
@@ -257,7 +257,7 @@
                 action: 'continue',
                 modes: 'edit',
                 label: 'Submit', //gadgetMsg['submit-button'],
-                flags: ['primary', 'constructive']
+                flags: [ 'primary', 'constructive' ]
             },
             {
                 action: 'cancel',
@@ -272,43 +272,43 @@
          * to initialize widgets, and to set up event handlers.
          */
         EmailEditor.prototype.initialize = function () {
-            EmailEditor.super.prototype.initialize.call(this);
-            this.content = new OO.ui.PanelLayout({
+            EmailEditor.super.prototype.initialize.call( this );
+            this.content = new OO.ui.PanelLayout( {
                 padded: true,
                 expanded: false
-            });
+            } );
 
             // Popup to be used after form validation
-            this.fieldPopup = new OO.ui.PopupWidget({
-                $content: $('<p style="color: red; text-align: center;">Error! Both the email title and body are required. Check and try submitting again.</p>'),
+            this.fieldPopup = new OO.ui.PopupWidget( {
+                $content: $( '<p style="color: red; text-align: center;">Error! Both the email title and body are required. Check and try submitting again.</p>' ),
                 padded: true,
                 width: 400,
                 height: 90,
                 head: true,
                 id: 'wadp-popup-widget-position'
-            });
-            this.field_email_title = new OO.ui.TextInputWidget({
+            } );
+            this.field_email_title = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'speechBubble ',
                 value: this.email_title,
                 // placeholder: 'First name' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
+                classes: [ 'full-width' ],
                 indicator: 'required',
                 required: true
-            });
-            this.field_email_body = new OO.ui.MultilineTextInputWidget({
+            } );
+            this.field_email_body = new OO.ui.MultilineTextInputWidget( {
                 labelPosition: 'before',
                 icon: 'edit',
                 value: this.email_body,
                 autosize: true,
                 // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
-                classes: ['full-width'],
+                classes: [ 'full-width' ],
                 indicator: 'required',
                 required: true
-            });
+            } );
 
             // Append things to fieldSet
-            this.fieldSet = new OO.ui.FieldsetLayout({
+            this.fieldSet = new OO.ui.FieldsetLayout( {
                 items: [
                     new OO.ui.FieldLayout(
                         this.field_email_title,
@@ -325,11 +325,11 @@
                         }
                     ),
                 ]
-            });
+            } );
 
             // When everything is done
-            this.content.$element.append(this.fieldSet.$element);
-            this.$body.append(this.content.$element);
+            this.content.$element.append( this.fieldSet.$element );
+            this.$body.append( this.content.$element );
         };
 
         /**
@@ -344,46 +344,45 @@
          * In the event "Select" is pressed
          *
          */
-        EmailEditor.prototype.getActionProcess = function (action) {
+        EmailEditor.prototype.getActionProcess = function ( action ) {
             var dialog = this,
                 allRequiredFieldsAvailable = false,
                 isValidEmail = false;
 
-
             // Before submitting the form, check that all required fields indeed
             // have values before we call saveItem(). Otherwise, don't close the
             // form but instead reveal which input fields are not yet filled.
-            if (dialog.field_email_title.getValue() &&
+            if ( dialog.field_email_title.getValue() &&
                 dialog.field_email_body.getValue()
             ) {
                 allRequiredFieldsAvailable = true;
             }
 
-            if (action === 'continue' && allRequiredFieldsAvailable) {
-                return new OO.ui.Process(function () {
+            if ( action === 'continue' && allRequiredFieldsAvailable ) {
+                return new OO.ui.Process( function () {
                     dialog.saveItem();
-                });
-            } else if (action === 'continue' && allRequiredFieldsAvailable === false) {
-                return new OO.ui.Process(function () {
-                    dialog.fieldPopup.toggle(true);
-                });
+                } );
+            } else if ( action === 'continue' && allRequiredFieldsAvailable === false ) {
+                return new OO.ui.Process( function () {
+                    dialog.fieldPopup.toggle( true );
+                } );
             } else {
-                return new OO.ui.Process(function () {
+                return new OO.ui.Process( function () {
                     dialog.close();
-                });
+                } );
             }
         };
 
         /**
          * Save the changes to [[Module:GroupContact_Informations]] page.
          */
-        EmailEditor.prototype.saveItem = function (deleteFlag) {
+        EmailEditor.prototype.saveItem = function ( deleteFlag ) {
             var dialog = this;
             var apiObj = new mw.Api();
 
             dialog.pushPending();
 
-            apiObj.get(getModuleContent('Affiliate_Contacts_Information')).then(function (data) {
+            apiObj.get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( data ) {
                 var i,
                     insertToTable,
                     processWorkingEntry,
@@ -393,29 +392,29 @@
                     entries,
                     updatedWorkingEntry;
 
-                entries = parseContentModule(data.query.pages);
+                entries = parseContentModule( data.query.pages );
                 // Cycle through existing entries. If we are editing an existing
                 // entry, that entry will be modified in place.
-                for (i = 0; i < entries.length; i++) {
-                    workingEntry = cleanRawEntry(entries[i].value.fields);
-                    manifest.push(workingEntry);
+                for ( i = 0; i < entries.length; i++ ) {
+                    workingEntry = cleanRawEntry( entries[ i ].value.fields );
+                    manifest.push( workingEntry );
                 }
 
                 for ( i = 0; i < manifest.length; i++ ) {
-                    if (manifest[i].primary_contact_1_email_address) {
-                        affiliateEmailAddresses.push(manifest[i].primary_contact_1_email_address);
+                    if ( manifest[ i ].primary_contact_1_email_address ) {
+                        affiliateEmailAddresses.push( manifest[ i ].primary_contact_1_email_address );
                     }
-                    if (manifest[i].primary_contact_2_email_address) {
-                        affiliateEmailAddresses.push(manifest[i].primary_contact_1_email_address);
+                    if ( manifest[ i ].primary_contact_2_email_address ) {
+                        affiliateEmailAddresses.push( manifest[ i ].primary_contact_1_email_address );
                     }
-                    if (manifest[i].primary_contact_1_username) {
-                        affiliateUsernames.push(manifest[i].primary_contact_1_username);
+                    if ( manifest[ i ].primary_contact_1_username ) {
+                        affiliateUsernames.push( manifest[ i ].primary_contact_1_username );
                     }
-                    if (manifest[i].primary_contact_2_username) {
-                        affiliateUsernames.push(manifest[i].primary_contact_2_username);
+                    if ( manifest[ i ].primary_contact_2_username ) {
+                        affiliateUsernames.push( manifest[ i ].primary_contact_2_username );
                     }
                 }
-                sendEmailToAllAffiliates(dialog.field_email_title.getValue(), dialog.field_email_body.getValue());
+                sendEmailToAllAffiliates( dialog.field_email_title.getValue(), dialog.field_email_body.getValue() );
 
                 dialog.close();
 
@@ -423,12 +422,12 @@
                 var messageDialog = new OO.ui.MessageDialog();
                 var windowManager = new OO.ui.WindowManager();
 
-                $('body').append(windowManager.$element);
+                $( 'body' ).append( windowManager.$element );
                 // Add the dialog to the window manager.
-                windowManager.addWindows([messageDialog]);
+                windowManager.addWindows( [ messageDialog ] );
 
                 // Configure the message dialog when it is opened with the window manager's openWindow() method.
-                windowManager.openWindow(messageDialog, {
+                windowManager.openWindow( messageDialog, {
                     title: 'Message Sent',
                     message: 'Affiliate Group Contacts emailed',
                     actions: [
@@ -438,52 +437,44 @@
                             flags: 'primary'
                         }
                     ]
-                });
+                } );
 
-                windowManager.closeWindow(messageDialog);
+                windowManager.closeWindow( messageDialog );
 
-            }).catch(function (error) {
-                alert('Failed');
+            } ).catch( function ( error ) {
+                alert( 'Failed' );
                 dialog.close();
-                console.error(error);
-            });
+                console.error( error );
+            } );
         };
 
-        $('.submitAffiliateContact').on('click', function () {
+        $( '.messageAffiliates' ).on( 'click', function () {
             // First check if the user is logged in
-            if (mw.config.get('wgUserName') === null) {
-                alert("You need to log in");
+            if ( mw.config.get( 'wgUserName' ) === null ) {
+                alert( 'You need to log in' );
             } else {
-                openContactWindow({});
+                openMessageWindow( {} );
             }
-        });
-        $('.messageAffiliates').on('click', function () {
-            // First check if the user is logged in
-            if (mw.config.get('wgUserName') === null) {
-                alert("You need to log in");
-            } else {
-                openMessageWindow({});
-            }
-        });
+        } );
 
         /**
          * The dialog window to enter group contact info will be displayed.
          *
          * @param {Object} config
          */
-        openMessageWindow = function (config) {
+        openMessageWindow = function ( config ) {
             var emailEditor;
             config.size = 'large';
-            emailEditor = new EmailEditor(config);
+            emailEditor = new EmailEditor( config );
 
             windowManager = new OO.ui.WindowManager();
-            $('body').append(windowManager.$element);
-            windowManager.addWindows([emailEditor]);
-            windowManager.openWindow(emailEditor);
+            $( 'body' ).append( windowManager.$element );
+            windowManager.addWindows( [ emailEditor ] );
+            windowManager.openWindow( emailEditor );
         };
     }
 
-    mw.loader.using([
+    mw.loader.using( [
         'mediawiki.api',
         'oojs-ui',
         'oojs-ui-widgets',
@@ -491,5 +482,5 @@
         'oojs-ui.styles.icons-editing-core',
         'ext.gadget.luaparse',
         'mediawiki.widgets.DateInputWidget'
-    ]).then(renderMessageAffiliatesGroupContactsForm);
-}());
+    ] ).then( renderMessageAffiliatesGroupContactsForm );
+}() );
