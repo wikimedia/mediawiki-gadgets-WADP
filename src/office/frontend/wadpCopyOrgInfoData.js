@@ -11,14 +11,12 @@
         archivePreviousContact,
         cleanRawEntry,
         getModuleContent,
+        generateNewAffiliateContacts,
         parseContentModule,
-        copyOrgInfoData,
         sanitizeInput,
         generateKeyValuePair,
         updateAffiliateContactsInfo,
         sendEmailToMEStaff,
-        metaGroupNames = [],
-        officeGroupNames = [],
         newAffiliates = [],
         emailSubject = '[WAC Portal] Affiliate Contact Changes';
 
@@ -98,10 +96,10 @@
      */
     sendEmailToMEStaff = function ( body ) {
         var MEStaff = [
-                'DNdubane (WMF)',
-                'AChina-WMF',
-                'DAlangi (WMF)'
-            ],
+            'DNdubane (WMF)',
+            'AChina-WMF',
+            'DAlangi (WMF)'
+        ],
             api = new mw.Api();
         for ( const staff in MEStaff ) {
             var params = {
@@ -117,7 +115,7 @@
         }
     };
 
-    archivePreviousContact = function ( contactsData, orgInfoData, archiveData ) {
+    archivePreviousContact = function ( contactsData, orgInfoData, archiveData, newAffiliates ) {
         var apiObj = new mw.Api(),
             i, j,
             contactsDataEntries,
@@ -132,7 +130,8 @@
             archiveManifest = [],
             archiveEntry,
             affiliateContactListManifest = [],
-            emailBody = '';
+            emailBody = '',
+            newAffiliateRecord;
 
         contactsDataEntries = parseContentModule( contactsData.query.pages );
         orgInfoDataEntries = parseContentModule( orgInfoData.query.pages );
@@ -143,6 +142,13 @@
 
         for ( i = 0; i < orgInfoDataEntries.length; i++ ) {
             orgInfoWorkingEntry = cleanRawEntry( orgInfoDataEntries[ i ].value.fields );
+
+            //check for new group contacts added
+            /* if ( newAffiliates.includes( orgInfoWorkingEntry.affiliate_name ) ) {
+                newAffiliateRecord = generateNewAffiliateContacts( orgInfoWorkingEntry );
+                affiliateContactListManifest.push( newAffiliateRecord );
+            }*/
+
             for ( j = 0; j < contactsDataEntries.length; j++ ) {
                 contactsWorkingEntry = cleanRawEntry( contactsDataEntries[ j ].value.fields );
                 if ( orgInfoWorkingEntry.affiliate_name === contactsWorkingEntry.affiliate_name ) {
@@ -153,9 +159,22 @@
                         orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_2_username ||
                         orgInfoWorkingEntry.affiliate_contact2 === contactsWorkingEntry.primary_contact_1_username
                     ) {
-                        affiliateContactListManifest.push( updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact2, orgInfoWorkingEntry.affiliate_contact1 ) );
-                        emailBody = 'Either one or both group contacts for ' + orgInfoWorkingEntry.affiliate_name + ' has been swapped but not changed';
+                        /* We pass contact 1 and 2 from the OrgInfo table in place as they are already in the desired
+                        position. As in:
+                            OrgInfo Table - Office
+                            org_info_pc1 = x
+                            org_info_pc2 = y
 
+                            Contacts Table - Office
+                            contact_pc1 = y
+                            contact_pc2 = x
+
+                            Swapping
+                            contact_pc1 = x (org_info_pc1)
+                            contact_pc2 = y (org_info_pc2)
+                        */
+                        affiliateContactListManifest.push( updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1, orgInfoWorkingEntry.affiliate_contact2 ) );
+                        emailBody = 'Either one or both group contacts for ' + orgInfoWorkingEntry.affiliate_name + ' has been swapped but not changed';
                         break;
                     }
 
@@ -376,123 +395,164 @@
         return workingEntry;
     };
 
-    copyOrgInfoData = function () {
-        var foreignAPI = new mw.ForeignApi( foreignWiki ),
+    // TODO: Debug to fix writing duplicates.
+    generateNewAffiliateContacts = function ( affiliateRecord ) {
+        var uniqueId = ( Math.random() + 1 ).toString( 36 ).substring( 4 );
+        var affiliateContact = {
+            affiliate_name: affiliateRecord.affiliate_name,
+            affiliate_code: affiliateRecord.affiliate_code,
+            affiliate_region: affiliateRecord.region,
+            primary_contact_1_firstname: '',
+            primary_contact_1_surname: '',
+            primary_contact_1_username: affiliateRecord.affiliate_contact1,
+            primary_contact_1_email_address: '',
+            primary_contact_1_designation: '',
+            primary_contact_2_firstname: '',
+            primary_contact_2_surname: '',
+            primary_contact_2_username: affiliateRecord.affiliate_contact2,
+            primary_contact_2_email_address: '',
+            primary_contact_2_designation: '',
+            unique_id: uniqueId,
+        };
+
+        return affiliateContact;
+    };
+
+    function copyOrgInfoData() {
+        var apiObject = new mw.Api(),
+            foreignAPI = new mw.ForeignApi( foreignWiki ),
             entries,
             processedEntry,
             i,
             insertToTable,
-            emailBody;
+            emailBody,
+            status = ['recognised', 'deferred', 'suspended'];
 
-        /**
-         * Pulling OrgInfo table information
-         *
-         */
-        foreignAPI.get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
-            entries = parseContentModule( data.query.pages );
-            // Re-generate the Lua table based on 'manifest'
-            insertToTable = 'return {\n';
-            for ( i = 0; i < entries.length; i++ ) {
-                processedEntry = cleanRawEntry( entries[ i ].value.fields );
-                /** Orange fields on the spreadsheet :
-                 Affiliate Code
-                 Affiliate Name
-                 Affiliate Country
-                 Region
-                 Affiliate Type
-                 Affiliate Contact 1
-                 Affiliate Contact 1
-                 Status
-                 Origination Date
-                 Last Updated
-                 */
-                if ( processedEntry.recognition_status === 'recognised' ) {
-                    metaGroupNames.push( processedEntry.group_name );
-                    insertToTable += '\t{\n';
-                    if ( processedEntry.affiliate_code ) {
-                        insertToTable += generateKeyValuePair( 'affiliate_code', processedEntry.affiliate_code );
-                    }
-                    if ( processedEntry.group_name ) {
-                        insertToTable += generateKeyValuePair( 'affiliate_name', processedEntry.group_name );
-                    }
-                    if ( processedEntry.group_country ) {
-                        insertToTable += generateKeyValuePair( 'affiliate_country', processedEntry.group_country );
-                    }
-                    if ( processedEntry.region ) {
-                        insertToTable += generateKeyValuePair( 'region', processedEntry.region );
-                    }
-                    if ( processedEntry.org_type ) {
-                        insertToTable += generateKeyValuePair( 'affiliate_type', processedEntry.org_type );
-                    }
-                    if ( processedEntry.group_contact1 ) {
-                        insertToTable += generateKeyValuePair( 'affiliate_contact1', processedEntry.group_contact1 );
-                    } else {
-                        insertToTable += generateKeyValuePair( 'affiliate_contact1', '' );
-                    }
-                    if ( processedEntry.group_contact2 ) {
-                        insertToTable += generateKeyValuePair( 'affiliate_contact2', processedEntry.group_contact2 );
-                    } else {
-                        insertToTable += generateKeyValuePair( 'affiliate_contact2', '' );
-                    }
-                    if ( processedEntry.recognition_status ) {
-                        insertToTable += generateKeyValuePair( 'status', processedEntry.recognition_status );
-                    }
-                    if ( processedEntry.agreement_date ) {
-                        insertToTable += generateKeyValuePair( 'origination_date', processedEntry.agreement_date );
-                    }
-                    if ( processedEntry.dos_stamp ) {
-                        insertToTable += generateKeyValuePair( 'last_updated', processedEntry.dos_stamp );
-                    }
-                    insertToTable += '\t},\n';
-                }
+        apiObject.get( getModuleContent( 'Organization_Information' ) ).then( function ( officeOrgInfoData ) {
+            var metaGroupNames = [],
+              officeGroupNames = [],
+              officeOrgInfoEntries,
+              processedOfficeOrgInfoEntry;
+
+            officeOrgInfoEntries = parseContentModule( officeOrgInfoData.query.pages );
+
+            for ( i = 0; i < officeOrgInfoEntries.length; i++ ) {
+                processedOfficeOrgInfoEntry = cleanRawEntry( officeOrgInfoEntries[ i ].value.fields );
+                officeGroupNames.push( processedOfficeOrgInfoEntry[ i ] );
             }
-            insertToTable += '}';
-
-            // Insert into newly created Affiliate Contacts Table as required
-            new mw.Api().postWithToken(
-                'csrf',
-                {
-                    action: 'edit',
-                    summary: 'Copying organization information from MetaWiki to this Affiliate Contacts Information...',
-                    pageid: 39956, //[[Module:Organization_Information]],
-                    text: insertToTable,
-                    contentmodel: 'Scribunto'
-                }
-            ).done( function ( data ) {
-                console.log( 'Organization Info Synced' );
-            } );
             /**
-             * Compare the two lists and create a new array with newly added group contact names
-             * */
-            for ( i = 0; i < metaGroupNames.length; i++ ) {
-                if ( officeGroupNames.indexOf( metaGroupNames[ i ] ) < 0 ) {
-                    newAffiliates.push( metaGroupNames[ i ] );
+             * Pulling OrgInfo table information
+             *
+             */
+            foreignAPI.get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
+                entries = parseContentModule( data.query.pages );
+                // Re-generate the Lua table based on 'manifest'
+                insertToTable = 'return {\n';
+                for ( i = 0; i < entries.length; i++ ) {
+                    processedEntry = cleanRawEntry( entries[ i ].value.fields );
+                    /** Orange fields on the spreadsheet :
+                     Affiliate Code
+                     Affiliate Name
+                     Affiliate Country
+                     Region
+                     Affiliate Type
+                     Affiliate Contact 1
+                     Affiliate Contact 1
+                     Status
+                     Origination Date
+                     Last Updated
+                     */
+                    if ( status.includes(processedEntry.recognition_status) ) {
+                        metaGroupNames.push( processedEntry.group_name );
+                        insertToTable += '\t{\n';
+                        if ( processedEntry.affiliate_code ) {
+                            insertToTable += generateKeyValuePair( 'affiliate_code', processedEntry.affiliate_code );
+                        }
+                        if ( processedEntry.group_name ) {
+                            insertToTable += generateKeyValuePair( 'affiliate_name', processedEntry.group_name );
+                        }
+                        if ( processedEntry.group_country ) {
+                            insertToTable += generateKeyValuePair( 'affiliate_country', processedEntry.group_country );
+                        }
+                        if ( processedEntry.region ) {
+                            insertToTable += generateKeyValuePair( 'region', processedEntry.region );
+                        }
+                        if ( processedEntry.org_type ) {
+                            insertToTable += generateKeyValuePair( 'affiliate_type', processedEntry.org_type );
+                        }
+                        if ( processedEntry.group_contact1 ) {
+                            insertToTable += generateKeyValuePair( 'affiliate_contact1', processedEntry.group_contact1 );
+                        } else {
+                            insertToTable += generateKeyValuePair( 'affiliate_contact1', '' );
+                        }
+                        if ( processedEntry.group_contact2 ) {
+                            insertToTable += generateKeyValuePair( 'affiliate_contact2', processedEntry.group_contact2 );
+                        } else {
+                            insertToTable += generateKeyValuePair( 'affiliate_contact2', '' );
+                        }
+                        if ( processedEntry.recognition_status ) {
+                            insertToTable += generateKeyValuePair( 'status', processedEntry.recognition_status );
+                        }
+                        if ( processedEntry.agreement_date ) {
+                            insertToTable += generateKeyValuePair( 'origination_date', processedEntry.agreement_date );
+                        }
+                        if ( processedEntry.dos_stamp ) {
+                            insertToTable += generateKeyValuePair( 'last_updated', processedEntry.dos_stamp );
+                        }
+                        insertToTable += '\t},\n';
+                    }
                 }
-            }
+                insertToTable += '}';
 
-            for ( i = 0; i < newAffiliates.length; i++ ) {
-                emailBody = newAffiliates[ i ] + ' has added new group contacts.\n Please update the contact details on Office.';
-                sendEmailToMEStaff( emailBody );
-            }
+                // Insert into newly created Affiliate Contacts Table as required
+                new mw.Api().postWithToken(
+                  'csrf',
+                  {
+                      action: 'edit',
+                      summary: 'Copying organization information from MetaWiki to this Affiliate Contacts Information...',
+                      pageid: 39956, //[[Module:Organization_Information]],
+                      text: insertToTable,
+                      contentmodel: 'Scribunto'
+                  }
+                ).done( function ( data ) {
+                    console.log( 'Organization Info Synced' );
+                } );
+
+                /**
+                 * Compare the two lists and create a new array with newly added group contact names
+                 * */
+                for ( i = 0; i < metaGroupNames.length; i++ ) {
+                    if ( officeGroupNames.indexOf( metaGroupNames[ i ] ) < 0 ) {
+                        newAffiliates.push( metaGroupNames[ i ] );
+                    }
+                }
+
+                for ( i = 0; i < newAffiliates.length; i++ ) {
+                    emailBody = newAffiliates[ i ] + ' has added new group contacts.\n Please update the contact details on Office.';
+                    sendEmailToMEStaff( emailBody );
+                }
+
+            } )
         } ).then( function () {
             var apiObject = new mw.Api();
             apiObject.get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( contactsData ) {
                 apiObject.get( getModuleContent( 'Organization_Information' ) ).then( function ( orgInfoData ) {
                     apiObject.get( getModuleContent( 'Affiliate_Contacts_Information_Archive' ) ).then( function ( archiveData ) {
-                        archivePreviousContact( contactsData, orgInfoData, archiveData );
+                        archivePreviousContact( contactsData, orgInfoData, archiveData, newAffiliates );
                     } );
                 } );
             } );
         } );
-    };
+    }
 
     /** Loading:
      * - The interface provided by mediawiki api
      * - Luaparse gadget that contains the logic to parse a Lua table
      * to an AST
      */
+
     mw.loader.using( [
         'mediawiki.api',
         'ext.gadget.luaparse'
-    ] ).then( copyOrgInfoData() );
+    ] ).then( copyOrgInfoData );
 }() );

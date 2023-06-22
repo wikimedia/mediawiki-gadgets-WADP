@@ -10,17 +10,29 @@
     'use strict';
 
     var pageName = mw.config.values.wgPageName;
+    var whiteList= [
+        'DNdubane (WMF)',
+        'DAlangi (WMF)',
+        'AChina-WMF',
+        'MKaur (WMF)',
+        'JAnstee (WMF)',
+        'Xeno (WMF)',
+        'Keegan (WMF)',
+        'Ramzym-WMF',
+        'Mervat (WMF)'
+    ];
 
     if ( pageName.startsWith( 'Wikimedia_Affiliates_Contacts_Portal' ) ) {
-        /* Submit Affiliate Contact Information Form */
-        mw.loader.load( 'ext.gadget.affiliateContactForm' );
-        /* Form to select download data */
-        mw.loader.load( 'ext.gadget.affiliateDataDownloadForm' );
-        /* Bridge to pull in orginfo data from Meta */
-        mw.loader.load( 'ext.gadget.wadpCopyOrgInfoData' );
-        /* [WIP] Helper functions for formatting */
-        // mw.loader.load( 'ext.gadget.affiliateContactsHelpers' );
-        /* [DISABLED] Email Affiliate Contacts Form */
-        // mw.loader.load( 'ext.gadget.emailAffiliateContactsForm' );
+        if ( whiteList.indexOf( mw.config.values.wgUserName ) > -1 ) {
+            mw.loader.load( [
+                'ext.gadget.affiliateContactForm',
+                'ext.gadget.affiliateDataDownloadForm',
+                'ext.gadget.wadpCopyOrgInfoData',
+            ] );
+            /* [WIP] Helper functions for formatting */
+            // mw.loader.load( 'ext.gadget.affiliateContactsHelpers' );
+            /* [DISABLED] Email Affiliate Contacts Form */
+            // mw.loader.load( 'ext.gadget.emailAffiliateContactsForm' );
+        }
     }
 }() );
