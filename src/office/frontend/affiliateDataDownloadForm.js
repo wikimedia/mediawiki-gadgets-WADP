@@ -1,7 +1,7 @@
 ( function () {
     'use strict';
 
-    var affiliateInfoFileName = 'affiliate_contacts_info',
+    var affiliateInfoFileName = 'Affiliate Contact Info',
         cleanRawEntry,
         downloadEmailAddressesCSV,
         getContactDataOnRecord,
@@ -71,28 +71,44 @@
          * Function that downloads a CSV file containing all affiliate contact
          * email addresses
          */
-        downloadEmailAddressesCSV = function ( items ) {
+        downloadEmailAddressesCSV = function ( items, regions, designations ) {
             var apiObj = new mw.Api();
             var entries, csvData, blob, url, link;
             apiObj.get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( data ) {
                 // Add a header row to the CSV
-                var csvContent = '';
+                var i, csvContent = '', fileDescription = '';
 
-                if ( items.includes( 'affiliate_name' ) ) csvContent += 'Affiliate Name,';
+                if ( regions ) {
+                    fileDescription += '\nRegions:\n';
+                    for ( i = 0; i < regions.length; i++ ) {
+                        fileDescription += i + 1;
+                        fileDescription += '. ' + regions[ i ] + '\n';
+                    }
+                }
+                if ( designations ) {
+                    fileDescription += '\nDesignations:\n';
+                    for ( i = 0; i < designations.length; i++ ) {
+                        fileDescription += i + 1;
+                        fileDescription += '. ' + designations[ i ] + '\n';
+                    }
+                }
+
+                csvContent += 'Affiliate Name,';
                 if ( items.includes( 'contact1_name' ) ) csvContent += 'Contact1 Name,';
                 if ( items.includes( 'contact1_username' ) ) csvContent += 'Contact1 Username,';
-                if ( items.includes( 'contact1_email' ) ) csvContent += 'Contact1 Email,';
+                if ( items.includes( 'contact1_name' ) ) csvContent += 'Contact1 Email,';
                 if ( items.includes( 'contact2_name' ) ) csvContent += 'Contact2 Name,';
                 if ( items.includes( 'contact2_username' ) ) csvContent += 'Contact2 Username,';
-                if ( items.includes( 'contact2_email' ) ) csvContent += 'Contact2 Email,';
+                if ( items.includes( 'contact2_name' ) ) csvContent += 'Contact2 Email,';
+
                 // Append new line at the end to ensure a proper CSV format
                 csvContent += '\n';
 
                 entries = parseContentModule( data.query.pages );
-                csvData = getContactDataOnRecord( items, entries );
+                csvData = getContactDataOnRecord( items, entries, regions, designations );
 
                 // Add each email address as a row to the CSV
-                for ( var i = 0; i < csvData.length; i++ ) {
+                for ( i = 0; i < csvData.length; i++ ) {
                     if ( csvData[ i ].affiliate_name !== undefined ) {
                         csvContent += csvData[ i ].affiliate_name + ',';
                     }
@@ -134,12 +150,13 @@
          * Function that goes through the [[Module:Affiliate_Contact_Information] and
          * populates an array with all the affiliate contact email addresses
          *
-         * @param Array List of items selected in the filter
-         * @param Array List of affiliate contacts
+         * @param {Array} items List of items selected in the filter
+         * @param {Array} entries List of affiliate contacts
+         * @param {string} region The region to filter on
          *
          * @return Array The data to be used in building the CSV
          */
-        getContactDataOnRecord = function ( items, entries ) {
+        getContactDataOnRecord = function ( items, entries, regions, designations ) {
             var i,
                 workingEntry,
                 cachedData = {},
@@ -154,61 +171,149 @@
             }
 
             for ( i = 0; i < manifest.length; i++ ) {
-                if ( items.includes( 'affiliate_name' ) ) {
+                if ( regions && regions.includes( manifest[ i ].affiliate_region ) ) {
                     if ( manifest[ i ].affiliate_name ) {
                         cachedData.affiliate_name = manifest[ i ].affiliate_name;
                     } else {
                         cachedData.affiliate_name = NOT_AVAILABLE;
                     }
-                }
-                if ( items.includes( 'contact1_name' ) ) {
-                    if ( manifest[ i ].primary_contact_1_firstname ) {
-                        cachedData.contact1_name = manifest[ i ].primary_contact_1_firstname;
-                    } else {
-                        cachedData.contact1_name = NOT_AVAILABLE;
-                    }
-                }
-                if ( items.includes( 'contact2_name' ) ) {
-                    if ( manifest[ i ].primary_contact_2_firstname ) {
-                        cachedData.contact2_name = manifest[ i ].primary_contact_2_firstname;
-                    } else {
-                        cachedData.contact2_name = NOT_AVAILABLE;
-                    }
-                }
-                if ( items.includes( 'contact1_username' ) ) {
-                    if ( manifest[ i ].primary_contact_1_username ) {
-                        cachedData.contact1_username = manifest[ i ].primary_contact_1_username;
-                    } else {
-                        cachedData.contact1_username = NOT_AVAILABLE;
-                    }
-                }
-                if ( items.includes( 'contact2_username' ) ) {
-                    if ( manifest[ i ].primary_contact_2_username ) {
-                        cachedData.contact2_username = manifest[ i ].primary_contact_2_username;
-                    } else {
-                        cachedData.contact2_username = NOT_AVAILABLE;
-                    }
-                }
-                if ( items.includes( 'contact1_email' ) ) {
                     if ( manifest[ i ].primary_contact_1_email_address ) {
                         cachedData.contact1_email = manifest[ i ].primary_contact_1_email_address;
                     } else {
                         cachedData.contact1_email = NOT_AVAILABLE;
                     }
-                }
-                if ( items.includes( 'contact2_email' ) ) {
                     if ( manifest[ i ].primary_contact_2_email_address ) {
                         cachedData.contact2_email = manifest[ i ].primary_contact_2_email_address;
                     } else {
                         cachedData.contact2_email = NOT_AVAILABLE;
                     }
-                }
+                    if ( items.includes( 'contact1_name' ) ) {
+                        if ( manifest[ i ].primary_contact_1_firstname ) {
+                            cachedData.contact1_name = manifest[ i ].primary_contact_1_firstname;
+                        } else {
+                            cachedData.contact1_name = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact2_name' ) ) {
+                        if ( manifest[ i ].primary_contact_2_firstname ) {
+                            cachedData.contact2_name = manifest[ i ].primary_contact_2_firstname;
+                        } else {
+                            cachedData.contact2_name = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact1_username' ) ) {
+                        if ( manifest[ i ].primary_contact_1_username ) {
+                            cachedData.contact1_username = manifest[ i ].primary_contact_1_username;
+                        } else {
+                            cachedData.contact1_username = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact2_username' ) ) {
+                        if ( manifest[ i ].primary_contact_2_username ) {
+                            cachedData.contact2_username = manifest[ i ].primary_contact_2_username;
+                        } else {
+                            cachedData.contact2_username = NOT_AVAILABLE;
+                        }
+                    }
 
-                dataToDownload.push( cachedData );
-                cachedData = {}; // Reset for the next round of data.
+                    dataToDownload.push( cachedData );
+                    cachedData = {}; // Reset for the next round of data.
+                } else if ( designations && ( designations.includes( manifest[ i ].primary_contact_1_designation ) ||
+                    designations.includes( manifest[ i ].primary_contact_2_designation ) ) ) {
+                    if ( manifest[ i ].affiliate_name ) {
+                        cachedData.affiliate_name = manifest[ i ].affiliate_name;
+                    } else {
+                        cachedData.affiliate_name = NOT_AVAILABLE;
+                    }
+                    if ( manifest[ i ].primary_contact_1_email_address ) {
+                        cachedData.contact1_email = manifest[ i ].primary_contact_1_email_address;
+                    } else {
+                        cachedData.contact1_email = NOT_AVAILABLE;
+                    }
+                    if ( manifest[ i ].primary_contact_2_email_address ) {
+                        cachedData.contact2_email = manifest[ i ].primary_contact_2_email_address;
+                    } else {
+                        cachedData.contact2_email = NOT_AVAILABLE;
+                    }
+                    if ( items.includes( 'contact1_name' ) ) {
+                        if ( manifest[ i ].primary_contact_1_firstname ) {
+                            cachedData.contact1_name = manifest[ i ].primary_contact_1_firstname;
+                        } else {
+                            cachedData.contact1_name = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact2_name' ) ) {
+                        if ( manifest[ i ].primary_contact_2_firstname ) {
+                            cachedData.contact2_name = manifest[ i ].primary_contact_2_firstname;
+                        } else {
+                            cachedData.contact2_name = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact1_username' ) ) {
+                        if ( manifest[ i ].primary_contact_1_username ) {
+                            cachedData.contact1_username = manifest[ i ].primary_contact_1_username;
+                        } else {
+                            cachedData.contact1_username = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact2_username' ) ) {
+                        if ( manifest[ i ].primary_contact_2_username ) {
+                            cachedData.contact2_username = manifest[ i ].primary_contact_2_username;
+                        } else {
+                            cachedData.contact2_username = NOT_AVAILABLE;
+                        }
+                    }
+                    dataToDownload.push( cachedData );
+                    cachedData = {}; // Reset for the next round of data.
+                } else {
+                    if ( manifest[ i ].affiliate_name ) {
+                        cachedData.affiliate_name = manifest[ i ].affiliate_name;
+                    } else {
+                        cachedData.affiliate_name = NOT_AVAILABLE;
+                    }
+                    if ( manifest[ i ].primary_contact_1_email_address ) {
+                        cachedData.contact1_email = manifest[ i ].primary_contact_1_email_address;
+                    } else {
+                        cachedData.contact1_email = NOT_AVAILABLE;
+                    }
+                    if ( manifest[ i ].primary_contact_2_email_address ) {
+                        cachedData.contact2_email = manifest[ i ].primary_contact_2_email_address;
+                    } else {
+                        cachedData.contact2_email = NOT_AVAILABLE;
+                    }
+                    if ( items.includes( 'contact1_name' ) ) {
+                        if ( manifest[ i ].primary_contact_1_firstname ) {
+                            cachedData.contact1_name = manifest[ i ].primary_contact_1_firstname;
+                        } else {
+                            cachedData.contact1_name = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact2_name' ) ) {
+                        if ( manifest[ i ].primary_contact_2_firstname ) {
+                            cachedData.contact2_name = manifest[ i ].primary_contact_2_firstname;
+                        } else {
+                            cachedData.contact2_name = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact1_username' ) ) {
+                        if ( manifest[ i ].primary_contact_1_username ) {
+                            cachedData.contact1_username = manifest[ i ].primary_contact_1_username;
+                        } else {
+                            cachedData.contact1_username = NOT_AVAILABLE;
+                        }
+                    }
+                    if ( items.includes( 'contact2_username' ) ) {
+                        if ( manifest[ i ].primary_contact_2_username ) {
+                            cachedData.contact2_username = manifest[ i ].primary_contact_2_username;
+                        } else {
+                            cachedData.contact2_username = NOT_AVAILABLE;
+                        }
+                    }
+                    dataToDownload.push( cachedData );
+                    cachedData = {}; // Reset for the next round of data.
+                }
             }
 
-            console.log( 'Emails from lua table', dataToDownload );
             return dataToDownload;
         };
 
@@ -223,9 +328,17 @@
          */
         function ContactInfoDownloadEditor ( config ) {
             this.affiliate_contact_data = '';
+            this.affiliate_contact_region = '';
+            this.affiliate_contact_designation = '';
 
             if ( config.affiliate_contact_data ) {
                 this.affiliate_contact_data = config.affiliate_contact_data;
+            }
+            if ( config.affiliate_contact_region ) {
+                this.affiliate_contact_region = config.affiliate_contact_region;
+            }
+            if ( config.affiliate_contact_designation ) {
+                this.affiliate_contact_designation = config.affiliate_contact_designation;
             }
             ContactInfoDownloadEditor.super.call( this, config );
         }
@@ -254,7 +367,8 @@
          * to initialize widgets, and to set up event handlers.
          */
         ContactInfoDownloadEditor.prototype.initialize = function () {
-            var i, fieldAffiliateContactsDataSelected;
+            var i, fieldAffiliateContactsDataSelected, fieldRegionSelected,
+                fieldDesignationSelected;
             ContactInfoDownloadEditor.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
                 padded: true,
@@ -262,20 +376,33 @@
             } );
 
             fieldAffiliateContactsDataSelected = [];
+            fieldRegionSelected = [];
+            fieldDesignationSelected = [];
             for ( i = 0; i < this.affiliate_contact_data.length; i++ ) {
                 fieldAffiliateContactsDataSelected.push(
                     { data: this.affiliate_contact_data[ i ] }
                 );
             }
+            for ( i = 0; i < this.affiliate_contact_region.length; i++ ) {
+                fieldAffiliateContactsDataSelected.push(
+                    { data: this.affiliate_contact_region[ i ] }
+                );
+            }
+            for ( i = 0; i < this.affiliate_contact_designation.length; i++ ) {
+                fieldAffiliateContactsDataSelected.push(
+                    { data: this.affiliate_contact_designation[ i ] }
+                );
+            }
 
+            this.fieldDownloadsDescription = new OO.ui.LabelWidget( {
+                label: 'If you do not wish to add filters to the data, you can directly click \'Download\'. The' +
+                    ' downloaded CSV file will contain a list of all affiliates with emails of both their' +
+                    ' contacts on record.\n\n'
+            } );
             this.fieldAffiliateContactsDataSelected = new OO.ui.CheckboxMultiselectWidget( {
                 classes: [ 'checkbox-inline' ],
                 selected: fieldAffiliateContactsDataSelected,
                 items: [
-                    new OO.ui.CheckboxMultioptionWidget( {
-                        data: 'affiliate_name',
-                        label: 'Affiliate Name'
-                    } ),
                     new OO.ui.CheckboxMultioptionWidget( {
                         data: 'contact1_name',
                         label: 'Contact 1 Name'
@@ -285,10 +412,6 @@
                         label: 'Contact 1 Username'
                     } ),
                     new OO.ui.CheckboxMultioptionWidget( {
-                        data: 'contact1_email',
-                        label: 'Contact 1 Email Address'
-                    } ),
-                    new OO.ui.CheckboxMultioptionWidget( {
                         data: 'contact2_name',
                         label: 'Contact 2 Name'
                     } ),
@@ -296,10 +419,98 @@
                         data: 'contact2_username',
                         label: 'Contact 2 Username'
                     } ),
-                    new OO.ui.CheckboxMultioptionWidget( {
-                        data: 'contact2_email',
-                        label: 'Contact 2 Email Address'
-                    } )
+                ]
+            } );
+
+            //Region
+            this.fieldDesignationSelected = new OO.ui.MenuTagMultiselectWidget( {
+                selected: fieldDesignationSelected,
+                icon: 'mapPin',
+                options: [
+                    {
+                        data: 'Board Chair/President',
+                        label: 'Board Chair/President'
+                    },
+                    {
+                        data: 'Board Member',
+                        label: 'Board Member'
+                    },
+                    {
+                        data: 'Board Secretary',
+                        label: 'Board Secretary'
+                    },
+                    {
+                        data: 'Board Vice Chair/President',
+                        label: 'Board Vice Chair/President'
+                    },
+                    {
+                        data: 'Community Liaison',
+                        label: 'Community Liaison'
+                    },
+                    {
+                        data: 'Executive/Managing Director',
+                        label: 'Executive/Managing Director'
+                    },
+                    {
+                        data: 'Office Manager',
+                        label: 'Office Manager'
+                    },
+                    {
+                        data: 'Operations Manager',
+                        label: 'Operations Manager'
+                    },
+                    {
+                        data: 'Primary Contact',
+                        label: 'Primary Contact'
+                    },
+                    {
+                        data: 'Program/Project Manager',
+                        label: 'Program/Project Manager'
+                    },
+                    {
+                        data: 'Secondary contact',
+                        label: 'Secondary contact'
+                    },
+                ]
+            } );
+
+            //Region
+            this.fieldRegionSelected = new OO.ui.MenuTagMultiselectWidget( {
+                selected: fieldRegionSelected,
+                icon: 'mapPin',
+                options: [
+                    {
+                        data: 'all',
+                        label: 'All Regions'
+                    },
+                    {
+                        data: 'International',
+                        label: 'International'
+                    },
+                    {
+                        data: 'Sub-Saharan Africa',
+                        label: 'Sub-Saharan Africa'
+                    },
+                    {
+                        data: 'Asia/Pacific',
+                        label: 'Asia/Pacific'
+                    },
+                    {
+                        data: 'Europe',
+                        label: 'Europe'
+                    },
+                    {
+                        data: 'MENA',
+                        label: 'MENA'
+                    },
+                    {
+                        data: 'North America',
+                        label: 'North America'
+                    },
+                    {
+                        data: 'South/Latin America',
+                        label: 'South/Latin America'
+                    }
                 ]
             } );
 
@@ -307,13 +518,31 @@
             this.fieldSet = new OO.ui.FieldsetLayout( {
                 items: [
                     new OO.ui.FieldLayout(
+                        this.fieldDownloadsDescription,
+                        {}
+                    ),
+                    new OO.ui.FieldLayout(
                         this.fieldAffiliateContactsDataSelected,
                         {
                             label: 'Select data you want to download',
                             align: 'top'
                         }
-                    )
-                ]
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldRegionSelected,
+                        {
+                            label: 'Select regions to filter on',
+                            align: 'top'
+                        }
+                    ),
+                    new OO.ui.FieldLayout(
+                        this.fieldDesignationSelected,
+                        {
+                            label: 'Select contact designation to filter on',
+                            align: 'top'
+                        }
+                    ),
+                ],
             } );
 
             // When everything is done
@@ -326,7 +555,7 @@
          *
          */
         ContactInfoDownloadEditor.prototype.getBodyHeight = function () {
-            return 200;
+            return 300;
         };
 
         /**
@@ -352,15 +581,28 @@
          */
         ContactInfoDownloadEditor.prototype.saveItem = function () {
             var dialog = this;
-            var selectedData;
+            var selectedData, selectedRegions, selectedDesignations;
 
             dialog.pushPending();
 
             if ( dialog.fieldAffiliateContactsDataSelected.findSelectedItemsData() ) {
                 selectedData = dialog.fieldAffiliateContactsDataSelected.findSelectedItemsData();
-                if ( selectedData ) {
-                    downloadEmailAddressesCSV( selectedData );
-                }
+            }
+
+            if ( dialog.fieldRegionSelected.getValue() ) {
+                selectedRegions = dialog.fieldRegionSelected.getValue();
+            }
+
+            if ( dialog.fieldDesignationSelected.getValue() ) {
+                selectedDesignations = dialog.fieldDesignationSelected.getValue();
+            }
+
+            if ( selectedData ) {
+                downloadEmailAddressesCSV(
+                    selectedData,
+                    selectedRegions ? selectedRegions : null,
+                    selectedDesignations ? selectedDesignations : null
+                );
             }
 
             dialog.close();

@@ -1,45 +1,17 @@
 ( function () {
     'use strict';
 
-    var affiliateEmailsFileName = 'affiliate_contacts_email_addresses',
-        AffiliateLookupTextInputWidget,
-        archiveExistingContacts,
-        archiveContactOne,
-        archiveContactTwo,
-        cleanRawEntry,
-        contactsExists = false,
-        contactsSwitched = false,
-        contactsUpdated = false,
-        ContactsExistsException,
-        convertDateToDdMmYyyyFormat,
-        convertDateToYyyyMmDdFormat,
-        emailAddresses = [],
-        generateKeyValuePair,
-        getModuleContent,
-        getWikiPageContent,
-        getAffiliatesList,
-        getRelevantRawEntry,
-        openContactWindow,
-        openMessageWindow,
-        parseContentModule,
-        sanitizeInput,
-        sendEmailToMEStaff,
-        switchGroupContacts,
-        updateGroupContacts,
-        validateEmail,
-        windowManager;
+    var AffiliateLookupTextInputWidget, archiveExistingContacts,
+        archiveContactOne, archiveContactTwo, cleanRawEntry,
+        ContactsExistsException, convertDateToDdMmYyyyFormat,
+        convertDateToYyyyMmDdFormat, generateKeyValuePair, getModuleContent,
+        getWikiPageContent, getAffiliatesList, getRelevantRawEntry,
+        openContactWindow, openMessageWindow, parseContentModule, sanitizeInput,
+        sendEmailToMEStaff, switchGroupContacts, updateGroupContacts,
+        validateEmail, windowManager;
     var foreignWiki = 'https://meta.wikimedia.org/w/api.php';
     var user = mw.config.values.wgUserName;
-    var me_staff = [
-        'DNdubane (WMF)',
-        'DAlangi (WMF)',
-        'AChina-WMF',
-        'MKaur (WMF)',
-        'JAnstee (WMF)',
-        'Xeno (WMF)',
-        'Keegan (WMF)',
-        'Ramzym-WMF',
-        'Mervat (WMF)'
+    var me_staff = [ 'DNdubane (WMF)', 'DAlangi (WMF)', 'AChina-WMF', 'MKaur (WMF)', 'JAnstee (WMF)', 'Xeno (WMF)', 'Keegan (WMF)', 'Ramzym-WMF', 'Mervat (WMF)'
     ];
 
     function renderAffiliateContactInfoForm () {
@@ -99,7 +71,8 @@
          */
         convertDateToYyyyMmDdFormat = function ( date ) {
             var splitted_date;
-            // Put in a format our calendar OOUI will feed on, in YYYY-MM-DD format
+            // Put in a format our calendar OOUI will feed on, in YYYY-MM-DD
+            // format
             splitted_date = date.split( '/' );
             date = splitted_date[ 2 ] + '-' + splitted_date[ 1 ] + '-' + splitted_date[ 0 ];
 
@@ -136,8 +109,8 @@
         };
 
         /**
-         * Takes Lua-formatted content from [[Module:Activities_Reports]] content and
-         * returns an abstract syntax tree.
+         * Takes Lua-formatted content from [[Module:Activities_Reports]]
+         * content and returns an abstract syntax tree.
          *
          * @param {Object} sourceblob The original API return
          * @return {Object} Abstract syntax tree
@@ -164,10 +137,7 @@
             for ( i = 0; i < entries.length; i++ ) {
                 // Loop through the individual key-value pairs within each entry
                 for ( j = 0; j < entries[ i ].value.fields.length; j++ ) {
-                    if (
-                        entries[ i ].value.fields[ j ].key.name === 'unique_id'
-                        && entries[ i ].value.fields[ j ].value.value === uniqueId
-                    ) {
+                    if ( entries[ i ].value.fields[ j ].key.name === 'unique_id' && entries[ i ].value.fields[ j ].value.value === uniqueId ) {
                         return entries[ i ].value.fields;
                     }
                 }
@@ -182,8 +152,7 @@
          * @return {Object} The cleaned up object
          */
         cleanRawEntry = function ( relevantRawEntry ) {
-            var entryData = {},
-                i, j;
+            var entryData = {}, i, j;
             for ( i = 0; i < relevantRawEntry.length; i++ ) {
                 entryData[ relevantRawEntry[ i ].key.name ] = relevantRawEntry[ i ].value.value;
             }
@@ -250,13 +219,12 @@
          */
         sendEmailToMEStaff = function ( subject, body, to ) {
             var params = {
-                    action: 'emailuser',
-                    target: to,
-                    subject: '[Affiliates Contacts Management] ' + subject,
-                    text: body,
-                    format: 'json'
-                },
-                api = new mw.Api();
+                action: 'emailuser',
+                target: to,
+                subject: '[Affiliates Contacts Management] ' + subject,
+                text: body,
+                format: 'json'
+            }, api = new mw.Api();
 
             api.postWithToken( 'csrf', params ).then( function ( data ) {
                 // No op
@@ -333,15 +301,9 @@
         archiveExistingContacts = function ( previousContact, contactFlag ) {
             var apiObj = new mw.Api();
             apiObj.get( getModuleContent( 'Affiliate_Contacts_Information_Archive' ) ).then( function ( data ) {
-                var i,
-                    insertToTable,
-                    processWorkingEntry,
-                    editSummary,
-                    manifest = [],
-                    workingEntry,
-                    entries,
-                    contactArchiveUpdated = false,
-                    updateEntry,
+                var i, insertToTable, processWorkingEntry, editSummary,
+                    manifest = [], workingEntry, entries,
+                    contactArchiveUpdated = false, updateEntry,
                     updatedWorkingEntry;
 
                 updateEntry = function ( workingEntry ) {
@@ -409,8 +371,9 @@
                 };
 
                 /**
-                 * Compares a given [[Module:Affiliate_Contacts_Information]] entry against the edit fields
-                 * and applies changes where relevant.
+                 * Compares a given [[Module:Affiliate_Contacts_Information]]
+                 * entry against the edit fields and applies changes where
+                 * relevant.
                  *
                  * @param {Object} workingEntry the entry being worked on
                  * @return {Object} The same entry but with modifications
@@ -478,18 +441,15 @@
                 insertToTable += '}';
 
                 // Add the previous group contact to the archives Lua table.
-                apiObj.postWithToken(
-                    'csrf',
-                    {
-                        action: 'edit',
-                        bot: true,
-                        nocreate: true,
-                        summary: editSummary,
-                        pageid: 39954, //[[Module:Affiliate_Contacts_Information_Archive]]
-                        text: insertToTable,
-                        contentmodel: 'Scribunto'
-                    }
-                ).then( function () {
+                apiObj.postWithToken( 'csrf', {
+                    action: 'edit',
+                    bot: true,
+                    nocreate: true,
+                    summary: editSummary,
+                    pageid: 39954, //[[Module:Affiliate_Contacts_Information_Archive]]
+                    text: insertToTable,
+                    contentmodel: 'Scribunto'
+                } ).then( function () {
                     console.log( 'Previous Group Contact Archived' );
                 } ).catch( function ( error ) {
                     alert( 'Failed' );
@@ -584,19 +544,13 @@
 
         ContactInfoEditor.static.name = 'contactInfoEditor';
         ContactInfoEditor.static.title = 'Affiliate Contact Uploader Form'; // gadgetMsg['org-info-header'];
-        ContactInfoEditor.static.actions = [
-            {
-                action: 'continue',
-                modes: 'edit',
-                label: 'Submit', //gadgetMsg['submit-button'],
-                flags: [ 'primary', 'constructive' ]
-            },
-            {
-                action: 'cancel',
-                modes: 'edit',
-                label: 'Cancel', //gadgetMsg['cancel-button'],
-                flags: 'safe'
-            }
+        ContactInfoEditor.static.actions = [ {
+            action: 'continue', modes: 'edit', label: 'Submit', //gadgetMsg['submit-button'],
+            flags: [ 'primary', 'constructive' ]
+        }, {
+            action: 'cancel', modes: 'edit', label: 'Cancel', //gadgetMsg['cancel-button'],
+            flags: 'safe'
+        }
         ];
 
         /**
@@ -606,8 +560,7 @@
         ContactInfoEditor.prototype.initialize = function () {
             ContactInfoEditor.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
-                padded: true,
-                expanded: false
+                padded: true, expanded: false
             } );
 
             // Popup to be used after form validation
@@ -630,7 +583,8 @@
                 id: 'wadp-popup-widget-position'
             } );
 
-            // Popup to be used to notify user that contacts provided already exists
+            // Popup to be used to notify user that contacts provided already
+            // exists
             this.fieldContactsExistPopup = new OO.ui.PopupWidget( {
                 $content: $( '<p style="color: red; text-align: center;">Error! Contacts provided already exist for this affiliate. Check and try submitting again.</p>' ),
                 padded: true,
@@ -640,7 +594,8 @@
                 id: 'wadp-popup-widget-position'
             } );
 
-            // this.field_affiliate_name = new AffiliateLookupTextInputWidget(this.affiliate_name);
+            // this.field_affiliate_name = new
+            // AffiliateLookupTextInputWidget(this.affiliate_name);
 
             this.field_affiliate_name = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
@@ -657,29 +612,32 @@
             this.field_primary_contact_1_firstname = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'userAvatar',
-                value: this.primary_contact_1_firstname,
-                // placeholder: 'First name' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_1_firstname, // placeholder: 'First
+                                                         // name'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
             this.field_primary_contact_1_surname = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'userAvatar',
-                value: this.primary_contact_1_surname,
-                // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_1_surname, // placeholder: 'Surname'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
             this.field_primary_contact_1_username = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'userAvatar',
-                value: this.primary_contact_1_username,
-                // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_1_username, // placeholder:
+                                                        // 'Surname'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
             this.field_primary_contact_1_email_address = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'newspaper',
-                value: this.primary_contact_1_email_address,
-                // placeholder: 'Email Address' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_1_email_address, // placeholder:
+                                                             // 'Email Address'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ],
                 indicator: 'required',
                 required: true
@@ -687,8 +645,10 @@
             this.field_primary_contact_1_other_input = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'logoWikimedia',
-                value: this.field_primary_contact_1_other_input,
-                // placeholder: 'Email Address' //gadgetMsg['group-membership-page-link']
+                value: this.field_primary_contact_1_other_input, // placeholder:
+                                                                 // 'Email
+                                                                 // Address'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
             this.field_primary_contact_2_label = new OO.ui.LabelWidget( {
@@ -697,29 +657,32 @@
             this.field_primary_contact_2_firstname = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'userAvatar',
-                value: this.primary_contact_2_firstname,
-                // placeholder: 'First name' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_2_firstname, // placeholder: 'First
+                                                         // name'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
             this.field_primary_contact_2_surname = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'userAvatar',
-                value: this.primary_contact_2_surname,
-                // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_2_surname, // placeholder: 'Surname'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
             this.field_primary_contact_2_username = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'userAvatar',
-                value: this.primary_contact_2_username,
-                // placeholder: 'Surname' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_2_username, // placeholder:
+                                                        // 'Surname'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
             this.field_primary_contact_2_email_address = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'newspaper',
-                value: this.primary_contact_2_email_address,
-                // placeholder: 'Email Address' //gadgetMsg['group-membership-page-link']
+                value: this.primary_contact_2_email_address, // placeholder:
+                                                             // 'Email Address'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ],
                 indicator: 'required',
                 required: true
@@ -727,8 +690,10 @@
             this.field_primary_contact_2_other_input = new OO.ui.TextInputWidget( {
                 labelPosition: 'before',
                 icon: 'logoWikimedia',
-                value: this.field_primary_contact_2_other_input,
-                // placeholder: 'Email Address' //gadgetMsg['group-membership-page-link']
+                value: this.field_primary_contact_2_other_input, // placeholder:
+                                                                 // 'Email
+                                                                 // Address'
+                // //gadgetMsg['group-membership-page-link']
                 classes: [ 'full-width' ]
             } );
 
@@ -736,8 +701,7 @@
             this.dos_stamp = new Date().toJSON().slice( 0, 10 ).replace( /-/g, '/' );
 
             this.fieldDateOfSubmission = new OO.ui.TextInputWidget( {
-                value: this.dos_stamp,
-                type: 'hidden'
+                value: this.dos_stamp, type: 'hidden'
             } );
 
             this.field_primary_contact_1_designation = new OO.ui.DropdownWidget( {
@@ -747,55 +711,35 @@
                 value: this.field_primary_contact_1_designation,
                 classes: [ 'full-width' ],
                 menu: {
-                    items: [
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Chair/President',
-                            label: 'Board Chair/President'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Member',
-                            label: 'Board Member'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Secretary',
-                            label: 'Board Secretary'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Vice Chair/President',
-                            label: 'Board Vice Chair/President'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Community Liaison',
-                            label: 'Community Liaison'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Executive/Managing Director',
-                            label: 'Executive/Managing Directo'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Office Manager',
-                            label: 'Office Manager'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Operations Manager',
-                            label: 'Operations Manager'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Primary Contact',
-                            label: 'Primary Contact'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Program/Project Manager',
-                            label: 'Program/Project Manager'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Secondary contact',
-                            label: 'Secondary contact'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Other',
-                            label: 'Other...'
-                        } )
+                    items: [ new OO.ui.MenuOptionWidget( {
+                        data: 'Board Chair/President',
+                        label: 'Board Chair/President'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Board Member', label: 'Board Member'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Board Secretary', label: 'Board Secretary'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Board Vice Chair/President',
+                        label: 'Board Vice Chair/President'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Community Liaison', label: 'Community Liaison'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Executive/Managing Director',
+                        label: 'Executive/Managing Director'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Office Manager', label: 'Office Manager'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Operations Manager', label: 'Operations Manager'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Primary Contact', label: 'Primary Contact'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Program/Project Manager',
+                        label: 'Program/Project Manager'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Secondary contact', label: 'Secondary contact'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Other', label: 'Other...'
+                    } )
                     ]
                 }
             } );
@@ -807,170 +751,81 @@
                 value: this.field_primary_contact_2_designation,
                 classes: [ 'full-width' ],
                 menu: {
-                    items: [
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Chair/President',
-                            label: 'Board Chair/President'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Member',
-                            label: 'Board Member'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Secretary',
-                            label: 'Board Secretary'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Board Vice Chair/President',
-                            label: 'Board Vice Chair/President'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Community Liaison',
-                            label: 'Community Liaison'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Executive/Managing Director',
-                            label: 'Executive/Managing Directo'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Office Manager',
-                            label: 'Office Manager'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Operations Manager',
-                            label: 'Operations Manager'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Primary Contact',
-                            label: 'Primary Contact'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Program/Project Manager',
-                            label: 'Program/Project Manager'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Secondary contact',
-                            label: 'Secondary contact'
-                        } ),
-                        new OO.ui.MenuOptionWidget( {
-                            data: 'Other',
-                            label: 'Other...'
-                        } )
+                    items: [ new OO.ui.MenuOptionWidget( {
+                        data: 'Board Chair/President',
+                        label: 'Board Chair/President'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Board Member', label: 'Board Member'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Board Secretary', label: 'Board Secretary'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Board Vice Chair/President',
+                        label: 'Board Vice Chair/President'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Community Liaison', label: 'Community Liaison'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Executive/Managing Director',
+                        label: 'Executive/Managing Directo'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Office Manager', label: 'Office Manager'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Operations Manager', label: 'Operations Manager'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Primary Contact', label: 'Primary Contact'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Program/Project Manager',
+                        label: 'Program/Project Manager'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Secondary contact', label: 'Secondary contact'
+                    } ), new OO.ui.MenuOptionWidget( {
+                        data: 'Other', label: 'Other...'
+                    } )
                     ]
                 }
             } );
 
             // Append things to fieldSet
             this.fieldSet = new OO.ui.FieldsetLayout( {
-                items: [
-                    new OO.ui.FieldLayout(
-                        this.fieldPopup, {}
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.fieldEmailPopup, {}
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.fieldContactsExistPopup, {}
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_affiliate_name,
-                        {
-                            label: 'Group Name', //gadgetMsg['has-group-mission-changed'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_1_label,
-                        {}
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_1_firstname,
-                        {
-                            label: 'First Name', //gadgetMsg['has-group-mission-changed'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_1_surname,
-                        {
-                            label: 'Surname', //gadgetMsg['mission-changed-or-unsure-explanation'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_1_username,
-                        {
-                            label: 'Wikimedia Username', //gadgetMsg['mission-changed-or-unsure-explanation'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_1_email_address,
-                        {
-                            label: 'Email Address', //gadgetMsg['legal-entity-or-not'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_1_designation,
-                        {
-                            label: 'Designation', //gadgetMsg['group-membership-page'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_1_other_input,
-                        {
-                            label: 'If Other, provide contact 1 designation', //gadgetMsg['group-membership-page'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_2_label,
-                        {}
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_2_firstname,
-                        {
-                            label: 'First name', //gadgetMsg['has-group-mission-changed'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_2_surname,
-                        {
-                            label: 'Surname', //gadgetMsg['mission-changed-or-unsure-explanation'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_2_username,
-                        {
-                            label: 'Wikimedia Username', //gadgetMsg['mission-changed-or-unsure-explanation'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_2_email_address,
-                        {
-                            label: 'Email Address', //gadgetMsg['legal-entity-or-not'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_2_designation,
-                        {
-                            label: 'Designation', //gadgetMsg['group-membership-page'],
-                            align: 'top'
-                        }
-                    ),
-                    new OO.ui.FieldLayout(
-                        this.field_primary_contact_2_other_input,
-                        {
-                            label: 'If Other, provide contact 2 designation', //gadgetMsg['group-membership-page'],
-                            align: 'top'
-                        }
-                    ),
+                items: [ new OO.ui.FieldLayout( this.fieldPopup, {} ), new OO.ui.FieldLayout( this.fieldEmailPopup, {} ), new OO.ui.FieldLayout( this.fieldContactsExistPopup, {} ), new OO.ui.FieldLayout( this.field_affiliate_name, {
+                    label: 'Group Name', //gadgetMsg['has-group-mission-changed'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_1_label, {} ), new OO.ui.FieldLayout( this.field_primary_contact_1_firstname, {
+                    label: 'First Name', //gadgetMsg['has-group-mission-changed'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_1_surname, {
+                    label: 'Surname', //gadgetMsg['mission-changed-or-unsure-explanation'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_1_username, {
+                    label: 'Wikimedia Username', //gadgetMsg['mission-changed-or-unsure-explanation'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_1_email_address, {
+                    label: 'Email Address', //gadgetMsg['legal-entity-or-not'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_1_designation, {
+                    label: 'Designation', //gadgetMsg['group-membership-page'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_1_other_input, {
+                    label: 'If Other, provide contact 1 designation', //gadgetMsg['group-membership-page'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_2_label, {} ), new OO.ui.FieldLayout( this.field_primary_contact_2_firstname, {
+                    label: 'First name', //gadgetMsg['has-group-mission-changed'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_2_surname, {
+                    label: 'Surname', //gadgetMsg['mission-changed-or-unsure-explanation'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_2_username, {
+                    label: 'Wikimedia Username', //gadgetMsg['mission-changed-or-unsure-explanation'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_2_email_address, {
+                    label: 'Email Address', //gadgetMsg['legal-entity-or-not'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_2_designation, {
+                    label: 'Designation', //gadgetMsg['group-membership-page'],
+                    align: 'top'
+                } ), new OO.ui.FieldLayout( this.field_primary_contact_2_other_input, {
+                    label: 'If Other, provide contact 2 designation', //gadgetMsg['group-membership-page'],
+                    align: 'top'
+                } ),
                 ]
             } );
 
@@ -980,19 +835,21 @@
         };
 
         /**
-         * Method to Lookup Affiliate names from [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
+         * Method to Lookup Affiliate names from
+         * [[m:Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates]]
          * and to be used as autocomplete form element in the forms
          */
         AffiliateLookupTextInputWidget = function AffiliatesLookupTextInputWidget ( config ) {
             // Parent constructor
-            OO.ui.TextInputWidget.call( this, $.extend(
-                {
-                    icon: 'userGroup',
-                    indicator: 'required',
-                    required: true,
-                    validate: 'text',
-                    placeholder: 'Enter affiliate name' //gadgetMsg[ 'group-name-placeholder' ]
-                }, config ) );
+            OO.ui.TextInputWidget.call( this, $.extend( {
+                icon: 'userGroup',
+                indicator: 'required',
+                required: true,
+                validate: 'text',
+                placeholder: 'Enter affiliate name' //gadgetMsg[
+                                                    // 'group-name-placeholder'
+                                                    // ]
+            }, config ) );
             // Mixin constructors
             OO.ui.mixin.LookupElement.call( this, config );
         };
@@ -1004,15 +861,13 @@
             var value = this.getValue();
             return this.getValidity().then( function () {
                 // Query the API to get the list of affiliates
-                return new mw.ForeignApi( foreignWiki ).get(
-                    getWikiPageContent( 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates' )
-                ).then( function ( data ) {
-                    var affiliates,
-                        affiliatesContent;
+                return new mw.ForeignApi( foreignWiki ).get( getWikiPageContent( 'Wikimedia_Affiliates_Data_Portal/MRL/List_Of_All_Wikimedia_Affiliates' ) ).then( function ( data ) {
+                    var affiliates, affiliatesContent;
 
                     affiliatesContent = getAffiliatesList( data.query.pages );
                     affiliates = affiliatesContent.split( ',\n' );
-                    // Filter to only affiliates whose names contain the input (case-insensitive)
+                    // Filter to only affiliates whose names contain the input
+                    // (case-insensitive)
                     affiliates = affiliates.filter( function ( v ) {
                         return v.toLowerCase().indexOf( value.toLowerCase() ) !== -1;
                     } );
@@ -1033,16 +888,13 @@
          * returned by #getLookupCacheDataFromResponse.
          */
         AffiliateLookupTextInputWidget.prototype.getLookupMenuOptionsFromData = function ( data ) {
-            var items = [],
-                i,
-                affiliate;
+            var items = [], i, affiliate;
 
             for ( i = 0; i < data.length; i++ ) {
                 affiliate = String( data[ i ] );
                 affiliate = affiliate.split( ' ~ ' )[ 0 ];
                 items.push( new OO.ui.MenuOptionWidget( {
-                    data: affiliate,
-                    label: affiliate
+                    data: affiliate, label: affiliate
                 } ) );
             }
             return items;
@@ -1061,10 +913,8 @@
          *
          */
         ContactInfoEditor.prototype.getActionProcess = function ( action ) {
-            var dialog = this,
-                allRequiredFieldsAvailable = false,
-                otherContactDesignationSelected = false,
-                isValidEmail = false;
+            var dialog = this, allRequiredFieldsAvailable = false,
+                otherContactDesignationSelected = false, isValidEmail = false;
 
             // Before submitting the form, check that all required fields indeed
             // have values before we call saveItem(). Otherwise, don't close the
@@ -1083,24 +933,19 @@
                 allRequiredFieldsAvailable = true;
             }
 
-            if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem() == null ||
-                dialog.field_primary_contact_2_designation.getMenu().findSelectedItem() == null ) {
+            if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem() == null || dialog.field_primary_contact_2_designation.getMenu().findSelectedItem() == null ) {
                 allRequiredFieldsAvailable = false;
             } else {
-                if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ||
-                    dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' || dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
                     otherContactDesignationSelected = true;
                 }
             }
 
-            if ( otherContactDesignationSelected && ( !dialog.field_primary_contact_1_other_input.getValue() ||
-                !dialog.field_primary_contact_2_other_input.getValue() ) ) {
+            if ( otherContactDesignationSelected && ( !dialog.field_primary_contact_1_other_input.getValue() || !dialog.field_primary_contact_2_other_input.getValue() ) ) {
                 allRequiredFieldsAvailable = false;
             }
 
-            if ( validateEmail( dialog.field_primary_contact_1_email_address.getValue() ) &&
-                validateEmail( dialog.field_primary_contact_2_email_address.getValue() )
-            ) {
+            if ( validateEmail( dialog.field_primary_contact_1_email_address.getValue() ) && validateEmail( dialog.field_primary_contact_2_email_address.getValue() ) ) {
                 isValidEmail = true;
             }
 
@@ -1128,307 +973,187 @@
         /**
          * Save the changes to [[Module:GroupContact_Informations]] page.
          */
-        ContactInfoEditor.prototype.saveItem = function ( deleteFlag ) {
+        ContactInfoEditor.prototype.saveItem = function () {
             var dialog = this;
             var apiObj = new mw.Api();
 
             dialog.pushPending();
 
             apiObj.get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( data ) {
-                apiObj.get( getModuleContent( 'Organization_Information' ) ).then( function ( orgInfo ) {
-                    var i,
-                        j,
-                        insertToTable,
-                        processWorkingEntry,
-                        editSummary,
-                        manifest = [],
-                        workingEntry,
-                        orgInfoData,
-                        entries,
-                        updatedWorkingEntry,
-                        orgInfoEntries,
-                        assignRegionandCode;
+                var i, insertToTable, processWorkingEntry, editSummary,
+                    manifest = [], workingEntry, entries;
 
-                    /**
-                     * Compares a given [[Module:Affiliate_Contacts_Information]] entry against a
-                     * [[Module:Organization_Information]] entry and updates the affiliate code and region
-                     * in the affiliate contact information record.
-                     *
-                     * @param {Object} contactInfo affiliate contacts information living on office
-                     * @param {Object} orgInfo organization information pulled in from meta using the bridge
-                     * @return {Object} updated affiliate contacts information entry but with modifications
-                     */
-                    assignRegionandCode = function ( contactInfo, orgInfo ) {
-                        if ( orgInfo.affiliate_code ) {
-                            contactInfo.affiliate_code = orgInfo.affiliate_code;
+                /**
+                 * Compares a given [[Module:Affiliate_Contacts_Information]]
+                 * entry against the edit fields and applies changes where
+                 * relevant.
+                 *
+                 * @param {Object} workingEntry the entry being worked on
+                 * @return {Object} The same entry but with modifications
+                 */
+                processWorkingEntry = function ( workingEntry ) {
+                    //Affiliate name
+                    if ( dialog.field_affiliate_name.getValue() ) {
+                        workingEntry.affiliate_name = dialog.field_affiliate_name.getValue();
+                    }
+                    // Primary Contact 1
+                    if ( dialog.field_primary_contact_1_firstname.getValue() ) {
+                        workingEntry.primary_contact_1_firstname = dialog.field_primary_contact_1_firstname.getValue();
+                    }
+                    if ( dialog.field_primary_contact_1_surname.getValue() ) {
+                        workingEntry.primary_contact_1_surname = dialog.field_primary_contact_1_surname.getValue();
+                    }
+                    if ( dialog.field_primary_contact_1_username.getValue() ) {
+                        workingEntry.primary_contact_1_username = dialog.field_primary_contact_1_username.getValue();
+                    }
+                    if ( dialog.field_primary_contact_1_email_address.getValue() ) {
+                        workingEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
+                    }
+                    if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() ) {
+                        if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_other_input.getValue();
                         } else {
-                            contactInfo.affiliate_code = '-';
-                        }
-
-                        if ( orgInfo.region ) {
-                            contactInfo.affiliate_region = orgInfo.region;
-                        } else {
-                            contactInfo.affiliate_region = '-';
-                        }
-                        return contactInfo;
-                    };
-
-                    /**
-                     * Compares a given [[Module:Affiliate_Contacts_Information]] entry against the edit fields
-                     * and applies changes where relevant.
-                     *
-                     * @param {Object} workingEntry the entry being worked on
-                     * @return {Object} The same entry but with modifications
-                     */
-                    processWorkingEntry = function ( workingEntry ) {
-                        //Affiliate name
-                        if ( dialog.field_affiliate_name.getValue() ) {
-                            workingEntry.affiliate_name = dialog.field_affiliate_name.getValue();
-                        }
-                        // Primary Contact 1
-                        if ( dialog.field_primary_contact_1_firstname.getValue() ) {
-                            workingEntry.primary_contact_1_firstname = dialog.field_primary_contact_1_firstname.getValue();
-                        }
-                        if ( dialog.field_primary_contact_1_surname.getValue() ) {
-                            workingEntry.primary_contact_1_surname = dialog.field_primary_contact_1_surname.getValue();
-                        }
-                        if ( dialog.field_primary_contact_1_username.getValue() ) {
-                            workingEntry.primary_contact_1_username = dialog.field_primary_contact_1_username.getValue();
-                        }
-                        if ( dialog.field_primary_contact_1_email_address.getValue() ) {
-                            workingEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
-                        }
-                        if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() ) {
-                            if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
-                                workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_other_input.getValue();
-                            } else {
-                                workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
-                            }
-                        }
-                        // Primary Contact 2
-                        if ( dialog.field_primary_contact_2_firstname.getValue() ) {
-                            workingEntry.primary_contact_2_firstname = dialog.field_primary_contact_2_firstname.getValue();
-                        }
-                        if ( dialog.field_primary_contact_2_surname.getValue() ) {
-                            workingEntry.primary_contact_2_surname = dialog.field_primary_contact_2_surname.getValue();
-                        }
-                        if ( dialog.field_primary_contact_2_username.getValue() ) {
-                            workingEntry.primary_contact_2_username = dialog.field_primary_contact_2_username.getValue();
-                        }
-                        if ( dialog.field_primary_contact_2_email_address.getValue() ) {
-                            workingEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
-                        }
-                        if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() ) {
-                            if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
-                                workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_other_input.getValue();
-                            } else {
-                                workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
-                            }
-                        }
-                        return workingEntry;
-                    };
-
-                    entries = parseContentModule( data.query.pages );
-                    orgInfoEntries = parseContentModule( orgInfo.query.pages );
-                    // Cycle through existing entries. If we are editing an existing
-                    // entry, that entry will be modified in place.
-                    try {
-                        for ( i = 0; i < entries.length; i++ ) {
-                            workingEntry = cleanRawEntry( entries[ i ].value.fields );
-                            /**
-                             * This code freshly populates the existing Affiliate Contacts Lua table
-                             * by adding their corresponding affiliate code and region. Commented
-                             * out because the scipt needs only to run ones. Kept here in case it is
-                             * needed in the future.
-                             */
-
-                            // for ( j = 0; j < orgInfoEntries.length; j++ ) {
-                            //     orgInfoData = cleanRawEntry( orgInfoEntries[ j ].value.fields );
-                            //     if(orgInfoData.affiliate_name == workingEntry.affiliate_name) {
-                            //         workingEntry = assignRegionandCode( workingEntry, orgInfoData );
-                            //     }
-                            // }
-                            //manifest.push(workingEntry)
-
-                            /**
-                             * Handling affiliates with already existing group contacts i.e. Updating
-                             * Case 1: If supplying the same group contacts again, in the same order, reject and notify user.
-                             * Case 2: If changing the order i.e contact 1 is now contact 2 and vice versa, update and notify Dumisani
-                             * If one or more has changed..make edit, populate archive table and notify Dumisani
-                             */
-                            if ( workingEntry.unique_id !== dialog.uniqueId || !deleteFlag ) {
-                                if ( workingEntry.affiliate_name === dialog.field_affiliate_name.getValue() ) {
-                                    //Case 1
-                                    if ( workingEntry.primary_contact_1_username === dialog.field_primary_contact_1_username.getValue() &&
-                                        workingEntry.primary_contact_2_username === dialog.field_primary_contact_2_username.getValue() ) {
-                                        contactsExists = true;
-                                        throw new ContactsExistsException();
-                                    } //Case 2
-                                    else if ( workingEntry.primary_contact_1_username === dialog.field_primary_contact_2_username.getValue() &&
-                                        workingEntry.primary_contact_2_username === dialog.field_primary_contact_1_username.getValue() ) {
-                                        contactsSwitched = true;
-                                        updatedWorkingEntry = switchGroupContacts( workingEntry );
-                                        manifest.push( updatedWorkingEntry );
-                                    } //Case 3
-                                    else if ( workingEntry.primary_contact_1_username !== dialog.field_primary_contact_1_username.getValue() &&
-                                        workingEntry.primary_contact_2_username === dialog.field_primary_contact_2_username.getValue() ) {
-                                        contactsUpdated = true;
-                                        updatedWorkingEntry = updateGroupContacts( workingEntry, dialog, 'contact1Updated' );
-                                        manifest.push( updatedWorkingEntry );
-                                    } else if ( workingEntry.primary_contact_1_username === dialog.field_primary_contact_1_username.getValue() &&
-                                        workingEntry.primary_contact_2_username !== dialog.field_primary_contact_2_username.getValue() ) {
-                                        contactsUpdated = true;
-                                        updatedWorkingEntry = updateGroupContacts( workingEntry, dialog, 'contact2Updated' );
-                                        manifest.push( updatedWorkingEntry );
-                                    } else if ( workingEntry.primary_contact_1_username !== dialog.field_primary_contact_1_username.getValue() &&
-                                        workingEntry.primary_contact_2_username !== dialog.field_primary_contact_2_username.getValue() ) {
-                                        contactsUpdated = true;
-                                        updatedWorkingEntry = updateGroupContacts( workingEntry, dialog, 'bothUpdated' );
-                                        manifest.push( updatedWorkingEntry );
-                                    }
-                                } else {
-                                    manifest.push( workingEntry );
-                                }
-                            }
-                        }
-                    } catch ( error ) {
-                        if ( error.name === 'ContactsExistsException' ) {
-                            console.error( error.name, error.message );
-                            alert( error.message );
-                            dialog.close();
-                        } else {
-                            alert( 'Failed' );
-                            dialog.close();
-                            console.error( error );
+                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
                         }
                     }
-
-                    // No unique ID means this is a new entry
-                    if ( !dialog.uniqueId && !contactsSwitched && !contactsUpdated ) {
-                        workingEntry = {
-                            unique_id: Math.random().toString( 36 ).substring( 2 )
-                        };
-                        workingEntry = processWorkingEntry( workingEntry );
-                        for ( j = 0; j < orgInfoEntries.length; j++ ) {
-                            orgInfoData = cleanRawEntry( orgInfoEntries[ j ].value.fields );
-                            if ( orgInfoData.affiliate_name == workingEntry.affiliate_name ) {
-                                workingEntry = assignRegionandCode( workingEntry, orgInfoData );
-                            }
+                    // Primary Contact 2
+                    if ( dialog.field_primary_contact_2_firstname.getValue() ) {
+                        workingEntry.primary_contact_2_firstname = dialog.field_primary_contact_2_firstname.getValue();
+                    }
+                    if ( dialog.field_primary_contact_2_surname.getValue() ) {
+                        workingEntry.primary_contact_2_surname = dialog.field_primary_contact_2_surname.getValue();
+                    }
+                    if ( dialog.field_primary_contact_2_username.getValue() ) {
+                        workingEntry.primary_contact_2_username = dialog.field_primary_contact_2_username.getValue();
+                    }
+                    if ( dialog.field_primary_contact_2_email_address.getValue() ) {
+                        workingEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
+                    }
+                    if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() ) {
+                        if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_other_input.getValue();
+                        } else {
+                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
                         }
-                        editSummary = 'Adding Group Contact for :  ' + workingEntry.affiliate_name;
-                        console.log( editSummary );
+                    }
+                    return workingEntry;
+                };
+
+                entries = parseContentModule( data.query.pages );
+                // Cycle through existing entries. If we are editing an existing
+                // entry, that entry will be modified in place.
+                for ( i = 0; i < entries.length; i++ ) {
+                    workingEntry = cleanRawEntry( entries[ i ].value.fields );
+
+                    if ( workingEntry.affiliate_name === dialog.affiliate_name ) {
+                        workingEntry = processWorkingEntry( workingEntry );
+                        manifest.push( workingEntry );
+                    } else {
                         manifest.push( workingEntry );
                     }
+                }
 
-                    // Re-generate the Lua table based on `manifest`
-                    insertToTable = 'return {\n';
-                    for ( i = 0; i < manifest.length; i++ ) {
-                        insertToTable += '\t{\n';
-                        if ( manifest[ i ].affiliate_name ) {
-                            insertToTable += generateKeyValuePair( 'affiliate_name', manifest[ i ].affiliate_name );
-                        }
-                        if ( manifest[ i ].affiliate_code ) {
-                            insertToTable += generateKeyValuePair( 'affiliate_code', manifest[ i ].affiliate_code );
-                        }
-                        if ( manifest[ i ].affiliate_region ) {
-                            insertToTable += generateKeyValuePair( 'affiliate_region', manifest[ i ].affiliate_region );
-                        }
-                        if ( manifest[ i ].primary_contact_1_firstname ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_1_firstname', manifest[ i ].primary_contact_1_firstname );
-                        }
-                        if ( manifest[ i ].primary_contact_1_surname ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_1_surname', manifest[ i ].primary_contact_1_surname );
-                        }
-                        if ( manifest[ i ].primary_contact_1_username ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_1_username', manifest[ i ].primary_contact_1_username );
-                        }
-                        if ( manifest[ i ].primary_contact_1_email_address ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_1_email_address', manifest[ i ].primary_contact_1_email_address );
-                        }
-                        if ( manifest[ i ].primary_contact_1_designation ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_1_designation', manifest[ i ].primary_contact_1_designation );
-                        }
-                        if ( manifest[ i ].primary_contact_2_firstname ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_2_firstname', manifest[ i ].primary_contact_2_firstname );
-                        }
-                        if ( manifest[ i ].primary_contact_2_surname ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_2_surname', manifest[ i ].primary_contact_2_surname );
-                        }
-                        if ( manifest[ i ].primary_contact_2_username ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_2_username', manifest[ i ].primary_contact_2_username );
-                        }
-                        if ( manifest[ i ].primary_contact_2_email_address ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_2_email_address', manifest[ i ].primary_contact_2_email_address );
-                        }
-                        if ( manifest[ i ].primary_contact_2_designation ) {
-                            insertToTable += generateKeyValuePair( 'primary_contact_2_designation', manifest[ i ].primary_contact_2_designation );
-                        }
-                        if ( manifest[ i ].unique_id ) {
-                            insertToTable += generateKeyValuePair( 'unique_id', manifest[ i ].unique_id );
-                        }
-                        if ( manifest[ i ].dos_stamp ) {
-                            insertToTable += generateKeyValuePair( 'created_at', manifest[ i ].dos_stamp );
-                        }
-                        insertToTable += '\t},\n';
+                // Re-generate the Lua table based on `manifest`
+                insertToTable = 'return {\n';
+                for ( i = 0; i < manifest.length; i++ ) {
+                    insertToTable += '\t{\n';
+                    if ( manifest[ i ].affiliate_name ) {
+                        insertToTable += generateKeyValuePair( 'affiliate_name', manifest[ i ].affiliate_name );
                     }
-                    insertToTable += '}';
-                    // console.log(insertToTable);
+                    if ( manifest[ i ].affiliate_code ) {
+                        insertToTable += generateKeyValuePair( 'affiliate_code', manifest[ i ].affiliate_code );
+                    }
+                    if ( manifest[ i ].affiliate_region ) {
+                        insertToTable += generateKeyValuePair( 'affiliate_region', manifest[ i ].affiliate_region );
+                    }
+                    if ( manifest[ i ].primary_contact_1_firstname || manifest[ i ].primary_contact_1_firstname === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_1_firstname', manifest[ i ].primary_contact_1_firstname );
+                    }
+                    if ( manifest[ i ].primary_contact_1_surname || manifest[ i ].primary_contact_1_surname === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_1_surname', manifest[ i ].primary_contact_1_surname );
+                    }
+                    if ( manifest[ i ].primary_contact_1_username || manifest[ i ].primary_contact_1_username === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_1_username', manifest[ i ].primary_contact_1_username );
+                    }
+                    if ( manifest[ i ].primary_contact_1_email_address || manifest[ i ].primary_contact_1_email_address === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_1_email_address', manifest[ i ].primary_contact_1_email_address );
+                    }
+                    if ( manifest[ i ].primary_contact_1_designation || manifest[ i ].primary_contact_1_designation === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_1_designation', manifest[ i ].primary_contact_1_designation );
+                    }
+                    if ( manifest[ i ].primary_contact_2_firstname || manifest[ i ].primary_contact_2_firstname === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_2_firstname', manifest[ i ].primary_contact_2_firstname );
+                    }
+                    if ( manifest[ i ].primary_contact_2_surname || manifest[ i ].primary_contact_2_surname === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_2_surname', manifest[ i ].primary_contact_2_surname );
+                    }
+                    if ( manifest[ i ].primary_contact_2_username || manifest[ i ].primary_contact_2_username === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_2_username', manifest[ i ].primary_contact_2_username );
+                    }
+                    if ( manifest[ i ].primary_contact_2_email_address || manifest[ i ].primary_contact_2_email_address === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_2_email_address', manifest[ i ].primary_contact_2_email_address );
+                    }
+                    if ( manifest[ i ].primary_contact_2_designation || manifest[ i ].primary_contact_2_designation === '' ) {
+                        insertToTable += generateKeyValuePair( 'primary_contact_2_designation', manifest[ i ].primary_contact_2_designation );
+                    }
+                    if ( manifest[ i ].unique_id || manifest[ i ].unique_id === '' ) {
+                        insertToTable += generateKeyValuePair( 'unique_id', manifest[ i ].unique_id );
+                    }
+                    if ( manifest[ i ].dos_stamp || manifest[ i ].dos_stamp === '' ) {
+                        insertToTable += generateKeyValuePair( 'created_at', manifest[ i ].dos_stamp );
+                    }
+                    insertToTable += '\t},\n';
+                }
+                insertToTable += '}';
+                // console.log(insertToTable);
 
-                    // Add the new Report into the Lua table.
-                    apiObj.postWithToken(
-                        'csrf',
-                        {
-                            action: 'edit',
-                            bot: true,
-                            nocreate: true,
-                            summary: editSummary,
-                            pageid: 39952, //[[Module:Affiliate_Contacts_Information]]
-                            text: insertToTable,
-                            contentmodel: 'Scribunto'
+                // Add the new Report into the Lua table.
+                apiObj.postWithToken( 'csrf', {
+                    action: 'edit',
+                    bot: true,
+                    nocreate: true,
+                    summary: editSummary,
+                    pageid: 39952, //[[Module:Affiliate_Contacts_Information]]
+                    text: insertToTable,
+                    contentmodel: 'Scribunto'
+                } ).then( function () {
+
+                    dialog.close();
+
+                    /** After saving, show a message box */
+                    var messageDialog = new OO.ui.MessageDialog();
+                    var windowManager = new OO.ui.WindowManager();
+
+                    $( 'body' ).append( windowManager.$element );
+                    // Add the dialog to the window manager.
+                    windowManager.addWindows( [ messageDialog ] );
+
+                    // Configure the message dialog when it is opened with the
+                    // window manager's openWindow() method.
+                    windowManager.openWindow( messageDialog, {
+                        title: 'Saved',
+                        message: 'Affiliate Contact Saved',
+                        actions: [ {
+                            action: 'accept', label: 'Dismiss', flags: 'primary'
                         }
-                    ).then( function () {
-
-                        dialog.close();
-
-                        /** After saving, show a message box */
-                        var messageDialog = new OO.ui.MessageDialog();
-                        var windowManager = new OO.ui.WindowManager();
-
-                        $( 'body' ).append( windowManager.$element );
-                        // Add the dialog to the window manager.
-                        windowManager.addWindows( [ messageDialog ] );
-
-                        // Configure the message dialog when it is opened with the window manager's openWindow() method.
-                        windowManager.openWindow( messageDialog, {
-                            title: 'Saved',
-                            message: 'Affiliate Contact Saved',
-                            actions: [
-                                {
-                                    action: 'accept',
-                                    label: 'Dismiss',
-                                    flags: 'primary'
-                                }
-                            ]
-                        } );
-
-                        windowManager.closeWindow( messageDialog );
-                    } ).catch( function ( error ) {
-                        alert( 'Failed' );
-                        dialog.close();
-                        console.error( error );
+                        ]
                     } );
+
+                    windowManager.closeWindow( messageDialog );
+                    location.reload();
+                } ).catch( function ( error ) {
+                    alert( 'Failed' );
+                    dialog.close();
+                    console.error( error );
                 } );
             } );
         };
 
         // Edit content via the form
         $( '.contact_record_id' ).each( function () {
-            var $icon = $( this ),
-                editButton;
+            var $icon = $( this ), editButton;
             editButton = new OO.ui.ButtonWidget( {
-                framed: false,
-                icon: 'edit',
-                flags: [ 'progressive' ]
+                framed: false, icon: 'edit', flags: [ 'progressive' ]
             } ).on( 'click', function () {
                 // First check if the user is logged in
                 if ( mw.config.get( 'wgUserName' ) === null ) {
@@ -1443,12 +1168,7 @@
                             .closest( '.contact_record' )
                             .data( 'contact-unique-id' );
 
-                        entryData = cleanRawEntry(
-                            getRelevantRawEntry(
-                                parseContentModule( contact_data.query.pages ),
-                                record
-                            )
-                        );
+                        entryData = cleanRawEntry( getRelevantRawEntry( parseContentModule( contact_data.query.pages ), record ) );
                         openContactWindow( entryData );
                     } );
                 }
@@ -1482,13 +1202,6 @@
         };
     }
 
-    mw.loader.using( [
-        'mediawiki.api',
-        'oojs-ui',
-        'oojs-ui-widgets',
-        'oojs-ui-core',
-        'oojs-ui.styles.icons-editing-core',
-        'ext.gadget.luaparse',
-        'mediawiki.widgets.DateInputWidget'
+    mw.loader.using( [ 'mediawiki.api', 'oojs-ui', 'oojs-ui-widgets', 'oojs-ui-core', 'oojs-ui.styles.icons-editing-core', 'ext.gadget.luaparse', 'mediawiki.widgets.DateInputWidget'
     ] ).then( renderAffiliateContactInfoForm );
 }() );

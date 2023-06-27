@@ -96,15 +96,17 @@
      */
     sendEmailToMEStaff = function ( body ) {
         var MEStaff = [
-            'DNdubane (WMF)',
-            'AChina-WMF',
-            'DAlangi (WMF)'
-        ],
-            api = new mw.Api();
-        for ( const staff in MEStaff ) {
-            var params = {
+                'DNdubane (WMF)',
+                'AChina-WMF',
+                'DAlangi (WMF)'
+            ],
+            api = new mw.Api(),
+            i, params;
+
+        for ( i = 0; i < MEStaff.length; i++ ) {
+            params = {
                 action: 'emailuser',
-                target: staff,
+                target: MEStaff[ i ],
                 subject: emailSubject,
                 text: body,
                 format: 'json'
@@ -131,26 +133,56 @@
             archiveEntry,
             affiliateContactListManifest = [],
             emailBody = '',
-            newAffiliateRecord;
+            newAffiliateRecord = {};
 
         contactsDataEntries = parseContentModule( contactsData.query.pages );
         orgInfoDataEntries = parseContentModule( orgInfoData.query.pages );
 
         contactToArchiveManifest = [];
-        console.log( 'Manifest before loops: ' );
-        console.log( JSON.stringify( contactToArchiveManifest ) );
 
         for ( i = 0; i < orgInfoDataEntries.length; i++ ) {
             orgInfoWorkingEntry = cleanRawEntry( orgInfoDataEntries[ i ].value.fields );
 
-            //check for new group contacts added
-            /* if ( newAffiliates.includes( orgInfoWorkingEntry.affiliate_name ) ) {
+            // Check for new group contacts added
+            if ( newAffiliates.includes( orgInfoWorkingEntry.affiliate_name ) ) {
                 newAffiliateRecord = generateNewAffiliateContacts( orgInfoWorkingEntry );
                 affiliateContactListManifest.push( newAffiliateRecord );
-            }*/
+            }
 
             for ( j = 0; j < contactsDataEntries.length; j++ ) {
                 contactsWorkingEntry = cleanRawEntry( contactsDataEntries[ j ].value.fields );
+                // XXX: If the affiliate has been derecognised, just delete
+                // it. In this case, delete means, just ignore.
+                if (
+                    orgInfoWorkingEntry.affiliate_name === contactsWorkingEntry.affiliate_name &&
+                    orgInfoWorkingEntry.status === 'derecognised'
+                ) {
+                    // Archive group contacts and just ignore entirely from the
+                    // contacts table.
+                    archive = {
+                        affiliate_name: contactsWorkingEntry.affiliate_name,
+                        first_name: contactsWorkingEntry.primary_contact_1_firstname,
+                        surname: contactsWorkingEntry.primary_contact_1_surname,
+                        username: contactsWorkingEntry.primary_contact_1_username,
+                        email_address: contactsWorkingEntry.primary_contact_1_email_address,
+                        designation: contactsWorkingEntry.primary_contact_1_designation,
+                        dos_stamp: new Date().toISOString()
+                    };
+                    contactToArchiveManifest.push( archive );
+                    archive = {
+                        affiliate_name: contactsWorkingEntry.affiliate_name,
+                        first_name: contactsWorkingEntry.primary_contact_2_firstname,
+                        surname: contactsWorkingEntry.primary_contact_2_surname,
+                        username: contactsWorkingEntry.primary_contact_2_username,
+                        email_address: contactsWorkingEntry.primary_contact_2_email_address,
+                        designation: contactsWorkingEntry.primary_contact_2_designation,
+                        dos_stamp: new Date().toISOString()
+                    };
+                    contactToArchiveManifest.push( archive );
+                    emailBody += 'Archiving derecognised affiliate contacts' +
+                        ' and deleting from the contacts table\n';
+                    break;
+                }
                 if ( orgInfoWorkingEntry.affiliate_name === contactsWorkingEntry.affiliate_name ) {
                     // Edge case: User group contacts don't change per se but they are just flipped. In this
                     //   case, don't do much, just inform M&E staff. Also, this can happen too for just one of
@@ -160,21 +192,24 @@
                         orgInfoWorkingEntry.affiliate_contact2 === contactsWorkingEntry.primary_contact_1_username
                     ) {
                         /* We pass contact 1 and 2 from the OrgInfo table in place as they are already in the desired
-                        position. As in:
-                            OrgInfo Table - Office
-                            org_info_pc1 = x
-                            org_info_pc2 = y
+                         position. As in:
+                         OrgInfo Table - Office
+                         org_info_pc1 = x
+                         org_info_pc2 = y
 
-                            Contacts Table - Office
-                            contact_pc1 = y
-                            contact_pc2 = x
+                         Contacts Table - Office
+                         contact_pc1 = y
+                         contact_pc2 = x
 
-                            Swapping
-                            contact_pc1 = x (org_info_pc1)
-                            contact_pc2 = y (org_info_pc2)
-                        */
-                        affiliateContactListManifest.push( updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1, orgInfoWorkingEntry.affiliate_contact2 ) );
-                        emailBody = 'Either one or both group contacts for ' + orgInfoWorkingEntry.affiliate_name + ' has been swapped but not changed';
+                         Swapping
+                         contact_pc1 = x (org_info_pc1)
+                         contact_pc2 = y (org_info_pc2)
+                         */
+                        affiliateContactListManifest.push(
+                            updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1,
+                                orgInfoWorkingEntry.affiliate_contact2
+                            ) );
+                        emailBody += 'One or both group contacts for ' + orgInfoWorkingEntry.affiliate_name + ' has been swapped.\n';
                         break;
                     }
 
@@ -190,9 +225,12 @@
                             designation: contactsWorkingEntry.primary_contact_1_designation,
                             dos_stamp: new Date().toISOString()
                         };
-                        affiliateContactListManifest.push( updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1, false ) );
+                        affiliateContactListManifest.push(
+                            updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1,
+                                false
+                            ) );
                         contactToArchiveManifest.push( archive );
-                        emailBody = orgInfoWorkingEntry.affiliate_name + 'has changed Group Contact 1. Previous contact archived. \n Please update the contact details on Office.';
+                        emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed Group Contact 1.\n';
                         break;
                     }
                     // Group contact 2 changed
@@ -207,9 +245,11 @@
                             designation: contactsWorkingEntry.primary_contact_2_designation,
                             dos_stamp: new Date().toISOString()
                         };
-                        affiliateContactListManifest.push( updateAffiliateContactsInfo( contactsWorkingEntry, false, orgInfoWorkingEntry.affiliate_contact2 ) );
+                        affiliateContactListManifest.push( updateAffiliateContactsInfo( contactsWorkingEntry, false,
+                            orgInfoWorkingEntry.affiliate_contact2
+                        ) );
                         contactToArchiveManifest.push( archive );
-                        emailBody = orgInfoWorkingEntry.affiliate_name + 'has changed Group Contact 2. Previous contact archived. \n Please update the contact details on Office.';
+                        emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed Group Contact 2.\n';
                         break;
                     }
                     // Both group contacts changed
@@ -235,8 +275,11 @@
                             dos_stamp: new Date().toISOString()
                         };
                         contactToArchiveManifest.push( archive );
-                        affiliateContactListManifest.push( updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1, orgInfoWorkingEntry.affiliate_contact2 ) );
-                        emailBody = orgInfoWorkingEntry.affiliate_name + 'has changed both Group Contact 1 and 2. Previous contacts archived. \n Please update the contact details on Office.';
+                        affiliateContactListManifest.push(
+                            updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1,
+                                orgInfoWorkingEntry.affiliate_contact2
+                            ) );
+                        emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed both Group Contact 1 and 2.\n';
                         break;
                     }
                     if ( orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_1_username &&
@@ -247,9 +290,10 @@
                     }
                 }
             }
-            if ( emailBody !== '' ) {
-                sendEmailToMEStaff( emailBody );
-            }
+        }
+
+        if ( emailBody !== '' ) {
+            sendEmailToMEStaff( emailBody );
         }
 
         archiveDataEntries = parseContentModule( archiveData.query.pages );
@@ -265,49 +309,79 @@
         for ( i = 0; i < affiliateContactListManifest.length; i++ ) {
             insertToContactsTable += '\t{\n';
             if ( affiliateContactListManifest[ i ].affiliate_name ) {
-                insertToContactsTable += generateKeyValuePair( 'affiliate_name', affiliateContactListManifest[ i ].affiliate_name );
+                insertToContactsTable += generateKeyValuePair( 'affiliate_name',
+                    affiliateContactListManifest[ i ].affiliate_name
+                );
             }
             if ( affiliateContactListManifest[ i ].affiliate_code ) {
-                insertToContactsTable += generateKeyValuePair( 'affiliate_code', affiliateContactListManifest[ i ].affiliate_code );
+                insertToContactsTable += generateKeyValuePair( 'affiliate_code',
+                    affiliateContactListManifest[ i ].affiliate_code
+                );
             }
-            if ( affiliateContactListManifest[ i ].affiliate_region ) {
-                insertToContactsTable += generateKeyValuePair( 'affiliate_region', affiliateContactListManifest[ i ].affiliate_region );
+            if ( affiliateContactListManifest[ i ].affiliate_region || affiliateContactListManifest[ i ].affiliate_region === '' ) {
+                insertToContactsTable += generateKeyValuePair( 'affiliate_region',
+                    affiliateContactListManifest[ i ].affiliate_region
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_1_firstname || affiliateContactListManifest[ i ].primary_contact_1_firstname === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_firstname', affiliateContactListManifest[ i ].primary_contact_1_firstname );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_firstname',
+                    affiliateContactListManifest[ i ].primary_contact_1_firstname
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_1_surname || affiliateContactListManifest[ i ].primary_contact_1_surname === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_surname', affiliateContactListManifest[ i ].primary_contact_1_surname );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_surname',
+                    affiliateContactListManifest[ i ].primary_contact_1_surname
+                );
             }
-            if ( affiliateContactListManifest[ i ].primary_contact_1_username ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_username', affiliateContactListManifest[ i ].primary_contact_1_username );
+            if ( affiliateContactListManifest[ i ].primary_contact_1_username || affiliateContactListManifest[ i ].primary_contact_1_username === '' ) {
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_username',
+                    affiliateContactListManifest[ i ].primary_contact_1_username
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_1_email_address || affiliateContactListManifest[ i ].primary_contact_1_email_address === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_email_address', affiliateContactListManifest[ i ].primary_contact_1_email_address );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_email_address',
+                    affiliateContactListManifest[ i ].primary_contact_1_email_address
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_1_designation || affiliateContactListManifest[ i ].primary_contact_1_designation === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_designation', affiliateContactListManifest[ i ].primary_contact_1_designation );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_1_designation',
+                    affiliateContactListManifest[ i ].primary_contact_1_designation
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_2_firstname || affiliateContactListManifest[ i ].primary_contact_2_firstname === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_firstname', affiliateContactListManifest[ i ].primary_contact_2_firstname );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_firstname',
+                    affiliateContactListManifest[ i ].primary_contact_2_firstname
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_2_surname || affiliateContactListManifest[ i ].primary_contact_2_surname === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_surname', affiliateContactListManifest[ i ].primary_contact_2_surname );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_surname',
+                    affiliateContactListManifest[ i ].primary_contact_2_surname
+                );
             }
-            if ( affiliateContactListManifest[ i ].primary_contact_2_username ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_username', affiliateContactListManifest[ i ].primary_contact_2_username );
+            if ( affiliateContactListManifest[ i ].primary_contact_2_username || affiliateContactListManifest[ i ].primary_contact_2_username === '' ) {
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_username',
+                    affiliateContactListManifest[ i ].primary_contact_2_username
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_2_email_address || affiliateContactListManifest[ i ].primary_contact_2_email_address === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_email_address', affiliateContactListManifest[ i ].primary_contact_2_email_address );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_email_address',
+                    affiliateContactListManifest[ i ].primary_contact_2_email_address
+                );
             }
             if ( affiliateContactListManifest[ i ].primary_contact_2_designation || affiliateContactListManifest[ i ].primary_contact_2_designation === '' ) {
-                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_designation', affiliateContactListManifest[ i ].primary_contact_2_designation );
+                insertToContactsTable += generateKeyValuePair( 'primary_contact_2_designation',
+                    affiliateContactListManifest[ i ].primary_contact_2_designation
+                );
             }
             if ( affiliateContactListManifest[ i ].unique_id ) {
-                insertToContactsTable += generateKeyValuePair( 'unique_id', affiliateContactListManifest[ i ].unique_id );
+                insertToContactsTable += generateKeyValuePair( 'unique_id',
+                    affiliateContactListManifest[ i ].unique_id
+                );
             }
             if ( affiliateContactListManifest[ i ].dos_stamp ) {
-                insertToContactsTable += generateKeyValuePair( 'created_at', affiliateContactListManifest[ i ].dos_stamp );
+                insertToContactsTable += generateKeyValuePair( 'created_at',
+                    affiliateContactListManifest[ i ].dos_stamp
+                );
             }
             insertToContactsTable += '\t},\n';
         }
@@ -330,25 +404,35 @@
             for ( i = 0; i < contactToArchiveManifest.length; i++ ) {
                 insertToArchiveTable += '\t{\n';
                 if ( contactToArchiveManifest[ i ].affiliate_name ) {
-                    insertToArchiveTable += generateKeyValuePair( 'affiliate_name', contactToArchiveManifest[ i ].affiliate_name );
+                    insertToArchiveTable += generateKeyValuePair( 'affiliate_name',
+                        contactToArchiveManifest[ i ].affiliate_name
+                    );
                 }
                 if ( contactToArchiveManifest[ i ].username ) {
                     insertToArchiveTable += generateKeyValuePair( 'username', contactToArchiveManifest[ i ].username );
                 }
                 if ( contactToArchiveManifest[ i ].first_name ) {
-                    insertToArchiveTable += generateKeyValuePair( 'first_name', contactToArchiveManifest[ i ].first_name );
+                    insertToArchiveTable += generateKeyValuePair( 'first_name',
+                        contactToArchiveManifest[ i ].first_name
+                    );
                 }
                 if ( contactToArchiveManifest[ i ].surname ) {
                     insertToArchiveTable += generateKeyValuePair( 'surname', contactToArchiveManifest[ i ].surname );
                 }
                 if ( contactToArchiveManifest[ i ].email_address ) {
-                    insertToArchiveTable += generateKeyValuePair( 'email_address', contactToArchiveManifest[ i ].email_address );
+                    insertToArchiveTable += generateKeyValuePair( 'email_address',
+                        contactToArchiveManifest[ i ].email_address
+                    );
                 }
                 if ( contactToArchiveManifest[ i ].designation ) {
-                    insertToArchiveTable += generateKeyValuePair( 'designation', contactToArchiveManifest[ i ].designation );
+                    insertToArchiveTable += generateKeyValuePair( 'designation',
+                        contactToArchiveManifest[ i ].designation
+                    );
                 }
                 if ( contactToArchiveManifest[ i ].dos_stamp ) {
-                    insertToArchiveTable += generateKeyValuePair( 'date_updated', contactToArchiveManifest[ i ].dos_stamp );
+                    insertToArchiveTable += generateKeyValuePair( 'date_updated',
+                        contactToArchiveManifest[ i ].dos_stamp
+                    );
                 }
                 insertToArchiveTable += '\t},\n';
             }
@@ -398,7 +482,7 @@
     // TODO: Debug to fix writing duplicates.
     generateNewAffiliateContacts = function ( affiliateRecord ) {
         var uniqueId = ( Math.random() + 1 ).toString( 36 ).substring( 4 );
-        var affiliateContact = {
+        return {
             affiliate_name: affiliateRecord.affiliate_name,
             affiliate_code: affiliateRecord.affiliate_code,
             affiliate_region: affiliateRecord.region,
@@ -415,36 +499,36 @@
             unique_id: uniqueId,
         };
 
-        return affiliateContact;
     };
 
-    function copyOrgInfoData() {
+    function copyOrgInfoData () {
         var apiObject = new mw.Api(),
             foreignAPI = new mw.ForeignApi( foreignWiki ),
             entries,
             processedEntry,
             i,
             insertToTable,
-            emailBody,
-            status = ['recognised', 'deferred', 'suspended'];
+            status = [ 'recognised', 'deferred', 'suspended' ],
+            officeGroupNames = [],
+            metaGroupNames = [];
 
         apiObject.get( getModuleContent( 'Organization_Information' ) ).then( function ( officeOrgInfoData ) {
-            var metaGroupNames = [],
-              officeGroupNames = [],
-              officeOrgInfoEntries,
-              processedOfficeOrgInfoEntry;
+            var officeOrgInfoEntries,
+                processedOfficeOrgInfoEntry;
 
             officeOrgInfoEntries = parseContentModule( officeOrgInfoData.query.pages );
 
             for ( i = 0; i < officeOrgInfoEntries.length; i++ ) {
                 processedOfficeOrgInfoEntry = cleanRawEntry( officeOrgInfoEntries[ i ].value.fields );
-                officeGroupNames.push( processedOfficeOrgInfoEntry[ i ] );
+                officeGroupNames.push( processedOfficeOrgInfoEntry.affiliate_name );
             }
             /**
              * Pulling OrgInfo table information
              *
              */
             foreignAPI.get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
+                var emailBody = '';
+
                 entries = parseContentModule( data.query.pages );
                 // Re-generate the Lua table based on 'manifest'
                 insertToTable = 'return {\n';
@@ -462,7 +546,10 @@
                      Origination Date
                      Last Updated
                      */
-                    if ( status.includes(processedEntry.recognition_status) ) {
+                    // TODO: We need a way to track affiliates that are
+                    //  derecognized so that we can notify the affiliate
+                    //  contacts table.
+                    if ( status.includes( processedEntry.recognition_status ) ) {
                         metaGroupNames.push( processedEntry.group_name );
                         insertToTable += '\t{\n';
                         if ( processedEntry.affiliate_code ) {
@@ -481,12 +568,16 @@
                             insertToTable += generateKeyValuePair( 'affiliate_type', processedEntry.org_type );
                         }
                         if ( processedEntry.group_contact1 ) {
-                            insertToTable += generateKeyValuePair( 'affiliate_contact1', processedEntry.group_contact1 );
+                            insertToTable += generateKeyValuePair( 'affiliate_contact1',
+                                processedEntry.group_contact1
+                            );
                         } else {
                             insertToTable += generateKeyValuePair( 'affiliate_contact1', '' );
                         }
                         if ( processedEntry.group_contact2 ) {
-                            insertToTable += generateKeyValuePair( 'affiliate_contact2', processedEntry.group_contact2 );
+                            insertToTable += generateKeyValuePair( 'affiliate_contact2',
+                                processedEntry.group_contact2
+                            );
                         } else {
                             insertToTable += generateKeyValuePair( 'affiliate_contact2', '' );
                         }
@@ -506,41 +597,52 @@
 
                 // Insert into newly created Affiliate Contacts Table as required
                 new mw.Api().postWithToken(
-                  'csrf',
-                  {
-                      action: 'edit',
-                      summary: 'Copying organization information from MetaWiki to this Affiliate Contacts Information...',
-                      pageid: 39956, //[[Module:Organization_Information]],
-                      text: insertToTable,
-                      contentmodel: 'Scribunto'
-                  }
-                ).done( function ( data ) {
-                    console.log( 'Organization Info Synced' );
-                } );
-
-                /**
-                 * Compare the two lists and create a new array with newly added group contact names
-                 * */
-                for ( i = 0; i < metaGroupNames.length; i++ ) {
-                    if ( officeGroupNames.indexOf( metaGroupNames[ i ] ) < 0 ) {
-                        newAffiliates.push( metaGroupNames[ i ] );
+                    'csrf',
+                    {
+                        action: 'edit',
+                        summary: 'Copying organization information from MetaWiki to this Affiliate Contacts Information...',
+                        pageid: 39956, //[[Module:Organization_Information]],
+                        text: insertToTable,
+                        contentmodel: 'Scribunto'
                     }
-                }
+                ).done( function () {
+                    console.log( 'Organization Info Synced' );
 
-                for ( i = 0; i < newAffiliates.length; i++ ) {
-                    emailBody = newAffiliates[ i ] + ' has added new group contacts.\n Please update the contact details on Office.';
-                    sendEmailToMEStaff( emailBody );
-                }
+                    /**
+                     * Compare the two lists and create a new array with newly added group contact names
+                     * NOTE: metaGroupNames has objects instead that we can
+                     * reference the group name from each object in the list.
+                     */
+                    for ( i = 0; i < metaGroupNames.length; i++ ) {
+                        if ( officeGroupNames.indexOf( metaGroupNames[ i ] ) < 0 ) {
+                            newAffiliates.push( metaGroupNames[ i ] );
+                        }
+                    }
 
-            } )
-        } ).then( function () {
-            var apiObject = new mw.Api();
-            apiObject.get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( contactsData ) {
-                apiObject.get( getModuleContent( 'Organization_Information' ) ).then( function ( orgInfoData ) {
-                    apiObject.get( getModuleContent( 'Affiliate_Contacts_Information_Archive' ) ).then( function ( archiveData ) {
-                        archivePreviousContact( contactsData, orgInfoData, archiveData, newAffiliates );
-                    } );
+                    // XXX: Build the email list for new affiliates added to
+                    // office from meta and notify M&E staff to update their
+                    // contacts on Office.
+                    for ( i = 0; i < newAffiliates.length; i++ ) {
+                        emailBody = 'A new affiliate ' + newAffiliates[ i ] + ' has been added, please update the contact details on Office.\n';
+                    }
+                    if ( emailBody ) {
+                        sendEmailToMEStaff( emailBody );
+                    }
+
+                    apiObject.get( getModuleContent( 'Affiliate_Contacts_Information' ) )
+                        .then( function ( contactsData ) {
+                            apiObject.get( getModuleContent( 'Organization_Information' ) )
+                                .then( function ( orgInfoData ) {
+                                    apiObject.get( getModuleContent( 'Affiliate_Contacts_Information_Archive' ) )
+                                        .then( function ( archiveData ) {
+                                            archivePreviousContact( contactsData, orgInfoData, archiveData,
+                                                newAffiliates
+                                            );
+                                        } );
+                                } );
+                        } );
                 } );
+
             } );
         } );
     }
