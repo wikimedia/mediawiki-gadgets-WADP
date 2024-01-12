@@ -1,3 +1,10 @@
+/**
+ * Script that is used to send email notifications to all group contacts on record whose meta usernames have
+ * an associated email address.
+ *
+ * @author Alice China (AChina-WMF)
+ */
+
 ( function () {
     'use strict';
 

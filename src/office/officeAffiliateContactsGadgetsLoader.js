@@ -1,7 +1,7 @@
 /**
  * Main entry point script for loading form used for the submission affiliate contact
- *  information as well as the form used to send mass messages to affiliates. The data
- *  collected will edit Lua tables and can be later used for userfacing purposes.
+ * information as well as the form used to send mass messages to affiliates. The data
+ * collected will edit Lua tables and can be later used for userfacing purposes.
  *
  * @author Alice China (WMF)
  */
@@ -10,7 +10,7 @@
     'use strict';
 
     var pageName = mw.config.values.wgPageName;
-    var whiteList= [
+    var whiteList = [
         'DNdubane (WMF)',
         'DAlangi (WMF)',
         'AChina-WMF',

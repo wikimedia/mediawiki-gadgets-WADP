@@ -464,8 +464,8 @@
                                 gc2
                             );
                     }
-                    //Check if the Talk Page Notification has been sent by ensuring it does not exist in the
-                    //tracking list
+                    // Check if the Talk Page Notification has been sent by ensuring it does not exist in the
+                    // tracking list
                     if( !talkPageNotificationSent.includes(orgInfo.group_name)) {
                         // Post notification to talk page of affiliate
                         apiObj.postWithToken(

@@ -1,7 +1,8 @@
 /**
- * Copy some extracts of OrgInfo and Contacts data from Meta-Wiki
- * to use on Office-Wiki.
- * @author Alice China (WMF)
+ * Data bridge porting group contact data from Meta into Office. The following are the data points ported
+ * from office for each affiliate group contact:
+ *
+ * @author Alice China (AChina-WMF)
  */
 
 ( function () {
@@ -459,7 +460,7 @@
     };
 
     updateAffiliateContactsInfo = function ( workingEntry, groupContact1, groupContact2 ) {
-        if ( groupContact1 ) {
+        if ( groupContact1 || groupContact1 === '' ) {
             // Detect if there is a change in group contact1
             workingEntry.primary_contact_1_firstname = '';
             workingEntry.primary_contact_1_surname = '';
@@ -467,7 +468,7 @@
             workingEntry.primary_contact_1_email_address = '';
             workingEntry.primary_contact_1_designation = '';
         }
-        if ( groupContact2 ) {
+        if ( groupContact2 || groupContact2 === '' ) {
             // Detect if there is a change in group contact2
             workingEntry.primary_contact_2_firstname = '';
             workingEntry.primary_contact_2_surname = '';
@@ -586,6 +587,9 @@
                         }
                         if ( processedEntry.agreement_date ) {
                             insertToTable += generateKeyValuePair( 'origination_date', processedEntry.agreement_date );
+                        }
+                        if ( processedEntry.unique_id ) {
+                            insertToTable += generateKeyValuePair( 'unique_id', processedEntry.unique_id );
                         }
                         if ( processedEntry.dos_stamp ) {
                             insertToTable += generateKeyValuePair( 'last_updated', processedEntry.dos_stamp );

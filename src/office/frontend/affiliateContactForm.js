@@ -1,3 +1,12 @@
+/**
+ * This gadget contains code that renders the form that enables M&E staff to update new group contacts
+ * added that have missing records. The group name and usernames are autofilled from the records we have.
+ * The data collected updates Lua tables and is used to display group contact information on Office.
+ * The following are the fields that can be updated by the user:
+ *
+ * @author Alice China (AChina-WMF)
+ */
+
 ( function () {
     'use strict';
 
@@ -11,8 +20,13 @@
         validateEmail, windowManager;
     var foreignWiki = 'https://meta.wikimedia.org/w/api.php';
     var user = mw.config.values.wgUserName;
-    var me_staff = [ 'DNdubane (WMF)', 'DAlangi (WMF)', 'AChina-WMF', 'MKaur (WMF)', 'JAnstee (WMF)', 'Xeno (WMF)', 'Keegan (WMF)', 'Ramzym-WMF', 'Mervat (WMF)'
-    ];
+    var me_staff = [ 'DNdubane (WMF)', 'DAlangi (WMF)', 'AChina-WMF']
+
+    /**Commenting out staff that are not part of the development team until system is stable
+     *
+     *'MKaur (WMF)', 'JAnstee (WMF)', 'Xeno (WMF)', 'Keegan (WMF)', 'Ramzym-WMF', 'Mervat (WMF)'
+     *];
+     */
 
     function renderAffiliateContactInfoForm () {
         /**
@@ -103,7 +117,12 @@
          */
         generateKeyValuePair = function ( k, v ) {
             var res;
-            res = '\t\t'.concat( k, ' = \'', v, '\'' );
+            res = '\t\t'.concat( k, ' = ' );
+
+            v = sanitizeInput( v );
+            v = v.replace( /'/g, '\\\'' );
+            res += '\'' + v + '\'';
+
             res += ',\n';
             return res;
         };
@@ -933,12 +952,8 @@
                 allRequiredFieldsAvailable = true;
             }
 
-            if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem() == null || dialog.field_primary_contact_2_designation.getMenu().findSelectedItem() == null ) {
-                allRequiredFieldsAvailable = false;
-            } else {
-                if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' || dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
-                    otherContactDesignationSelected = true;
-                }
+            if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' || dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                otherContactDesignationSelected = true;
             }
 
             if ( otherContactDesignationSelected && ( !dialog.field_primary_contact_1_other_input.getValue() || !dialog.field_primary_contact_2_other_input.getValue() ) ) {
@@ -1066,46 +1081,45 @@
                     if ( manifest[ i ].affiliate_region ) {
                         insertToTable += generateKeyValuePair( 'affiliate_region', manifest[ i ].affiliate_region );
                     }
-                    if ( manifest[ i ].primary_contact_1_firstname || manifest[ i ].primary_contact_1_firstname === '' ) {
+                    if ( manifest[ i ].primary_contact_1_firstname ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_firstname', manifest[ i ].primary_contact_1_firstname );
                     }
-                    if ( manifest[ i ].primary_contact_1_surname || manifest[ i ].primary_contact_1_surname === '' ) {
+                    if ( manifest[ i ].primary_contact_1_surname ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_surname', manifest[ i ].primary_contact_1_surname );
                     }
-                    if ( manifest[ i ].primary_contact_1_username || manifest[ i ].primary_contact_1_username === '' ) {
+                    if ( manifest[ i ].primary_contact_1_username ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_username', manifest[ i ].primary_contact_1_username );
                     }
-                    if ( manifest[ i ].primary_contact_1_email_address || manifest[ i ].primary_contact_1_email_address === '' ) {
+                    if ( manifest[ i ].primary_contact_1_email_address ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_email_address', manifest[ i ].primary_contact_1_email_address );
                     }
-                    if ( manifest[ i ].primary_contact_1_designation || manifest[ i ].primary_contact_1_designation === '' ) {
+                    if ( manifest[ i ].primary_contact_1_designation ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_designation', manifest[ i ].primary_contact_1_designation );
                     }
-                    if ( manifest[ i ].primary_contact_2_firstname || manifest[ i ].primary_contact_2_firstname === '' ) {
+                    if ( manifest[ i ].primary_contact_2_firstname ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_firstname', manifest[ i ].primary_contact_2_firstname );
                     }
-                    if ( manifest[ i ].primary_contact_2_surname || manifest[ i ].primary_contact_2_surname === '' ) {
+                    if ( manifest[ i ].primary_contact_2_surname ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_surname', manifest[ i ].primary_contact_2_surname );
                     }
-                    if ( manifest[ i ].primary_contact_2_username || manifest[ i ].primary_contact_2_username === '' ) {
+                    if ( manifest[ i ].primary_contact_2_username ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_username', manifest[ i ].primary_contact_2_username );
                     }
-                    if ( manifest[ i ].primary_contact_2_email_address || manifest[ i ].primary_contact_2_email_address === '' ) {
+                    if ( manifest[ i ].primary_contact_2_email_address ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_email_address', manifest[ i ].primary_contact_2_email_address );
                     }
-                    if ( manifest[ i ].primary_contact_2_designation || manifest[ i ].primary_contact_2_designation === '' ) {
+                    if ( manifest[ i ].primary_contact_2_designation ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_designation', manifest[ i ].primary_contact_2_designation );
                     }
-                    if ( manifest[ i ].unique_id || manifest[ i ].unique_id === '' ) {
+                    if ( manifest[ i ].unique_id ) {
                         insertToTable += generateKeyValuePair( 'unique_id', manifest[ i ].unique_id );
                     }
-                    if ( manifest[ i ].dos_stamp || manifest[ i ].dos_stamp === '' ) {
+                    if ( manifest[ i ].dos_stamp ) {
                         insertToTable += generateKeyValuePair( 'created_at', manifest[ i ].dos_stamp );
                     }
                     insertToTable += '\t},\n';
                 }
                 insertToTable += '}';
-                // console.log(insertToTable);
 
                 // Add the new Report into the Lua table.
                 apiObj.postWithToken( 'csrf', {
@@ -1201,7 +1215,6 @@
 
         };
     }
-
     mw.loader.using( [ 'mediawiki.api', 'oojs-ui', 'oojs-ui-widgets', 'oojs-ui-core', 'oojs-ui.styles.icons-editing-core', 'ext.gadget.luaparse', 'mediawiki.widgets.DateInputWidget'
     ] ).then( renderAffiliateContactInfoForm );
 }() );

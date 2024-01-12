@@ -1,3 +1,10 @@
+/**
+ * This gadget contains the logic that enables M&E staff to be able to download group contacts data in csv format.
+ * It provides a way to select the fields one is interested in. The following are the selectable fields:
+ *
+ * @author Alice China (AChina-WMF)
+ */
+
 ( function () {
     'use strict';
 
