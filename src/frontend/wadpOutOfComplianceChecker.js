@@ -23,6 +23,7 @@
         getModuleContent,
         resetReportingDueDate,
         renderWikitextTimestampSignature,
+        talkPageNotificationSent = [],
         // If an affiliate's distance between its activity and financial report year
         // is less than the offset below, then the affiliate is considered compliant
         // provided that the activity report is the latest.
@@ -463,19 +464,24 @@
                                 gc2
                             );
                     }
-                    // Post notification to talk page of affiliate
-                    apiObj.postWithToken(
-                        'csrf',
-                        {
-                            action: 'edit',
-                            nocreate: true,
-                            summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
-                            // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
-                            title: 'Talk:' + redirectsTo,
-                            text: affiliateTalkPageContent,
-                            contentmodel: 'wikitext'
-                        }
-                    );
+                    //Check if the Talk Page Notification has been sent by ensuring it does not exist in the
+                    //tracking list
+                    if( !talkPageNotificationSent.includes(orgInfo.group_name)) {
+                        // Post notification to talk page of affiliate
+                        apiObj.postWithToken(
+                            'csrf',
+                            {
+                                action: 'edit',
+                                nocreate: true,
+                                summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
+                                // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
+                                title: 'Talk:' + redirectsTo,
+                                text: affiliateTalkPageContent,
+                                contentmodel: 'wikitext'
+                            }
+                        );
+                        talkPageNotificationSent.add(orgInfo.group_name);
+                    }
                 } );
             } );
         };
