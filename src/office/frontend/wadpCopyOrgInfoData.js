@@ -184,9 +184,22 @@
                     break;
                 }
                 if ( orgInfoWorkingEntry.affiliate_name === contactsWorkingEntry.affiliate_name ) {
+                    // Edge case: User group contacts are both empty. If this special case is not handled, the record
+                    // will pass all the below conditions leading to records being updated and notification being sent
+                    //  multiple times.
+                    //
+                    if ( orgInfoWorkingEntry.affiliate_contact1 === '' && orgInfoWorkingEntry.affiliate_contact2 === '' ) {
+                        // We retain the current contacts on record and just send out a notification
+
+                        affiliateContactListManifest.push( contactsWorkingEntry );
+                        emailBody += orgInfoWorkingEntry.affiliate_name + ' has no group contacts on record. Both' +
+                            ' group contact usernames are empty.\n';
+                        break;
+                    }
+
                     // Edge case: User group contacts don't change per se but they are just flipped. In this
-                    //   case, don't do much, just inform M&E staff. Also, this can happen too for just one of
-                    //   the contacts, so we need to detect it as well.
+                    // case, don't do much, just inform M&E staff. Also, this can happen too for just one of
+                    // the contacts, so we need to detect it as well.
                     if (
                         orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_2_username ||
                         orgInfoWorkingEntry.affiliate_contact2 === contactsWorkingEntry.primary_contact_1_username
