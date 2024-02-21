@@ -762,6 +762,9 @@
                     ]
                 }
             } );
+            if ( this.primary_contact_1_designation ) {
+                this.field_primary_contact_1_designation.setData( this.primary_contact_1_designation );
+            }
 
             this.field_primary_contact_2_designation = new OO.ui.DropdownWidget( {
                 label: 'Choose second group contact designation...',
@@ -802,6 +805,9 @@
                     ]
                 }
             } );
+            if ( this.primary_contact_2_designation ) {
+                this.field_primary_contact_2_designation.setData( this.primary_contact_2_designation );
+            }
 
             // Append things to fieldSet
             this.fieldSet = new OO.ui.FieldsetLayout( {
