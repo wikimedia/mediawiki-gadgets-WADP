@@ -273,7 +273,7 @@
                 rawEntry.primary_contact_1_surname = dialog.field_primary_contact_1_surname.getValue();
                 rawEntry.primary_contact_1_username = dialog.field_primary_contact_1_username.getValue();
                 rawEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
-                rawEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
+                rawEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getValue();
             } else if ( updateFlag === 'contact2Updated' ) {
                 //Archive the previous contact 2 record
                 archiveExistingContacts( rawEntry, 'Contact2' );
@@ -285,7 +285,7 @@
                 rawEntry.primary_contact_2_surname = dialog.field_primary_contact_2_surname.getValue();
                 rawEntry.primary_contact_2_username = dialog.field_primary_contact_2_username.getValue();
                 rawEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
-                rawEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
+                rawEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getValue();
             } else if ( updateFlag === 'bothUpdated' ) {
                 //Archive both of the previous contacts
                 archiveExistingContacts( rawEntry, 'Contact1' );
@@ -299,13 +299,13 @@
                 rawEntry.primary_contact_1_surname = dialog.field_primary_contact_1_surname.getValue();
                 rawEntry.primary_contact_1_username = dialog.field_primary_contact_1_username.getValue();
                 rawEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
-                rawEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
+                rawEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getValue();
                 //Contact 2
                 rawEntry.primary_contact_2_firstname = dialog.field_primary_contact_2_firstname.getValue();
                 rawEntry.primary_contact_2_surname = dialog.field_primary_contact_2_surname.getValue();
                 rawEntry.primary_contact_2_username = dialog.field_primary_contact_2_username.getValue();
                 rawEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
-                rawEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
+                rawEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getValue();
             }
             //TODO Loop through M&E Staff sending emails dynamically
             sendEmailToMEStaff( emailSubject, emailBody, 'DNdubane (WMF)' );
@@ -722,91 +722,42 @@
             this.fieldDateOfSubmission = new OO.ui.TextInputWidget( {
                 value: this.dos_stamp, type: 'hidden'
             } );
-
-            this.field_primary_contact_1_designation = new OO.ui.DropdownWidget( {
-                label: 'Choose first group contact designation...',
-                labelPosition: 'before',
-                icon: 'logoWikimedia',
-                value: this.field_primary_contact_1_designation,
-                classes: [ 'full-width' ],
-                menu: {
-                    items: [ new OO.ui.MenuOptionWidget( {
-                        data: 'Board Chair/President',
-                        label: 'Board Chair/President'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Board Member', label: 'Board Member'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Board Secretary', label: 'Board Secretary'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Board Vice Chair/President',
-                        label: 'Board Vice Chair/President'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Community Liaison', label: 'Community Liaison'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Executive/Managing Director',
-                        label: 'Executive/Managing Director'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Office Manager', label: 'Office Manager'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Operations Manager', label: 'Operations Manager'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Primary Contact', label: 'Primary Contact'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Program/Project Manager',
-                        label: 'Program/Project Manager'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Secondary contact', label: 'Secondary contact'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Other', label: 'Other...'
-                    } )
-                    ]
-                }
+            this.field_primary_contact_1_designation = new OO.ui.DropdownInputWidget( {
+                options: [
+                    { data: 'Board Chair/President', label: 'Board Chair/President' },
+                    { data: 'Board Member', label: 'Board Member' },
+                    { data: 'Board Secretary', label: 'Board Secretary' },
+                    { data: 'Community Liaison', label: 'Community Liaison' },
+                    { data: 'Executive/Managing Director', label: 'Executive/Managing Director' },
+                    { data: 'Office Manager', label: 'Office Manager' },
+                    { data: 'Operations Manager', label: 'Operations Manager' },
+                    { data: 'Primary Contact', label: 'Primary Contact' },
+                    { data: 'Secondary Contact', label: 'Secondary Contact' },
+                    { data: 'Program/Project Manager', label: 'Program/Project Manager' },
+                    { data: 'Other', label: 'Other...' }
+                ]
             } );
             if ( this.primary_contact_1_designation ) {
-                this.field_primary_contact_1_designation.setData( this.primary_contact_1_designation );
+                this.field_primary_contact_1_designation.setValue( this.primary_contact_1_designation );
             }
 
-            this.field_primary_contact_2_designation = new OO.ui.DropdownWidget( {
-                label: 'Choose second group contact designation...',
-                labelPosition: 'before',
-                icon: 'logoWikimedia',
-                value: this.field_primary_contact_2_designation,
-                classes: [ 'full-width' ],
-                menu: {
-                    items: [ new OO.ui.MenuOptionWidget( {
-                        data: 'Board Chair/President',
-                        label: 'Board Chair/President'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Board Member', label: 'Board Member'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Board Secretary', label: 'Board Secretary'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Board Vice Chair/President',
-                        label: 'Board Vice Chair/President'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Community Liaison', label: 'Community Liaison'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Executive/Managing Director',
-                        label: 'Executive/Managing Directo'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Office Manager', label: 'Office Manager'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Operations Manager', label: 'Operations Manager'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Primary Contact', label: 'Primary Contact'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Program/Project Manager',
-                        label: 'Program/Project Manager'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Secondary contact', label: 'Secondary contact'
-                    } ), new OO.ui.MenuOptionWidget( {
-                        data: 'Other', label: 'Other...'
-                    } )
-                    ]
-                }
+            this.field_primary_contact_2_designation = new OO.ui.DropdownInputWidget( {
+                options: [
+                    { data: 'Board Chair/President', label: 'Board Chair/President' },
+                    { data: 'Board Member', label: 'Board Member' },
+                    { data: 'Board Secretary', label: 'Board Secretary' },
+                    { data: 'Community Liaison', label: 'Community Liaison' },
+                    { data: 'Executive/Managing Director', label: 'Executive/Managing Director' },
+                    { data: 'Office Manager', label: 'Office Manager' },
+                    { data: 'Operations Manager', label: 'Operations Manager' },
+                    { data: 'Primary Contact', label: 'Primary Contact' },
+                    { data: 'Secondary Contact', label: 'Secondary Contact' },
+                    { data: 'Program/Project Manager', label: 'Program/Project Manager' },
+                    { data: 'Other', label: 'Other...' }
+                ]
             } );
             if ( this.primary_contact_2_designation ) {
-                this.field_primary_contact_2_designation.setData( this.primary_contact_2_designation );
+                this.field_primary_contact_2_designation.setValue( this.primary_contact_2_designation );
             }
 
             // Append things to fieldSet
@@ -938,8 +889,7 @@
          *
          */
         ContactInfoEditor.prototype.getActionProcess = function ( action ) {
-            var dialog = this, allRequiredFieldsAvailable = false,
-                otherContactDesignationSelected = false, isValidEmail = false;
+            var dialog = this, allRequiredFieldsAvailable = false, isValidEmail = false;
 
             // Before submitting the form, check that all required fields indeed
             // have values before we call saveItem(). Otherwise, don't close the
@@ -953,11 +903,10 @@
                 allRequiredFieldsAvailable = true;
             }
 
-            if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' || dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
-                otherContactDesignationSelected = true;
+            if ( dialog.field_primary_contact_1_designation.getValue() === 'Other' && !dialog.field_primary_contact_1_other_input.getValue() ) {
+                allRequiredFieldsAvailable = false;
             }
-
-            if ( otherContactDesignationSelected && ( !dialog.field_primary_contact_1_other_input.getValue() || !dialog.field_primary_contact_2_other_input.getValue() ) ) {
+            if ( dialog.field_primary_contact_2_designation.getValue() === 'Other' && !dialog.field_primary_contact_2_other_input.getValue() ) {
                 allRequiredFieldsAvailable = false;
             }
 
@@ -1025,11 +974,11 @@
                     if ( dialog.field_primary_contact_1_email_address.getValue() ) {
                         workingEntry.primary_contact_1_email_address = dialog.field_primary_contact_1_email_address.getValue();
                     }
-                    if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() ) {
-                        if ( dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                    if ( dialog.field_primary_contact_1_designation.getValue() ) {
+                        if ( dialog.field_primary_contact_1_designation.getValue() === 'Other' ) {
                             workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_other_input.getValue();
                         } else {
-                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getMenu().findSelectedItem().getData();
+                            workingEntry.primary_contact_1_designation = dialog.field_primary_contact_1_designation.getValue();
                         }
                     }
                     // Primary Contact 2
@@ -1045,11 +994,11 @@
                     if ( dialog.field_primary_contact_2_email_address.getValue() ) {
                         workingEntry.primary_contact_2_email_address = dialog.field_primary_contact_2_email_address.getValue();
                     }
-                    if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() ) {
-                        if ( dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData() === 'Other' ) {
+                    if ( dialog.field_primary_contact_2_designation.getValue() ) {
+                        if ( dialog.field_primary_contact_2_designation.getValue() === 'Other' ) {
                             workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_other_input.getValue();
                         } else {
-                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getMenu().findSelectedItem().getData();
+                            workingEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getValue();
                         }
                     }
                     return workingEntry;
