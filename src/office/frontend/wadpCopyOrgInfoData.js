@@ -1,6 +1,6 @@
 /**
- * Data bridge porting group contact data from Meta into Office. The following are the data points ported
- * from office for each affiliate group contact:
+ * Data bridge porting group contact data from Meta into Office. The following
+ * are the data points ported from office for each affiliate group contact.
  *
  * @author Alice China (AChina-WMF)
  */
@@ -50,7 +50,9 @@
     };
 
     generateKeyValuePair = function ( k, v ) {
-        var res, jsonarray;
+        var res,
+            jsonarray;
+
         res = '\t\t'.concat( k, ' = ' );
         if ( k === 'dm_structure' ) {
             jsonarray = JSON.stringify( v );
@@ -85,7 +87,9 @@
 
     parseContentModule = function ( sourceBlob ) {
         var ast, i, raw;
-        for ( i in sourceBlob ) {  // should only be one result
+
+        // Should only be one result returned
+        for ( i in sourceBlob ) {
             raw = sourceBlob[ i ].revisions[ 0 ][ '*' ];
             ast = luaparse.parse( raw );
             return ast.body[ 0 ].arguments[ 0 ].fields;
@@ -102,7 +106,8 @@
                 'DAlangi (WMF)'
             ],
             api = new mw.Api(),
-            i, params;
+            i,
+            params;
 
         for ( i = 0; i < MEStaff.length; i++ ) {
             params = {
@@ -184,14 +189,13 @@
                         ' and deleting from the contacts table\n';
                     break;
                 }
+
                 if ( orgInfoWorkingEntry.affiliate_name === contactsWorkingEntry.affiliate_name ) {
-                    // Edge case: User group contacts are both empty. If this special case is not handled, the record
-                    // will pass all the below conditions leading to records being updated and notification being sent
-                    //  multiple times.
-                    //
+                    // Edge case: User group contacts are both empty. If this special case is not
+                    // handled, the record will pass all the below conditions leading to records
+                    // being updated and notification being sent multiple times.
                     if ( orgInfoWorkingEntry.affiliate_contact1 === '' && orgInfoWorkingEntry.affiliate_contact2 === '' ) {
                         // We retain the current contacts on record and just send out a notification
-
                         affiliateContactListManifest.push( contactsWorkingEntry );
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has no group contacts on record. Both' +
                             ' group contact usernames are empty.\n';
@@ -205,20 +209,20 @@
                         orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_2_username ||
                         orgInfoWorkingEntry.affiliate_contact2 === contactsWorkingEntry.primary_contact_1_username
                     ) {
-                        /* We pass contact 1 and 2 from the OrgInfo table in place as they are already in the desired
-                         position. As in:
-                         OrgInfo Table - Office
-                         org_info_pc1 = x
-                         org_info_pc2 = y
-
-                         Contacts Table - Office
-                         contact_pc1 = y
-                         contact_pc2 = x
-
-                         Swapping
-                         contact_pc1 = x (org_info_pc1)
-                         contact_pc2 = y (org_info_pc2)
-                         */
+                        // We pass contact 1 and 2 from the OrgInfo table in place as they are already in
+                        // the desired position. As in:
+                        //
+                        //      OrgInfo Table - Office
+                        //      org_info_pc1 = x
+                        //      org_info_pc2 = y
+                        //
+                        //      Contacts Table - Office
+                        //      contact_pc1 = y
+                        //      contact_pc2 = x
+                        //
+                        // Swapping
+                        //      contact_pc1 = x (org_info_pc1)
+                        //      contact_pc2 = y (org_info_pc2)
                         affiliateContactListManifest.push(
                             updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1,
                                 orgInfoWorkingEntry.affiliate_contact2
@@ -247,6 +251,7 @@
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed Group Contact 1.\n';
                         break;
                     }
+
                     // Group contact 2 changed
                     if ( orgInfoWorkingEntry.affiliate_contact2 !== contactsWorkingEntry.primary_contact_2_username &&
                         orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_1_username ) {
@@ -266,6 +271,7 @@
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed Group Contact 2.\n';
                         break;
                     }
+
                     // Both group contacts changed
                     if ( orgInfoWorkingEntry.affiliate_contact1 !== contactsWorkingEntry.primary_contact_1_username &&
                         orgInfoWorkingEntry.affiliate_contact2 !== contactsWorkingEntry.primary_contact_2_username ) {
@@ -296,6 +302,7 @@
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed both Group Contact 1 and 2.\n';
                         break;
                     }
+
                     if ( orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_1_username &&
                         orgInfoWorkingEntry.affiliate_contact2 === contactsWorkingEntry.primary_contact_2_username
                     ) {
@@ -408,7 +415,7 @@
                 bot: true,
                 nocreate: true,
                 summary: 'Updating Affiliate Contact',
-                pageid: 39952, //[[Module:Affiliate_Contacts_Information]]
+                pageid: 39952, // [[Module:Affiliate_Contacts_Information]]
                 text: insertToContactsTable,
                 contentmodel: 'Scribunto'
             }
@@ -460,7 +467,7 @@
                     bot: true,
                     nocreate: true,
                     summary: 'Archiving latest information',
-                    pageid: 39954, //[[Module:Affiliate_Contacts_Information_Archive]]
+                    pageid: 39954, // [[Module:Affiliate_Contacts_Information_Archive]]
                     text: insertToArchiveTable,
                     contentmodel: 'Scribunto'
                 }
@@ -493,7 +500,6 @@
         return workingEntry;
     };
 
-    // TODO: Debug to fix writing duplicates.
     generateNewAffiliateContacts = function ( affiliateRecord ) {
         var uniqueId = ( Math.random() + 1 ).toString( 36 ).substring( 4 );
         return {
@@ -536,10 +542,8 @@
                 processedOfficeOrgInfoEntry = cleanRawEntry( officeOrgInfoEntries[ i ].value.fields );
                 officeGroupNames.push( processedOfficeOrgInfoEntry.affiliate_name );
             }
-            /**
-             * Pulling OrgInfo table information
-             *
-             */
+
+            // Pulling OrgInfo table information
             foreignAPI.get( getModuleContent( 'Organizational_Informations' ) ).then( function ( data ) {
                 var emailBody = '';
 
@@ -548,21 +552,20 @@
                 insertToTable = 'return {\n';
                 for ( i = 0; i < entries.length; i++ ) {
                     processedEntry = cleanRawEntry( entries[ i ].value.fields );
-                    /** Orange fields on the spreadsheet :
-                     Affiliate Code
-                     Affiliate Name
-                     Affiliate Country
-                     Region
-                     Affiliate Type
-                     Affiliate Contact 1
-                     Affiliate Contact 1
-                     Status
-                     Origination Date
-                     Last Updated
-                     */
-                    // TODO: We need a way to track affiliates that are
-                    //  derecognized so that we can notify the affiliate
-                    //  contacts table.
+                    // Orange fields on the spreadsheet :
+                    // - Affiliate Code
+                    // - Affiliate Name
+                    // - Affiliate Country
+                    // - Region
+                    // - Affiliate Type
+                    // - Affiliate Contact 1
+                    // - Affiliate Contact 2
+                    // - Status
+                    // - Origination Date
+                    // - Last Updated
+                    //
+                    // TODO: We need a way to track affiliates that are derecognized so that we
+                    // can notify the affiliate contacts table.
                     if ( status.includes( processedEntry.recognition_status ) ) {
                         metaGroupNames.push( processedEntry.group_name );
                         insertToTable += '\t{\n';
@@ -618,27 +621,23 @@
                     {
                         action: 'edit',
                         summary: 'Copying organization information from MetaWiki to this Affiliate Contacts Information...',
-                        pageid: 39956, //[[Module:Organization_Information]],
+                        pageid: 39956, // [[Module:Organization_Information]],
                         text: insertToTable,
                         contentmodel: 'Scribunto'
                     }
                 ).done( function () {
-                    console.log( 'Organization Info Synced' );
-
-                    /**
-                     * Compare the two lists and create a new array with newly added group contact names
-                     * NOTE: metaGroupNames has objects instead that we can
-                     * reference the group name from each object in the list.
-                     */
+                    // Compare the two lists and create a new array with newly added group contact names.
+                    //
+                    // NOTE: metaGroupNames has objects instead that we can reference the group name from
+                    // each object in the list.
                     for ( i = 0; i < metaGroupNames.length; i++ ) {
                         if ( officeGroupNames.indexOf( metaGroupNames[ i ] ) < 0 ) {
                             newAffiliates.push( metaGroupNames[ i ] );
                         }
                     }
 
-                    // XXX: Build the email list for new affiliates added to
-                    // office from meta and notify M&E staff to update their
-                    // contacts on Office.
+                    // XXX: Build the email list for new affiliates added to office from meta and notify M&E
+                    // staff to update their contacts on Office.
                     for ( i = 0; i < newAffiliates.length; i++ ) {
                         emailBody = 'A new affiliate ' + newAffiliates[ i ] + ' has been added, please update the contact details on Office.\n';
                     }
@@ -664,12 +663,12 @@
         } );
     }
 
-    /** Loading:
-     * - The interface provided by mediawiki api
+    /**
+     * Loading:
+     * - The interface provided by mediawiki api.
      * - Luaparse gadget that contains the logic to parse a Lua table
-     * to an AST
+     *   to an AST.
      */
-
     mw.loader.using( [
         'mediawiki.api',
         'ext.gadget.luaparse'
