@@ -1,6 +1,7 @@
 /**
- * This gadget contains the logic that enables M&E staff to be able to download group contacts data in csv format.
- * It provides a way to select the fields one is interested in. The following are the selectable fields:
+ * This gadget contains the logic that enables M&E staff to be able to download
+ * group contacts data in csv format. It provides a way to select the fields one
+ * is interested in. The following are the selectable fields:
  *
  * @author Alice China (AChina-WMF)
  */
@@ -15,14 +16,13 @@
         getModuleContent,
         openFilterForm,
         parseContentModule,
-        windowManager;
-
-    var user = mw.config.values.wgUserName;
-    var me_staff = [
-        'DAlangi (WMF)',
-        'DNdubane (WMF)',
-        'AChina-WMF'
-    ];
+        windowManager,
+        user = mw.config.values.wgUserName,
+        me_staff = [
+            'DAlangi (WMF)',
+            'DNdubane (WMF)',
+            'AChina-WMF'
+        ];
 
     function downloadAffiliateData () {
         /**
@@ -50,8 +50,7 @@
          * @return {Object} The cleaned up object
          */
         cleanRawEntry = function ( relevantRawEntry ) {
-            var entryData = {},
-                i, j;
+            var entryData = {}, i;
             for ( i = 0; i < relevantRawEntry.length; i++ ) {
                 entryData[ relevantRawEntry[ i ].key.name ] = relevantRawEntry[ i ].value.value;
             }
@@ -59,7 +58,7 @@
         };
 
         /**
-         * Takes Lua-formatted content from [[Module:Activities_Reports]] content and
+         * Takes Lua-formatted content from lua tables content and
          * returns an abstract syntax tree.
          *
          * @param {Object} sourceblob The original API return
@@ -79,8 +78,12 @@
          * email addresses
          */
         downloadEmailAddressesCSV = function ( items, regions, designations ) {
-            var apiObj = new mw.Api();
-            var entries, csvData, blob, url, link;
+            var apiObj = new mw.Api(),
+                entries,
+                csvData,
+                blob,
+                url,
+                link;
             apiObj.get( getModuleContent( 'Affiliate_Contacts_Information' ) ).then( function ( data ) {
                 // Add a header row to the CSV
                 var i, csvContent = '', fileDescription = '';
@@ -317,7 +320,8 @@
                         }
                     }
                     dataToDownload.push( cachedData );
-                    cachedData = {}; // Reset for the next round of data.
+                    // Reset for the next round of data.
+                    cachedData = {};
                 }
             }
 
@@ -374,8 +378,11 @@
          * to initialize widgets, and to set up event handlers.
          */
         ContactInfoDownloadEditor.prototype.initialize = function () {
-            var i, fieldAffiliateContactsDataSelected, fieldRegionSelected,
+            var i,
+                fieldAffiliateContactsDataSelected,
+                fieldRegionSelected,
                 fieldDesignationSelected;
+
             ContactInfoDownloadEditor.super.prototype.initialize.call( this );
             this.content = new OO.ui.PanelLayout( {
                 padded: true,
@@ -406,6 +413,7 @@
                     ' downloaded CSV file will contain a list of all affiliates with emails of both their' +
                     ' contacts on record.\n\n'
             } );
+
             this.fieldAffiliateContactsDataSelected = new OO.ui.CheckboxMultiselectWidget( {
                 classes: [ 'checkbox-inline' ],
                 selected: fieldAffiliateContactsDataSelected,
@@ -429,7 +437,6 @@
                 ]
             } );
 
-            //Region
             this.fieldDesignationSelected = new OO.ui.MenuTagMultiselectWidget( {
                 selected: fieldDesignationSelected,
                 icon: 'mapPin',
@@ -481,7 +488,6 @@
                 ]
             } );
 
-            //Region
             this.fieldRegionSelected = new OO.ui.MenuTagMultiselectWidget( {
                 selected: fieldRegionSelected,
                 icon: 'mapPin',
@@ -558,16 +564,14 @@
         };
 
         /**
-         * Set custom height for the modal window
-         *
+         * Set custom height for the modal window.
          */
         ContactInfoDownloadEditor.prototype.getBodyHeight = function () {
             return 300;
         };
 
         /**
-         * In the event "Select" is pressed
-         *
+         * In the event "Download" is pressed
          */
         ContactInfoDownloadEditor.prototype.getActionProcess = function ( action ) {
             var dialog = this;
@@ -587,8 +591,10 @@
          * Save the changes to [[Module:GroupContact_Informations]] page.
          */
         ContactInfoDownloadEditor.prototype.saveItem = function () {
-            var dialog = this;
-            var selectedData, selectedRegions, selectedDesignations;
+            var dialog = this,
+                selectedData,
+                selectedRegions,
+                selectedDesignations;
 
             dialog.pushPending();
 
@@ -615,8 +621,8 @@
             dialog.close();
 
             /** After saving, show a message box */
-            var messageDialog = new OO.ui.MessageDialog();
-            var windowManager = new OO.ui.WindowManager();
+            var messageDialog = new OO.ui.MessageDialog(),
+                windowManager = new OO.ui.WindowManager();
 
             $( 'body' ).append( windowManager.$element );
             // Add the dialog to the window manager.
