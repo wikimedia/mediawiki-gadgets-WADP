@@ -945,15 +945,10 @@
             // have values before we call saveItem(). Otherwise, don't close the
             // form but instead reveal which input fields are not yet filled.
             if ( dialog.field_affiliate_name.getValue() &&
-                dialog.field_primary_contact_1_firstname.getValue() &&
-                dialog.field_primary_contact_1_surname.getValue() &&
                 dialog.field_primary_contact_1_username.getValue() &&
                 dialog.field_primary_contact_1_email_address.getValue() &&
-                dialog.field_primary_contact_2_firstname.getValue() &&
-                dialog.field_primary_contact_2_surname.getValue() &&
                 dialog.field_primary_contact_2_username.getValue() &&
                 dialog.field_primary_contact_2_email_address.getValue()
-
             ) {
                 allRequiredFieldsAvailable = true;
             }
@@ -1087,40 +1082,40 @@
                     if ( manifest[ i ].affiliate_region ) {
                         insertToTable += generateKeyValuePair( 'affiliate_region', manifest[ i ].affiliate_region );
                     }
-                    if ( manifest[ i ].primary_contact_1_firstname ) {
+                    if ( manifest[ i ].primary_contact_1_firstname || manifest[ i ].primary_contact_1_firstname == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_firstname', manifest[ i ].primary_contact_1_firstname );
                     }
-                    if ( manifest[ i ].primary_contact_1_surname ) {
+                    if ( manifest[ i ].primary_contact_1_surname || manifest[ i ].primary_contact_1_surname == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_surname', manifest[ i ].primary_contact_1_surname );
                     }
-                    if ( manifest[ i ].primary_contact_1_username ) {
+                    if ( manifest[ i ].primary_contact_1_username || manifest[ i ].primary_contact_1_username == ""  ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_username', manifest[ i ].primary_contact_1_username );
                     }
-                    if ( manifest[ i ].primary_contact_1_email_address ) {
+                    if ( manifest[ i ].primary_contact_1_email_address || manifest[ i ].primary_contact_1_email_address == "") {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_email_address', manifest[ i ].primary_contact_1_email_address );
                     }
-                    if ( manifest[ i ].primary_contact_1_designation ) {
+                    if ( manifest[ i ].primary_contact_1_designation || manifest[ i ].primary_contact_1_designation == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_1_designation', manifest[ i ].primary_contact_1_designation );
                     }
-                    if ( manifest[ i ].primary_contact_2_firstname ) {
+                    if ( manifest[ i ].primary_contact_2_firstname || manifest[ i ].primary_contact_2_firstname == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_firstname', manifest[ i ].primary_contact_2_firstname );
                     }
-                    if ( manifest[ i ].primary_contact_2_surname ) {
+                    if ( manifest[ i ].primary_contact_2_surname || manifest[ i ].primary_contact_2_surname == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_surname', manifest[ i ].primary_contact_2_surname );
                     }
-                    if ( manifest[ i ].primary_contact_2_username ) {
+                    if ( manifest[ i ].primary_contact_2_username || manifest[ i ].primary_contact_2_username == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_username', manifest[ i ].primary_contact_2_username );
                     }
-                    if ( manifest[ i ].primary_contact_2_email_address ) {
+                    if ( manifest[ i ].primary_contact_2_email_address || manifest[ i ].primary_contact_2_email_address == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_email_address', manifest[ i ].primary_contact_2_email_address );
                     }
-                    if ( manifest[ i ].primary_contact_2_designation ) {
+                    if ( manifest[ i ].primary_contact_2_designation || manifest[ i ].primary_contact_2_designation == "" ) {
                         insertToTable += generateKeyValuePair( 'primary_contact_2_designation', manifest[ i ].primary_contact_2_designation );
                     }
-                    if ( manifest[ i ].unique_id ) {
+                    if ( manifest[ i ].unique_id || manifest[ i ].unique_id == "" ) {
                         insertToTable += generateKeyValuePair( 'unique_id', manifest[ i ].unique_id );
                     }
-                    if ( manifest[ i ].dos_stamp ) {
+                    if ( manifest[ i ].dos_stamp || manifest[ i ].dos_stamp == "" ) {
                         insertToTable += generateKeyValuePair( 'created_at', manifest[ i ].dos_stamp );
                     }
                     insertToTable += '\t},\n';
@@ -1132,7 +1127,7 @@
                     action: 'edit',
                     bot: true,
                     nocreate: true,
-                    summary: editSummary,
+                    summary: "WACP: Record updated via contact form",
                     pageid: 39952, //[[Module:Affiliate_Contacts_Information]]
                     text: insertToTable,
                     contentmodel: 'Scribunto'
