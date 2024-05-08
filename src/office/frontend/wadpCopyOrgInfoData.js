@@ -8,9 +8,10 @@
 ( function () {
     'use strict';
 
-    var foreignWiki = 'https://meta.wikimedia.org/w/api.php',
+    var foreign_wiki = 'https://meta.wikimedia.org/w/api.php',
         archivePreviousContact,
         cleanRawEntry,
+        getFirstDayOfWeek,
         getModuleContent,
         generateNewAffiliateContacts,
         parseContentModule,
@@ -18,8 +19,9 @@
         generateKeyValuePair,
         updateAffiliateContactsInfo,
         sendEmailToMEStaff,
-        newAffiliates = [],
-        emailSubject = '[WAC Portal] Affiliate Contact Changes';
+        new_affiliates = [],
+        email_subject = '[WAC Portal] Affiliate Contact Changes',
+        populateDigestTable;
 
     cleanRawEntry = function ( relevantRawEntry ) {
         var entryData = {},
@@ -103,7 +105,9 @@
         var MEStaff = [
                 'DNdubane (WMF)',
                 'AChina-WMF',
-                'DAlangi (WMF)'
+                'DAlangi (WMF)',
+                'Xeno (WMF)',
+                'Ramzym-WMF',
             ],
             api = new mw.Api(),
             i,
@@ -113,7 +117,7 @@
             params = {
                 action: 'emailuser',
                 target: MEStaff[ i ],
-                subject: emailSubject,
+                subject: email_subject,
                 text: body,
                 format: 'json'
             };
@@ -123,11 +127,115 @@
         }
     };
 
+    /**
+     * This function gets the first day of the current week
+     */
+    getFirstDayOfWeek = function () {
+        var date = new Date();
+        var today = date.getDate();
+        var current_day = date.getDay();
+        var new_date = date.setDate( today - ( current_day || 7 ) );
+
+        return new Date( new_date ).toISOString();
+    };
+
+    /**
+     * This function builds the digest methos and writes the new reord back into the Digest table. One record is as
+     * follows:
+     * {
+     *     date= "2024-04-14",
+     *     affiliate_name: "Wikimedia Kenya",
+     *     change = "contact1_changed",
+     *     last_digest = "2024-04-14"
+     * }
+     *
+     * @param {string} affiliate_name The name of the affiliate.
+     * @param {string} change The change being recorded.
+     */
+    populateDigestTable = function ( affiliate_name, change ) {
+        var api_object = new mw.Api();
+        var date = getFirstDayOfWeek();
+
+        api_object.get( getModuleContent( 'Affiliate_Contacts_Digest' ) ).then( function ( digest_data ) {
+
+            var i, digest_entry, digest_entries, digest_manifest = [],
+                new_contact_changes_manifest = [],
+                contact_changes, insert_to_digest_table;
+
+            digest_entries = parseContentModule( digest_data.query.pages );
+
+            for ( i = 0; i < digest_entries.length; i++ ) {
+                digest_entry = cleanRawEntry( digest_entries[ i ].value.fields );
+                digest_manifest.push( digest_entry );
+            }
+
+            contact_changes = {
+                date: date,
+                affiliate_name: affiliate_name,
+                change: change,
+                last_digest: '-',
+            };
+            new_contact_changes_manifest.push( contact_changes );
+
+            // Combine both manifest and write back to the digest table.
+            digest_manifest = new_contact_changes_manifest.concat( digest_manifest );
+
+            insert_to_digest_table = 'return {\n';
+            for ( i = 0; i < digest_manifest.length; i++ ) {
+                insert_to_digest_table += '\t{\n';
+                if ( digest_manifest[ i ].date ) {
+                    insert_to_digest_table += generateKeyValuePair( 'date',
+                        digest_manifest[ i ].date
+                    );
+                }
+                if ( digest_manifest[ i ].affiliate_name ) {
+                    insert_to_digest_table += generateKeyValuePair( 'affiliate_name',
+                        digest_manifest[ i ].affiliate_name
+                    );
+                }
+                if ( digest_manifest[ i ].change ) {
+                    insert_to_digest_table += generateKeyValuePair( 'change',
+                        digest_manifest[ i ].change
+                    );
+                }
+                if ( digest_manifest[ i ].last_digest ) {
+                    insert_to_digest_table += generateKeyValuePair( 'last_digest',
+                        digest_manifest[ i ].last_digest
+                    );
+                }
+                insert_to_digest_table += '\t},\n';
+            }
+            insert_to_digest_table += '}';
+
+            // Write data back to the Digest Lua table.
+            api_object.postWithToken(
+                'csrf',
+                {
+                    action: 'edit',
+                    bot: true,
+                    nocreate: true,
+                    summary: 'Writing latest changes to Digest table',
+                    pageid: 44161, // [[Module:Affiliate_Contacts_Digest]]
+                    text: insert_to_digest_table,
+                    contentmodel: 'Scribunto'
+                }
+            );
+            console.log( 'Group contact changes summary written to Digest Table' );
+
+        } ).catch( function ( error ) {
+            alert( 'Failed' );
+            console.error( error );
+        } );
+
+    };
+
     archivePreviousContact = function ( contactsData, orgInfoData, archiveData, newAffiliates ) {
         var apiObj = new mw.Api(),
             i, j,
             contactsDataEntries,
             contactsWorkingEntry,
+            change_category = '', //Change categories are "contact1_changed", "contact2_changed",
+            // "both_contacts_changed", "contacts_swapped", "new_contacts" and "archived_contacts"
             orgInfoDataEntries,
             orgInfoWorkingEntry,
             insertToArchiveTable,
@@ -153,6 +261,8 @@
             if ( newAffiliates.includes( orgInfoWorkingEntry.affiliate_name ) ) {
                 newAffiliateRecord = generateNewAffiliateContacts( orgInfoWorkingEntry );
                 affiliateContactListManifest.push( newAffiliateRecord );
+                change_category = 'new_contacts';
+                populateDigestTable( orgInfoWorkingEntry.affiliate_name, change_category );
             }
 
             for ( j = 0; j < contactsDataEntries.length; j++ ) {
@@ -185,6 +295,8 @@
                         dos_stamp: new Date().toISOString()
                     };
                     contactToArchiveManifest.push( archive );
+                    change_category = 'archived_contacts';
+                    populateDigestTable( orgInfoWorkingEntry.affiliate_name, change_category );
                     emailBody += 'Archiving derecognised affiliate contacts' +
                         ' and deleting from the contacts table\n';
                     break;
@@ -197,6 +309,8 @@
                     if ( orgInfoWorkingEntry.affiliate_contact1 === '' && orgInfoWorkingEntry.affiliate_contact2 === '' ) {
                         // We retain the current contacts on record and just send out a notification
                         affiliateContactListManifest.push( contactsWorkingEntry );
+                        change_category = 'new_contacts';
+                        populateDigestTable( orgInfoWorkingEntry.affiliate_name, change_category );
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has no group contacts on record. Both' +
                             ' group contact usernames are empty.\n';
                         break;
@@ -227,6 +341,8 @@
                             updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1,
                                 orgInfoWorkingEntry.affiliate_contact2
                             ) );
+                        change_category = 'contacts_swapped';
+                        populateDigestTable( orgInfoWorkingEntry.affiliate_name, change_category );
                         emailBody += 'One or both group contacts for ' + orgInfoWorkingEntry.affiliate_name + ' has been swapped.\n';
                         break;
                     }
@@ -248,6 +364,8 @@
                                 false
                             ) );
                         contactToArchiveManifest.push( archive );
+                        change_category = 'contact1_changed';
+                        populateDigestTable( orgInfoWorkingEntry.affiliate_name, change_category );
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed Group Contact 1.\n';
                         break;
                     }
@@ -268,6 +386,8 @@
                             orgInfoWorkingEntry.affiliate_contact2
                         ) );
                         contactToArchiveManifest.push( archive );
+                        change_category = 'contact2_changed';
+                        populateDigestTable( orgInfoWorkingEntry.affiliate_name, change_category );
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed Group Contact 2.\n';
                         break;
                     }
@@ -299,6 +419,8 @@
                             updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1,
                                 orgInfoWorkingEntry.affiliate_contact2
                             ) );
+                        change_category = 'both_contacts_changed';
+                        populateDigestTable( orgInfoWorkingEntry.affiliate_name, change_category );
                         emailBody += orgInfoWorkingEntry.affiliate_name + ' has changed both Group Contact 1 and 2.\n';
                         break;
                     }
@@ -480,6 +602,8 @@
     };
 
     updateAffiliateContactsInfo = function ( workingEntry, groupContact1, groupContact2 ) {
+        //swapped affiliates should have the data populated swapped as well
+        //emails should include description of updates required
         if ( groupContact1 || groupContact1 === '' ) {
             // Detect if there is a change in group contact1
             workingEntry.primary_contact_1_firstname = '';
@@ -523,7 +647,7 @@
 
     function copyOrgInfoData () {
         var apiObject = new mw.Api(),
-            foreignAPI = new mw.ForeignApi( foreignWiki ),
+            foreignAPI = new mw.ForeignApi( foreign_wiki ),
             entries,
             processedEntry,
             i,
@@ -632,14 +756,14 @@
                     // each object in the list.
                     for ( i = 0; i < metaGroupNames.length; i++ ) {
                         if ( officeGroupNames.indexOf( metaGroupNames[ i ] ) < 0 ) {
-                            newAffiliates.push( metaGroupNames[ i ] );
+                            new_affiliates.push( metaGroupNames[ i ] );
                         }
                     }
 
                     // XXX: Build the email list for new affiliates added to office from meta and notify M&E
                     // staff to update their contacts on Office.
-                    for ( i = 0; i < newAffiliates.length; i++ ) {
-                        emailBody = 'A new affiliate ' + newAffiliates[ i ] + ' has been added, please update the contact details on Office.\n';
+                    for ( i = 0; i < new_affiliates.length; i++ ) {
+                        emailBody = 'A new affiliate ' + new_affiliates[ i ] + ' has been added, please update the contact details on Office.\n';
                     }
                     if ( emailBody ) {
                         sendEmailToMEStaff( emailBody );
@@ -652,7 +776,7 @@
                                     apiObject.get( getModuleContent( 'Affiliate_Contacts_Information_Archive' ) )
                                         .then( function ( archiveData ) {
                                             archivePreviousContact( contactsData, orgInfoData, archiveData,
-                                                newAffiliates
+                                                new_affiliates
                                             );
                                         } );
                                 } );
