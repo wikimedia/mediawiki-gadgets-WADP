@@ -364,7 +364,7 @@
                 "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
                 "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
                 "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
-                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]] " + renderWikitextTimestampSignature();
+                "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:RamzyM (WMF)]] " + renderWikitextTimestampSignature();
         };
 
         /**
@@ -408,7 +408,7 @@
             "* Post your '''" + String( currentYear ) + "''' annual reporting to the meta via the  [[Wikimedia Affiliates Data Portal]] as soon as possible to return to compliance with your user group agreement.\n\n" +
             "* Check that your group’s page is also up to date with past report links for historical record-keeping, and\n\n" +
             "* Please send an email to [[Mailing_lists/Wikimedia_Announce|Wikimedia-l]] in order to share with a movement-wide audience.\n\n" +
-            "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:DNdubane_(WMF)]] " + renderWikitextTimestampSignature();
+            "If you have any questions or need any further guidance, please don’t hesitate to reach out to wadportal{{at}}wikimedia.org.<br /><br />'''Best regards''',\n\n''Wikimedia Affiliates Data Portal''\n\n--[[User:RamzyM (WMF)]] " + renderWikitextTimestampSignature();
         };
 
         /**
@@ -1165,7 +1165,7 @@
                         if ( emailDispatcherCount["l34"] > 0) {
                             // Send aggregate email to M&E staff (L3-4)
                             subject = "New affiliates at level 4 of OOC Checks";
-                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DNdubane (WMF)' );
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'RamzyM (WMF)' );
                             // loop back address -- for backup purposes and monitoring
                             sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DAlangi (WMF)' );
                         }
@@ -1173,7 +1173,7 @@
                         if ( emailDispatcherCount["l45"] > 0 ) {
                             // Send aggregate email to M&E staff (L4-5)
                             subject = "New affiliates at level 5 of OOC Checks";
-                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DNdubane (WMF)' );
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'RamzyM (WMF)' );
                             // loop back address -- for backup purposes and monitoring
                             sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
                         }
@@ -1181,7 +1181,7 @@
                         if ( emailDispatcherCount["l050"] > 0 ) {
                             // Send aggregate email to M&E staff (L0-5 and back)
                             subject = "[General] Compliance sweep of all Wikimedia Affiliates";
-                            sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DNdubane (WMF)' );
+                            sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'RamzyM (WMF)' );
                             // loop back address -- for backup purposes and monitoring
                             sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DAlangi (WMF)' );
                         }

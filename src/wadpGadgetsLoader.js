@@ -16,7 +16,7 @@
 
         var me_staff = [
             'DAlangi (WMF)',
-            'DNdubane (WMF)',
+            'RamzyM (WMF)',
             'MKaur (WMF)',
             'AChina-WMF'
         ];

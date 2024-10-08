@@ -3640,7 +3640,7 @@
         $( '.codedData' ).on( 'click', function () {
             var users = [
                 'DAlangi (WMF)',
-                'DNdubane (WMF)',
+                'RamzyM (WMF)',
                 'MKaur (WMF)'
             ];
 

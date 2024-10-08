@@ -20,7 +20,7 @@
         user = mw.config.values.wgUserName,
         me_staff = [
             'DAlangi (WMF)',
-            'DNdubane (WMF)',
+            'RamzyM (WMF)',
             'AChina-WMF'
         ];
 

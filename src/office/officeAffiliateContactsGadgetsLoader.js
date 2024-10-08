@@ -14,11 +14,9 @@
         'DAlangi (WMF)',
         'AChina-WMF',
         'Xeno (WMF)',
-        'Ramzym-WMF',
+        'RamzyM (WMF)',
+        'Keegan (WMF)',
         // 'MKaur (WMF)',
-        // 'JAnstee (WMF)',
-        // 'Keegan (WMF)',
-        // 'Ramzym-WMF',
         // 'Mervat (WMF)'
     ];
 

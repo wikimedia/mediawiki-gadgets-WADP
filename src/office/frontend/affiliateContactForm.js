@@ -20,11 +20,11 @@
         validateEmail, windowManager;
     var foreignWiki = 'https://meta.wikimedia.org/w/api.php';
     var user = mw.config.values.wgUserName;
-    var me_staff = [ 'DNdubane (WMF)', 'DAlangi (WMF)', 'AChina-WMF']
+    var me_staff = [ 'Keegan (WMF)', 'RamzyM (WMF)', 'DAlangi (WMF)', 'AChina-WMF']
 
-    /**Commenting out staff that are not part of the development team until system is stable
+    /**Commenting out staff that have not explicitly requested access
      *
-     *'MKaur (WMF)', 'JAnstee (WMF)', 'Xeno (WMF)', 'Keegan (WMF)', 'Ramzym-WMF', 'Mervat (WMF)'
+     *'MKaur (WMF)', 'JAnstee (WMF)', 'Xeno (WMF)', 'Mervat (WMF)'
      *];
      */
 
@@ -308,7 +308,7 @@
                 rawEntry.primary_contact_2_designation = dialog.field_primary_contact_2_designation.getValue();
             }
             //TODO Loop through M&E Staff sending emails dynamically
-            sendEmailToMEStaff( emailSubject, emailBody, 'DNdubane (WMF)' );
+            sendEmailToMEStaff( emailSubject, emailBody, 'RamzyM (WMF)' );
             sendEmailToMEStaff( emailSubject, emailBody, 'AChina-WMF' );
             sendEmailToMEStaff( emailSubject, emailBody, 'DAlangi (WMF)' );
             return rawEntry;

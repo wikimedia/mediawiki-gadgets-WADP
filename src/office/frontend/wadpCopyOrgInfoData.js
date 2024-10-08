@@ -103,11 +103,10 @@
      */
     sendEmailToMEStaff = function ( body ) {
         var MEStaff = [
-                'DNdubane (WMF)',
                 'AChina-WMF',
                 'DAlangi (WMF)',
                 'Xeno (WMF)',
-                'Ramzym-WMF',
+                'RamzyM (WMF)',
             ],
             api = new mw.Api(),
             i,
