@@ -210,7 +210,7 @@
      * emails. It also records the time the digest email has been sent.
      */
     compileDigest = function ( body ) {
-        var api_object = new mw.Api(), currentAffiliate;
+        var api_object = new mw.Api(), current_affiliate;
 
         api_object.get( getModuleContent( 'Affiliate_Contacts_Digest' ) ).then( function ( data ) {
             var i,
@@ -250,12 +250,14 @@
                     }
                 }
                 if ( send_digest ) {
-                    currentAffiliate = digest_manifest[ i ].affiliate_name;
+                    current_affiliate = digest_manifest[ i ].affiliate_name;
                     digest_manifest[ i ].last_digest = new Date().toISOString();
-                    for ( i = 0; i < digest_manifest.length; i++ ) {
-                        if ( digest_manifest[ i ].affiliate_name == currentAffiliate ) {
-                            affiliate_changes[ currentAffiliate ].push( digest_manifest[ i ].change );
+                    if ( digest_manifest[ i ].affiliate_name == current_affiliate ) {
+                        if ( !affiliate_changes[ current_affiliate ] ) {
+                            // Initialize it as an empty array if it doesn't exist
+                            affiliate_changes[ current_affiliate ] = [];
                         }
+                        affiliate_changes[ current_affiliate ].push( digest_manifest[ i ].change );
                     }
                 }
             }
