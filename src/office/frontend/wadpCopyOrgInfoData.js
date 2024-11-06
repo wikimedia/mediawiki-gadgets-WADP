@@ -266,14 +266,15 @@
 
             for ( j = 0; j < contactsDataEntries.length; j++ ) {
                 contactsWorkingEntry = cleanRawEntry( contactsDataEntries[ j ].value.fields );
-                // XXX: If the affiliate has been derecognised, just delete
-                // it. In this case, delete means, just ignore.
+                /** XXX: If the affiliate has been derecognised, just delete
+                 * it. In this case, delete means, just ignore.
+                 */
+
                 if (
                     orgInfoWorkingEntry.affiliate_name === contactsWorkingEntry.affiliate_name &&
                     orgInfoWorkingEntry.status === 'derecognised'
                 ) {
-                    // Archive group contacts and just ignore entirely from the
-                    // contacts table.
+                    // Archive group contacts and just ignore entirely from the contacts table.
                     archive = {
                         affiliate_name: contactsWorkingEntry.affiliate_name,
                         first_name: contactsWorkingEntry.primary_contact_1_firstname,
@@ -302,8 +303,10 @@
                 }
 
                 if ( orgInfoWorkingEntry.affiliate_name === contactsWorkingEntry.affiliate_name ) {
-                    // Edge case: User group contacts are both empty. If this special case is not
-                    // handled, the record will pass all the below conditions leading to records
+                    /** Edge case: User group contacts are both empty. If this special case is not
+                     * handled, the record will pass all the below conditions leading to records
+                     */
+
                     // being updated and notification being sent multiple times.
                     if ( orgInfoWorkingEntry.affiliate_contact1 === '' && orgInfoWorkingEntry.affiliate_contact2 === '' ) {
                         // We retain the current contacts on record and just send out a notification
@@ -315,27 +318,41 @@
                         break;
                     }
 
-                    // Edge case: User group contacts don't change per se but they are just flipped. In this
-                    // case, don't do much, just inform M&E staff. Also, this can happen too for just one of
-                    // the contacts, so we need to detect it as well.
+                    /** Edge case: User group contacts have been updated such that contact1 username and
+                     * contact2 username are identical. In this case, if no change is detected, we do nothing and
+                     * exit the loop. This will ensure that the record is not mistakenly detected as a swap.
+                     */
+                    if (
+                        orgInfoWorkingEntry.affiliate_contact1 === orgInfoWorkingEntry.affiliate_contact2 &&
+                        orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_1_username &&
+                        orgInfoWorkingEntry.affiliate_contact2 === contactsWorkingEntry.primary_contact_2_username
+                    ) {
+                        break;
+                    }
+
+                    /** Edge case: User group contacts don't change per se but they are just flipped. In this
+                     * case, don't do much, just inform M&E staff. Also, this can happen too for just one of
+                     * the contacts, so we need to detect it as well.
+                     */
                     if (
                         orgInfoWorkingEntry.affiliate_contact1 === contactsWorkingEntry.primary_contact_2_username ||
                         orgInfoWorkingEntry.affiliate_contact2 === contactsWorkingEntry.primary_contact_1_username
                     ) {
-                        // We pass contact 1 and 2 from the OrgInfo table in place as they are already in
-                        // the desired position. As in:
-                        //
-                        //      OrgInfo Table - Office
-                        //      org_info_pc1 = x
-                        //      org_info_pc2 = y
-                        //
-                        //      Contacts Table - Office
-                        //      contact_pc1 = y
-                        //      contact_pc2 = x
-                        //
-                        // Swapping
-                        //      contact_pc1 = x (org_info_pc1)
-                        //      contact_pc2 = y (org_info_pc2)
+                        /** We pass contact 1 and 2 from the OrgInfo table in place as they are already in
+                         * the desired position. As in:
+                         *
+                         *      OrgInfo Table - Office
+                         *      org_info_pc1 = x
+                         *      org_info_pc2 = y
+                         *
+                         *      Contacts Table - Office
+                         *      contact_pc1 = y
+                         *      contact_pc2 = x
+                         *
+                         * Swapping
+                         *      contact_pc1 = x (org_info_pc1)
+                         *      contact_pc2 = y (org_info_pc2)
+                         */
                         affiliateContactListManifest.push(
                             updateAffiliateContactsInfo( contactsWorkingEntry, orgInfoWorkingEntry.affiliate_contact1,
                                 orgInfoWorkingEntry.affiliate_contact2
