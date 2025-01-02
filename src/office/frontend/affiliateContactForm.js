@@ -20,7 +20,7 @@
         validateEmail, windowManager;
     var foreignWiki = 'https://meta.wikimedia.org/w/api.php';
     var user = mw.config.values.wgUserName;
-    var me_staff = [ 'Keegan (WMF)', 'RamzyM (WMF)', 'DAlangi (WMF)', 'AChina-WMF']
+    var me_staff = [ 'Keegan (WMF)', 'RamzyM (WMF)', 'AChina-WMF']
 
     /**Commenting out staff that have not explicitly requested access
      *
@@ -310,7 +310,6 @@
             //TODO Loop through M&E Staff sending emails dynamically
             sendEmailToMEStaff( emailSubject, emailBody, 'RamzyM (WMF)' );
             sendEmailToMEStaff( emailSubject, emailBody, 'AChina-WMF' );
-            sendEmailToMEStaff( emailSubject, emailBody, 'DAlangi (WMF)' );
             return rawEntry;
         };
 

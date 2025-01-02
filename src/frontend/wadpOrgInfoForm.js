@@ -7,7 +7,6 @@
 
     /** M&E staff list */
     var users = [
-        'DAlangi (WMF)',
         'RamzyM (WMF)',
         'MKaur (WMF)',
         'AChina-WMF'

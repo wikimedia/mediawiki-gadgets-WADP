@@ -3639,7 +3639,7 @@
 
         $( '.codedData' ).on( 'click', function () {
             var users = [
-                'DAlangi (WMF)',
+                'AChina-WMF',
                 'RamzyM (WMF)',
                 'MKaur (WMF)'
             ];

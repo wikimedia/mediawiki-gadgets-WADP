@@ -15,7 +15,6 @@
         /** TODO: During maintenance mode, lock app from writing to lua tables */
 
         var me_staff = [
-            'DAlangi (WMF)',
             'RamzyM (WMF)',
             'MKaur (WMF)',
             'AChina-WMF'

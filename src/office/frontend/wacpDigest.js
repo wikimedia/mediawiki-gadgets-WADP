@@ -110,7 +110,6 @@
     sendEmailToMEStaff = function ( email_subject, email_body ) {
         var ME_staff = [
                 'AChina-WMF',
-                'DAlangi (WMF)'
             ],
             api = new mw.Api(),
             i,

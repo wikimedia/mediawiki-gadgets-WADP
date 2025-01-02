@@ -104,7 +104,6 @@
     sendEmailToMEStaff = function ( body ) {
         var MEStaff = [
                 'AChina-WMF',
-                'DAlangi (WMF)',
                 'Xeno (WMF)',
                 'RamzyM (WMF)',
             ],

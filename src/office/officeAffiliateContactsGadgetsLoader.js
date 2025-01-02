@@ -11,7 +11,6 @@
 
     var pageName = mw.config.values.wgPageName;
     var whiteList = [
-        'DAlangi (WMF)',
         'AChina-WMF',
         'Xeno (WMF)',
         'RamzyM (WMF)',

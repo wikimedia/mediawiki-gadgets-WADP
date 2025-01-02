@@ -66,7 +66,7 @@
             var titles;
             if ( affiliate === 'test' ) {
                 // Test feature before deployment
-                titles = 'User:DAlangi (WMF)/Sandbox/OOC post notif messages';
+                titles = 'User:AChina-WMF/Sandbox/OOC post notif messages';
             } else {
                 titles = 'Talk:' + affiliate;
             }
@@ -474,7 +474,7 @@
                                 action: 'edit',
                                 nocreate: true,
                                 summary: '[Automated] Out of compliance check notification message: ' + orgInfo.group_name,
-                                // title: 'User:DAlangi (WMF)/Sandbox/OOC post notif messages', [used for testing]
+                                // title: 'User:<Page>/Sandbox/OOC post notif messages', [used for testing]
                                 title: 'Talk:' + redirectsTo,
                                 text: affiliateTalkPageContent,
                                 contentmodel: 'wikitext'
@@ -1167,7 +1167,7 @@
                             subject = "New affiliates at level 4 of OOC Checks";
                             sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'RamzyM (WMF)' );
                             // loop back address -- for backup purposes and monitoring
-                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'DAlangi (WMF)' );
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL34, 'AChina-WMF' );
                         }
 
                         if ( emailDispatcherCount["l45"] > 0 ) {
@@ -1175,7 +1175,7 @@
                             subject = "New affiliates at level 5 of OOC Checks";
                             sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'RamzyM (WMF)' );
                             // loop back address -- for backup purposes and monitoring
-                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'DAlangi (WMF)' );
+                            sendEmailToMEStaff( subject, specialAffiliatesToEmailL45, 'AChina-WMF' );
                         }
 
                         if ( emailDispatcherCount["l050"] > 0 ) {
@@ -1183,7 +1183,7 @@
                             subject = "[General] Compliance sweep of all Wikimedia Affiliates";
                             sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'RamzyM (WMF)' );
                             // loop back address -- for backup purposes and monitoring
-                            sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'DAlangi (WMF)' );
+                            sendEmailToMEStaff( subject, systemActivityLogsToEmail, 'AChina-WMF' );
                         }
 
                         // Re-generate the OOC Lua table based on `ooc_manifest`
